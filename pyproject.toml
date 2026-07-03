@@ -1,0 +1,8 @@
+[project]
+name = "catalyst-ai"
+version = "4.0.0"
+description = "Professional Trading Intelligence powered by the PJB Trading Engine"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
