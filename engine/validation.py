@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import pandas as pd
 
 
@@ -45,9 +44,11 @@ def _normalise_price_index(prices: pd.DataFrame) -> pd.DataFrame:
 
 
 def _find_entry_position(prices: pd.DataFrame, saved_at: pd.Timestamp | None) -> int | None:
-    """Find the first market close at or after the scan timestamp.
+    """Find the first daily market bar on or after the saved scan date.
 
-    If saved_at is unavailable, return the latest row as a safe fallback.
+    Daily Yahoo bars are stored at midnight. Saved scans usually happen during
+    the day. Comparing exact timestamps would incorrectly skip the same-day bar,
+    so this anchors by calendar date.
     """
     if prices is None or prices.empty:
         return None
@@ -55,14 +56,16 @@ def _find_entry_position(prices: pd.DataFrame, saved_at: pd.Timestamp | None) ->
     if saved_at is None:
         return len(prices) - 1
 
-    positions = prices.index.searchsorted(saved_at, side="left")
+    saved_date = saved_at.normalize()
+    price_dates = prices.index.normalize()
 
-    if positions >= len(prices):
-        # The scan happened after the latest available market close.
-        # Use the latest close as entry point, but all forward windows will be pending.
+    matches = price_dates >= saved_date
+
+    if not matches.any():
+        # The scan is newer than the latest available daily bar.
         return len(prices) - 1
 
-    return int(positions)
+    return int(matches.argmax())
 
 
 def calculate_forward_returns(
@@ -72,12 +75,10 @@ def calculate_forward_returns(
 ) -> pd.DataFrame:
     """Calculate forward returns from the saved scan date.
 
-    This version anchors returns to the saved scan timestamp. It finds the first
-    available price bar at or after the scan timestamp, then calculates future
-    returns from that entry point.
+    Anchors to the saved scan calendar date, finds the first available daily bar
+    on or after that date, then calculates forward returns from that anchor.
 
-    Windows that have not completed yet are marked as PENDING rather than being
-    calculated against unrelated earlier prices.
+    Incomplete windows are marked as PENDING.
     """
     if scan_frame is None or scan_frame.empty:
         return pd.DataFrame()
@@ -101,17 +102,14 @@ def calculate_forward_returns(
         if entry_pos is None:
             continue
 
-        entry_price = float(signal_row.get("close", 0) or 0)
-
-        # Prefer the actual market close at the anchored entry bar, but keep
-        # the saved scan close visible for audit.
+        saved_entry_price = float(signal_row.get("close", 0) or 0)
         anchored_entry_price = float(prices["Close"].iloc[entry_pos])
 
         if anchored_entry_price <= 0:
             continue
 
         output = signal_row.to_dict()
-        output["saved_entry_price"] = round(entry_price, 2)
+        output["saved_entry_price"] = round(saved_entry_price, 2)
         output["entry_price"] = round(anchored_entry_price, 2)
         output["entry_date"] = prices.index[entry_pos].isoformat()
         output["latest_price"] = round(float(prices["Close"].iloc[-1]), 2)
