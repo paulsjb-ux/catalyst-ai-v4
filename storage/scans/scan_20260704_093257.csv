@@ -1,0 +1,30 @@
+scan_id,saved_at,ticker,signal,score,close,change_1d_pct,change_20d_pct,rsi_14,sma_20,sma_50,sma_200,volume_ratio,trend,reason
+20260704_093257,2026-07-04T09:32:57.279151+00:00,ABNB,BUY,90,148.93,1.1,11.48,63.9,139.24,137.89,130.08,0.87,TREND,"above 20-day average, short-term trend rising, above 50-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,AAPL,BUY,85,308.63,4.84,-0.53,60.3,294.8,293.52,270.69,1.09,TREND,"above 20-day average, short-term trend rising, above 50-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,AMD,BUY,80,517.82,-4.26,-4.55,52.3,516.84,460.38,278.19,0.88,TREND,"above 20-day average, short-term trend rising, above 50-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,NET,BUY,80,242.41,-1.58,-8.64,56.2,235.22,225.45,208.21,0.8,TREND,"above 20-day average, short-term trend rising, above 50-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,DDOG,BUY,75,260.36,-1.56,4.01,68.4,235.07,207.94,156.08,0.61,TREND,"above 20-day average, short-term trend rising, above 50-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,CRWD,BUY,75,193.98,0.41,3.79,71.9,174.0,155.16,125.64,0.77,TREND,"above 20-day average, short-term trend rising, above 50-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,INTC,WATCH,67,120.35,-5.25,6.78,49.1,123.12,113.38,60.33,0.95,TREND,"short-term trend rising, above 50-day average, long-term trend rising, positive 20-day return"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,HOOD,WATCH,62,112.73,3.76,36.07,67.0,97.07,86.58,102.37,1.2,RECOVERING,"above 20-day average, short-term trend rising, above 50-day average, healthy momentum"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,MU,WATCH,62,975.56,-5.49,-9.63,48.5,1043.27,852.09,444.34,1.04,TREND,"short-term trend rising, above 50-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,PANW,WATCH,60,348.06,-1.13,24.12,78.5,293.39,251.44,201.47,1.0,TREND,"above 20-day average, short-term trend rising, above 50-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,SNOW,WATCH,60,260.15,-0.4,7.82,68.6,240.4,198.41,206.51,1.1,RECOVERING,"above 20-day average, short-term trend rising, above 50-day average, positive 20-day return"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,ARM,WATCH,57,315.28,-6.58,-23.44,44.8,363.57,298.72,177.17,0.67,TREND,"short-term trend rising, above 50-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,PYPL,WATCH,55,45.47,3.18,6.71,59.8,42.56,44.88,53.77,0.83,RECOVERING,"above 20-day average, above 50-day average, healthy momentum, positive 20-day return"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,SHOP,WATCH,55,119.46,-1.78,5.77,57.9,112.21,112.33,136.23,0.77,RECOVERING,"above 20-day average, above 50-day average, healthy momentum, positive 20-day return"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,UBER,WATCH,55,74.43,2.44,3.82,54.3,71.86,73.21,81.12,0.61,RECOVERING,"above 20-day average, above 50-day average, healthy momentum, positive 20-day return"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,GOOGL,IGNORE,42,359.91,-0.36,0.26,49.5,358.54,370.97,316.15,0.68,RECOVERING,"above 20-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,AMZN,IGNORE,42,242.67,0.4,-2.94,48.7,240.25,255.42,232.98,0.76,RECOVERING,"above 20-day average, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,PLTR,IGNORE,40,129.3,2.84,-9.07,51.5,125.97,134.58,157.91,1.39,RECOVERING,"above 20-day average, healthy momentum, strong volume"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,COIN,IGNORE,35,165.48,3.92,1.38,50.8,158.13,178.84,230.97,1.09,RECOVERING,"above 20-day average, healthy momentum"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,QCOM,IGNORE,35,176.25,-3.12,-29.5,38.1,205.55,202.48,168.36,0.82,WEAK,"short-term trend rising, long-term trend rising"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,ADBE,IGNORE,30,219.72,4.14,-14.25,50.7,214.06,234.92,288.68,0.88,RECOVERING,"above 20-day average, healthy momentum"
+20260704_093257,2026-07-04T09:32:57.279151+00:00,NFLX,IGNORE,27,77.65,4.66,-4.75,47.3,77.27,84.12,96.1,1.12,RECOVERING,above 20-day average
+20260704_093257,2026-07-04T09:32:57.279151+00:00,META,IGNORE,27,582.9,-4.9,-6.43,49.6,576.7,605.23,646.51,1.1,RECOVERING,above 20-day average
+20260704_093257,2026-07-04T09:32:57.279151+00:00,NVDA,IGNORE,27,194.83,-1.39,-9.28,41.2,203.48,209.8,191.03,0.91,WEAK,long-term trend rising
+20260704_093257,2026-07-04T09:32:57.279151+00:00,MSFT,IGNORE,22,390.49,1.62,-8.62,49.8,386.96,407.6,445.44,0.86,RECOVERING,above 20-day average
+20260704_093257,2026-07-04T09:32:57.279151+00:00,CRM,IGNORE,22,166.11,1.76,-12.85,49.9,163.87,174.39,212.27,0.62,RECOVERING,above 20-day average
+20260704_093257,2026-07-04T09:32:57.279151+00:00,AVGO,IGNORE,20,360.45,-2.41,-24.79,39.6,384.32,409.43,361.45,0.76,WEAK,long-term trend rising
+20260704_093257,2026-07-04T09:32:57.279151+00:00,TSLA,IGNORE,17,393.45,-7.49,-7.14,46.8,399.16,406.42,418.61,1.49,WEAK,strong volume
+20260704_093257,2026-07-04T09:32:57.279151+00:00,ORCL,IGNORE,10,140.27,-1.56,-39.1,26.7,178.09,186.37,199.88,1.37,WEAK,strong volume

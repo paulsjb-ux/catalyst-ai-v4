@@ -13,12 +13,41 @@ def render_repeat_winners() -> None:
     )
 
     scans = list_saved_scans()
+    scan_count = len(scans)
 
     if scans.empty:
-        empty_state("No scan history yet", "Run Market Scan several times to build repeat-winner evidence.", "🏆")
+        empty_state(
+            "No scan history yet",
+            "Run Market Scan several times to build repeat-winner evidence.",
+            "🏆",
+        )
         return
 
-    lookback = st.slider("Saved scans to analyse", 2, min(30, max(2, len(scans))), min(10, max(2, len(scans))))
+    if scan_count == 1:
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Saved Scans", 1)
+        c2.metric("Minimum Needed", 2)
+        c3.metric("Status", "Building")
+
+        empty_state(
+            "One saved scan found",
+            "Run Market Scan one more time to start repeat-winner analysis.",
+            "🏆",
+        )
+        return
+
+    if scan_count == 2:
+        lookback = 2
+        status_card("Using both saved scans for repeat-winner analysis.", "info")
+    else:
+        max_scans = min(30, scan_count)
+        default_scans = min(10, max_scans)
+        lookback = st.slider(
+            "Saved scans to analyse",
+            min_value=2,
+            max_value=max_scans,
+            value=default_scans,
+        )
 
     frames = []
     for _, row in scans.head(lookback).iterrows():
@@ -29,7 +58,11 @@ def render_repeat_winners() -> None:
     winners = build_repeat_winners(frames)
 
     if winners.empty:
-        empty_state("No repeat winners yet", "No symbols have repeated as BUY/WATCH across the selected scans.", "🛡️")
+        empty_state(
+            "No repeat winners yet",
+            "No symbols have repeated as BUY/WATCH across the selected scans.",
+            "🛡️",
+        )
         return
 
     priority_count = int((winners["status"] == "PRIORITY").sum())

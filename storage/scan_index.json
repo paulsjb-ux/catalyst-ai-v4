@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "scan_id": "20260704_084649",
+    "saved_at": "2026-07-04T08:46:49.106618+00:00",
+    "file_path": "storage/scans/scan_20260704_084649.csv",
+    "row_count": 29,
+    "buy_count": 6,
+    "watch_count": 9
+  },
+  {
+    "scan_id": "20260704_084821",
+    "saved_at": "2026-07-04T08:48:21.169292+00:00",
+    "file_path": "storage/scans/scan_20260704_084821.csv",
+    "row_count": 29,
+    "buy_count": 6,
+    "watch_count": 9
+  },
+  {
+    "scan_id": "20260704_093257",
+    "saved_at": "2026-07-04T09:32:57.279151+00:00",
+    "file_path": "storage/scans/scan_20260704_093257.csv",
+    "row_count": 29,
+    "buy_count": 6,
+    "watch_count": 9
+  }
+]
