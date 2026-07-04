@@ -11,20 +11,27 @@ VALIDATION_COLUMNS = [
     "ticker",
     "signal",
     "score",
+    "saved_entry_price",
     "entry_price",
+    "entry_date",
     "latest_price",
     "return_1d_pct",
+    "status_1d",
     "return_5d_pct",
+    "status_5d",
     "return_10d_pct",
+    "status_10d",
     "return_20d_pct",
+    "status_20d",
     "avg_forward_return_pct",
+    "validation_status",
 ]
 
 
 def render_validation() -> None:
     section_header(
         "Validation Centre",
-        "Forward-return validation for saved Catalyst signals.",
+        "Forward-return validation anchored to the saved scan date.",
     )
 
     scans = list_saved_scans()
@@ -40,8 +47,8 @@ def render_validation() -> None:
     c4.metric("WATCH Signals", int(scans["watch_count"].sum()))
 
     status_card(
-        "Sprint 2 validation estimates 1D, 5D, 10D and 20D forward returns from saved scan entries.",
-        "info",
+        "Validation now anchors returns to the saved scan timestamp and marks incomplete windows as PENDING.",
+        "positive",
     )
 
     st.markdown("### Choose scan to validate")
@@ -59,6 +66,7 @@ def render_validation() -> None:
     signal_filter = st.selectbox("Signals to validate", ["BUY & WATCH", "BUY", "WATCH", "All"], index=0)
 
     filtered = frame.copy()
+
     if signal_filter == "BUY & WATCH":
         filtered = filtered[filtered["signal"].isin(["BUY", "WATCH"])]
     elif signal_filter != "All":
@@ -71,8 +79,9 @@ def render_validation() -> None:
     tickers = filtered["ticker"].dropna().astype(str).str.upper().unique().tolist()
 
     if st.button("Run Forward Validation", type="primary", use_container_width=True):
-        with st.spinner(f"Downloading forward price data for {len(tickers)} tickers..."):
-            market = download_history(tickers, period="3mo")
+        with st.spinner(f"Downloading price data for {len(tickers)} tickers..."):
+            # 6mo provides enough history for older saved scans while keeping downloads light.
+            market = download_history(tickers, period="6mo")
             validation = calculate_forward_returns(filtered, market.prices)
             summary = add_quality_labels(summarise_validation(validation))
 
@@ -92,7 +101,7 @@ def render_validation() -> None:
     if validation.empty:
         empty_state(
             "No forward validation run yet",
-            "Press Run Forward Validation to calculate forward returns for the selected scan.",
+            "Press Run Forward Validation to calculate returns from the selected scan date.",
             "📈",
         )
         return
@@ -103,8 +112,16 @@ def render_validation() -> None:
     else:
         st.dataframe(summary, use_container_width=True, hide_index=True)
 
+    pending_count = int((validation.get("validation_status", pd.Series(dtype=str)) == "PENDING").sum())
+    if pending_count:
+        status_card(
+            f"{pending_count} rows have no completed forward window yet. That is normal for very recent scans.",
+            "info",
+        )
+
     st.markdown("### Signal-Level Forward Returns")
     visible_cols = [col for col in VALIDATION_COLUMNS if col in validation.columns]
+
     st.dataframe(
         validation[visible_cols],
         use_container_width=True,
@@ -114,7 +131,8 @@ def render_validation() -> None:
             "ticker": st.column_config.TextColumn("Ticker", width="small"),
             "signal": st.column_config.TextColumn("Signal", width="small"),
             "score": st.column_config.NumberColumn("Score", width="small"),
-            "entry_price": st.column_config.NumberColumn("Entry", format="%.2f", width="small"),
+            "saved_entry_price": st.column_config.NumberColumn("Saved Entry", format="%.2f", width="small"),
+            "entry_price": st.column_config.NumberColumn("Market Entry", format="%.2f", width="small"),
             "latest_price": st.column_config.NumberColumn("Latest", format="%.2f", width="small"),
             "return_1d_pct": st.column_config.NumberColumn("1D %", format="%.2f", width="small"),
             "return_5d_pct": st.column_config.NumberColumn("5D %", format="%.2f", width="small"),

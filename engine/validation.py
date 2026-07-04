@@ -1,9 +1,68 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 import pandas as pd
 
 
 FORWARD_WINDOWS = [1, 5, 10, 20]
+
+
+def _parse_saved_at(value) -> pd.Timestamp | None:
+    """Parse saved_at into a timezone-normalised pandas timestamp."""
+    if value is None or pd.isna(value):
+        return None
+
+    try:
+        ts = pd.to_datetime(value, utc=True)
+    except Exception:
+        return None
+
+    if pd.isna(ts):
+        return None
+
+    return ts
+
+
+def _normalise_price_index(prices: pd.DataFrame) -> pd.DataFrame:
+    """Return prices with a timezone-aware UTC DatetimeIndex where possible."""
+    if prices is None or prices.empty:
+        return pd.DataFrame()
+
+    frame = prices.copy()
+
+    if not isinstance(frame.index, pd.DatetimeIndex):
+        try:
+            frame.index = pd.to_datetime(frame.index, utc=True)
+        except Exception:
+            return frame
+
+    if frame.index.tz is None:
+        frame.index = frame.index.tz_localize("UTC")
+    else:
+        frame.index = frame.index.tz_convert("UTC")
+
+    return frame.sort_index()
+
+
+def _find_entry_position(prices: pd.DataFrame, saved_at: pd.Timestamp | None) -> int | None:
+    """Find the first market close at or after the scan timestamp.
+
+    If saved_at is unavailable, return the latest row as a safe fallback.
+    """
+    if prices is None or prices.empty:
+        return None
+
+    if saved_at is None:
+        return len(prices) - 1
+
+    positions = prices.index.searchsorted(saved_at, side="left")
+
+    if positions >= len(prices):
+        # The scan happened after the latest available market close.
+        # Use the latest close as entry point, but all forward windows will be pending.
+        return len(prices) - 1
+
+    return int(positions)
 
 
 def calculate_forward_returns(
@@ -11,11 +70,14 @@ def calculate_forward_returns(
     price_map: dict[str, pd.DataFrame],
     windows: list[int] | None = None,
 ) -> pd.DataFrame:
-    """Calculate forward returns for a saved scan using downloaded price history.
+    """Calculate forward returns from the saved scan date.
 
-    The scan close is treated as the entry price. The latest available prices
-    from yfinance are used to estimate the forward result for each window.
-    If enough forward data is unavailable, that window is left blank.
+    This version anchors returns to the saved scan timestamp. It finds the first
+    available price bar at or after the scan timestamp, then calculates future
+    returns from that entry point.
+
+    Windows that have not completed yet are marked as PENDING rather than being
+    calculated against unrelated earlier prices.
     """
     if scan_frame is None or scan_frame.empty:
         return pd.DataFrame()
@@ -28,43 +90,61 @@ def calculate_forward_returns(
         if not ticker:
             continue
 
-        prices = price_map.get(ticker)
-        if prices is None or prices.empty or "Close" not in prices.columns:
+        prices = _normalise_price_index(price_map.get(ticker, pd.DataFrame()))
+
+        if prices.empty or "Close" not in prices.columns:
             continue
 
-        entry = float(signal_row.get("close", 0) or 0)
-        if entry <= 0:
+        saved_at = _parse_saved_at(signal_row.get("saved_at"))
+        entry_pos = _find_entry_position(prices, saved_at)
+
+        if entry_pos is None:
             continue
 
-        closes = prices["Close"].dropna().reset_index(drop=True)
-        if closes.empty:
+        entry_price = float(signal_row.get("close", 0) or 0)
+
+        # Prefer the actual market close at the anchored entry bar, but keep
+        # the saved scan close visible for audit.
+        anchored_entry_price = float(prices["Close"].iloc[entry_pos])
+
+        if anchored_entry_price <= 0:
             continue
 
-        # Use the first close after the scan as the earliest forward point.
         output = signal_row.to_dict()
-        output["entry_price"] = round(entry, 2)
-        output["latest_price"] = round(float(closes.iloc[-1]), 2)
+        output["saved_entry_price"] = round(entry_price, 2)
+        output["entry_price"] = round(anchored_entry_price, 2)
+        output["entry_date"] = prices.index[entry_pos].isoformat()
+        output["latest_price"] = round(float(prices["Close"].iloc[-1]), 2)
+        output["validation_status"] = "READY"
 
         valid_returns = []
 
         for window in windows:
-            col_return = f"return_{window}d_pct"
-            col_win = f"win_{window}d"
+            return_col = f"return_{window}d_pct"
+            win_col = f"win_{window}d"
+            status_col = f"status_{window}d"
 
-            if len(closes) > window:
-                future_price = float(closes.iloc[min(window, len(closes) - 1)])
-                forward_return = ((future_price / entry) - 1) * 100
-                output[col_return] = round(forward_return, 2)
-                output[col_win] = bool(forward_return > 0)
-                valid_returns.append(forward_return)
-            else:
-                output[col_return] = None
-                output[col_win] = None
+            future_pos = entry_pos + window
+
+            if future_pos >= len(prices):
+                output[return_col] = None
+                output[win_col] = None
+                output[status_col] = "PENDING"
+                continue
+
+            future_price = float(prices["Close"].iloc[future_pos])
+            forward_return = ((future_price / anchored_entry_price) - 1) * 100
+
+            output[return_col] = round(forward_return, 2)
+            output[win_col] = bool(forward_return > 0)
+            output[status_col] = "COMPLETE"
+            valid_returns.append(forward_return)
 
         if valid_returns:
             output["avg_forward_return_pct"] = round(sum(valid_returns) / len(valid_returns), 2)
         else:
             output["avg_forward_return_pct"] = None
+            output["validation_status"] = "PENDING"
 
         rows.append(output)
 
@@ -78,19 +158,23 @@ def summarise_validation(validation_frame: pd.DataFrame) -> pd.DataFrame:
             columns=[
                 "signal",
                 "count",
-                "avg_score",
+                "complete_1d",
                 "avg_1d_return",
                 "win_rate_1d",
+                "complete_5d",
                 "avg_5d_return",
                 "win_rate_5d",
+                "complete_10d",
                 "avg_10d_return",
                 "win_rate_10d",
+                "complete_20d",
                 "avg_20d_return",
                 "win_rate_20d",
             ]
         )
 
     rows = []
+
     for signal, group in validation_frame.groupby("signal"):
         row = {
             "signal": signal,
@@ -101,17 +185,26 @@ def summarise_validation(validation_frame: pd.DataFrame) -> pd.DataFrame:
         for window in FORWARD_WINDOWS:
             return_col = f"return_{window}d_pct"
             win_col = f"win_{window}d"
+            status_col = f"status_{window}d"
+            complete_col = f"complete_{window}d"
             avg_col = f"avg_{window}d_return"
             rate_col = f"win_rate_{window}d"
 
-            if return_col in group:
-                returns = pd.to_numeric(group[return_col], errors="coerce").dropna()
+            if status_col in group:
+                complete = group[group[status_col] == "COMPLETE"]
+            else:
+                complete = group
+
+            row[complete_col] = len(complete)
+
+            if return_col in complete:
+                returns = pd.to_numeric(complete[return_col], errors="coerce").dropna()
                 row[avg_col] = round(float(returns.mean()), 2) if not returns.empty else None
             else:
                 row[avg_col] = None
 
-            if win_col in group:
-                wins = group[win_col].dropna()
+            if win_col in complete:
+                wins = complete[win_col].dropna()
                 row[rate_col] = round(float(wins.mean() * 100), 1) if not wins.empty else None
             else:
                 row[rate_col] = None
@@ -122,12 +215,13 @@ def summarise_validation(validation_frame: pd.DataFrame) -> pd.DataFrame:
 
 
 def validation_quality_label(row: pd.Series) -> str:
-    """Assign a simple quality label based on forward validation."""
+    """Assign a simple quality label based on completed 5D validation."""
+    complete_5d = row.get("complete_5d", 0)
     avg_5d = row.get("avg_5d_return")
     win_5d = row.get("win_rate_5d")
 
-    if pd.isna(avg_5d) or pd.isna(win_5d):
-        return "INSUFFICIENT DATA"
+    if complete_5d is None or complete_5d == 0 or pd.isna(avg_5d) or pd.isna(win_5d):
+        return "PENDING"
 
     if avg_5d > 2 and win_5d >= 60:
         return "STRONG"

@@ -68,7 +68,7 @@ def render_reports() -> None:
     if st.button("Validate latest scan", type="primary", use_container_width=True):
         tickers = candidate_rows["ticker"].dropna().astype(str).str.upper().unique().tolist()
         with st.spinner(f"Validating latest scan for {len(tickers)} tickers..."):
-            market = download_history(tickers, period="3mo")
+            market = download_history(tickers, period="6mo")
             validation = calculate_forward_returns(candidate_rows, market.prices)
             summary = add_quality_labels(summarise_validation(validation))
             st.session_state["report_validation"] = validation
@@ -82,6 +82,13 @@ def render_reports() -> None:
         st.dataframe(summary, use_container_width=True, hide_index=True)
 
     if not validation.empty:
+        pending = int((validation.get("validation_status", pd.Series(dtype=str)) == "PENDING").sum())
+        if pending:
+            status_card(
+                f"{pending} rows are pending because future validation windows have not completed yet.",
+                "info",
+            )
+
         st.download_button(
             "Download latest validation CSV",
             validation.to_csv(index=False).encode("utf-8"),
