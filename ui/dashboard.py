@@ -10,22 +10,23 @@ PLAN_COLUMNS = ["ticker", "signal", "entry_price", "target_price", "stop_loss", 
 
 
 def render_dashboard(version: str, scan_results: pd.DataFrame | None = None) -> None:
-    section_header("Command Dashboard", "Live intelligence, saved scan status and target/stop planning.")
+    section_header("Command Dashboard", "Live intelligence, saved scan status and smarter scoring.")
 
     frame = scan_results if scan_results is not None else pd.DataFrame()
     plans = st.session_state.get("trade_plans", pd.DataFrame())
     scans = list_saved_scans()
     buys = int((frame["signal"] == "BUY").sum()) if not frame.empty else 0
     watches = int((frame["signal"] == "WATCH").sum()) if not frame.empty else 0
+    avg_score = round(float(frame["score"].mean()), 1) if not frame.empty and "score" in frame else 0
 
     c1, c2, c3, c4 = st.columns(4)
     c1.markdown(metric_card("Universe", str(len(frame)) if not frame.empty else "Not loaded", "latest session scan"), unsafe_allow_html=True)
     c2.markdown(metric_card("BUY", str(buys), "high-conviction candidates"), unsafe_allow_html=True)
     c3.markdown(metric_card("WATCH", str(watches), "developing candidates"), unsafe_allow_html=True)
-    c4.markdown(metric_card("Trade Plans", str(len(plans)) if plans is not None else "0", "targets and stops"), unsafe_allow_html=True)
+    c4.markdown(metric_card("Avg Score", str(avg_score), "smarter scoring engine"), unsafe_allow_html=True)
 
     st.markdown("### System Status")
-    status_card("Sprint 2 Part 2 target/stop engine is installed.", "positive")
+    status_card("Sprint 2 Part 3 smarter scoring engine is installed.", "positive")
     st.caption(f"Version: {version}")
 
     if frame.empty:
@@ -40,7 +41,7 @@ def render_dashboard(version: str, scan_results: pd.DataFrame | None = None) -> 
         if top.empty:
             empty_state("No qualifying candidates", "The current universe produced no BUY or WATCH signals.", "🛡️")
         else:
-            st.dataframe(top[TOP_COLUMNS], use_container_width=True, hide_index=True, height=360)
+            st.dataframe(top[[col for col in TOP_COLUMNS if col in top.columns]], use_container_width=True, hide_index=True, height=360)
 
     if plans is not None and not plans.empty:
         st.markdown("### Best Trade Plans")

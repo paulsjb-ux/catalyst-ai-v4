@@ -16,9 +16,25 @@ DISPLAY_COLUMNS = [
     "close",
     "change_1d_pct",
     "change_20d_pct",
+    "change_60d_pct",
     "rsi_14",
     "volume_ratio",
+    "volatility_20d_pct",
     "trend",
+    "reason",
+]
+
+
+SCORE_COLUMNS = [
+    "ticker",
+    "signal",
+    "score",
+    "trend_score",
+    "momentum_score",
+    "volume_score",
+    "relative_strength_score",
+    "volatility_penalty",
+    "extension_penalty",
     "reason",
 ]
 
@@ -41,7 +57,7 @@ PLAN_COLUMNS = [
 def render_market_scan() -> None:
     section_header(
         "Market Scan",
-        "Live BUY, WATCH and IGNORE analysis with trade-plan targets and stops.",
+        "Smarter BUY, WATCH and IGNORE scoring with trade-plan targets and stops.",
     )
 
     default_text = ",".join(get_default_universe(30))
@@ -108,7 +124,7 @@ def render_market_scan() -> None:
     c1.metric("Scanned", len(frame))
     c2.metric("BUY", int((frame["signal"] == "BUY").sum()))
     c3.metric("WATCH", int((frame["signal"] == "WATCH").sum()))
-    c4.metric("Plans", len(plans) if plans is not None else 0)
+    c4.metric("Trade Plans", len(plans) if plans is not None else 0)
 
     scan_id = st.session_state.get("scan_id", "")
     if scan_id:
@@ -142,10 +158,18 @@ def render_market_scan() -> None:
 
     st.markdown("### Candidate Results")
     st.dataframe(
-        filtered[DISPLAY_COLUMNS],
+        filtered[[col for col in DISPLAY_COLUMNS if col in filtered.columns]],
         use_container_width=True,
         hide_index=True,
         height=420,
+    )
+
+    st.markdown("### Scoring Breakdown")
+    st.dataframe(
+        filtered[[col for col in SCORE_COLUMNS if col in filtered.columns]],
+        use_container_width=True,
+        hide_index=True,
+        height=360,
     )
 
     if plans is not None and not plans.empty:
