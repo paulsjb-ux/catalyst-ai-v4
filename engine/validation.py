@@ -44,17 +44,20 @@ def _normalise_price_index(prices: pd.DataFrame) -> pd.DataFrame:
 
 
 def _find_entry_position(prices: pd.DataFrame, saved_at: pd.Timestamp | None) -> int | None:
-    """Find the first daily market bar on or after the saved scan date.
+    """Find validation anchor position.
 
-    Daily Yahoo bars are stored at midnight. Saved scans usually happen during
-    the day. Comparing exact timestamps would incorrectly skip the same-day bar,
-    so this anchors by calendar date.
+    If saved_at is available:
+    - anchor to the first daily market bar on or after the saved scan date.
+
+    If saved_at is missing:
+    - preserve backwards compatibility with earlier tests and ad-hoc validation by
+      anchoring to the first available price bar.
     """
     if prices is None or prices.empty:
         return None
 
     if saved_at is None:
-        return len(prices) - 1
+        return 0
 
     saved_date = saved_at.normalize()
     price_dates = prices.index.normalize()
@@ -75,8 +78,9 @@ def calculate_forward_returns(
 ) -> pd.DataFrame:
     """Calculate forward returns from the saved scan date.
 
-    Anchors to the saved scan calendar date, finds the first available daily bar
-    on or after that date, then calculates forward returns from that anchor.
+    Anchors to the saved scan calendar date when available. For legacy scan rows
+    without saved_at, anchors to the first available price bar so old tests and
+    older CSVs still work.
 
     Incomplete windows are marked as PENDING.
     """
