@@ -1,5 +1,6 @@
 import pandas as pd
 import streamlit as st
+
 from config import CONFIG
 from logging_config import configure_logging
 from ui.components import render_header, top_navigation
@@ -13,9 +14,11 @@ from ui.trade_universe import render_trade_universe
 from ui.validation import render_validation
 from version import APP_VERSION
 
+
 logger = configure_logging()
 HOLDINGS_ENABLED = False
 CURRENT_HOLDINGS: list[dict] = []
+
 
 def route_page(page: str) -> None:
     routes = {
@@ -33,11 +36,18 @@ def route_page(page: str) -> None:
         return
     renderer()
 
+
 def main() -> None:
-    st.set_page_config(page_title=CONFIG.app_name, page_icon=CONFIG.page_icon, layout=CONFIG.layout, initial_sidebar_state="collapsed")
+    st.set_page_config(
+        page_title=CONFIG.app_name,
+        page_icon=CONFIG.page_icon,
+        layout=CONFIG.layout,
+        initial_sidebar_state="collapsed",
+    )
     apply_theme()
     render_header(CONFIG.app_name, CONFIG.tagline, CONFIG.engine_name, APP_VERSION)
     route_page(top_navigation())
+
 
 if __name__ == "__main__":
     main()
