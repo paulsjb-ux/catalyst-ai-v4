@@ -4,12 +4,13 @@ import streamlit as st
 from data.history_store import list_saved_scans, load_scan
 from data.market_data import download_history
 from engine.repeat_winners import build_repeat_winners
+from engine.trade_plans import build_trade_plans, filter_trade_plan_candidates
 from engine.validation import calculate_forward_returns, summarise_validation, add_quality_labels
 from ui.components import empty_state, section_header, status_card
 
 
 def render_reports() -> None:
-    section_header("Reports", "Saved scan summaries, exports, repeat winners and validation reporting.")
+    section_header("Reports", "Saved scan summaries, exports, repeat winners, validation and trade plans.")
 
     scans = list_saved_scans()
 
@@ -51,7 +52,7 @@ def render_reports() -> None:
             use_container_width=True,
         )
 
-    st.markdown("### Quick Validation Report")
+    st.markdown("### Latest Scan Trade Plan Report")
     latest_scan_id = str(scans.iloc[0]["scan_id"])
     latest = load_scan(latest_scan_id)
 
@@ -59,13 +60,36 @@ def render_reports() -> None:
         empty_state("Latest scan unavailable", "The latest saved scan could not be loaded.", "📈")
         return
 
+    candidate_rows = filter_trade_plan_candidates(latest)
+
+    if candidate_rows.empty:
+        empty_state("No candidates in latest scan", "The latest scan has no BUY or WATCH rows.", "📈")
+    elif st.button("Build latest trade plan report", type="primary", use_container_width=True):
+        tickers = candidate_rows["ticker"].dropna().astype(str).str.upper().unique().tolist()
+        with st.spinner(f"Building trade plans for {len(tickers)} tickers..."):
+            market = download_history(tickers, period="6mo")
+            plans = build_trade_plans(candidate_rows, market.prices)
+            st.session_state["report_trade_plans"] = plans
+
+    plans = st.session_state.get("report_trade_plans", pd.DataFrame())
+    if not plans.empty:
+        st.dataframe(plans, use_container_width=True, hide_index=True)
+        st.download_button(
+            "Download latest trade plans CSV",
+            plans.to_csv(index=False).encode("utf-8"),
+            file_name=f"catalyst_trade_plans_{latest_scan_id}.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+
+    st.markdown("### Quick Validation Report")
     candidate_rows = latest[latest["signal"].isin(["BUY", "WATCH"])].copy()
 
     if candidate_rows.empty:
         empty_state("No candidates in latest scan", "The latest scan has no BUY or WATCH rows.", "📈")
         return
 
-    if st.button("Validate latest scan", type="primary", use_container_width=True):
+    if st.button("Validate latest scan", use_container_width=True):
         tickers = candidate_rows["ticker"].dropna().astype(str).str.upper().unique().tolist()
         with st.spinner(f"Validating latest scan for {len(tickers)} tickers..."):
             market = download_history(tickers, period="6mo")
@@ -82,13 +106,6 @@ def render_reports() -> None:
         st.dataframe(summary, use_container_width=True, hide_index=True)
 
     if not validation.empty:
-        pending = int((validation.get("validation_status", pd.Series(dtype=str)) == "PENDING").sum())
-        if pending:
-            status_card(
-                f"{pending} rows are pending because future validation windows have not completed yet.",
-                "info",
-            )
-
         st.download_button(
             "Download latest validation CSV",
             validation.to_csv(index=False).encode("utf-8"),

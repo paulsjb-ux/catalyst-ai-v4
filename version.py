@@ -1,3 +1,3 @@
 APP_NAME = "Catalyst AI"
-APP_VERSION = "4.1.1-sprint2-part1-validation-fix"
+APP_VERSION = "4.2.0-sprint2-part2"
 ENGINE_NAME = "PJB Trading Engine"

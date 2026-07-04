@@ -5,6 +5,7 @@ from data.history_store import load_previous_scan, save_scan, compare_scans
 from data.market_data import download_history
 from data.universe import get_default_universe, normalise_tickers
 from engine.scanner import run_scan
+from engine.trade_plans import build_trade_plans, filter_trade_plan_candidates
 from ui.components import empty_state, section_header, status_card
 
 
@@ -22,8 +23,26 @@ DISPLAY_COLUMNS = [
 ]
 
 
+PLAN_COLUMNS = [
+    "ticker",
+    "signal",
+    "score",
+    "entry_price",
+    "target_price",
+    "stop_loss",
+    "risk_pct",
+    "reward_pct",
+    "risk_reward",
+    "position_quality",
+    "plan_reason",
+]
+
+
 def render_market_scan() -> None:
-    section_header("Market Scan", "Live BUY, WATCH and IGNORE candidate analysis with automatic history saving.")
+    section_header(
+        "Market Scan",
+        "Live BUY, WATCH and IGNORE analysis with trade-plan targets and stops.",
+    )
 
     default_text = ",".join(get_default_universe(30))
     tickers_raw = st.text_area(
@@ -47,12 +66,16 @@ def render_market_scan() -> None:
         if not tickers:
             st.error("Enter at least one ticker.")
         else:
-            with st.spinner(f"Downloading, analysing and saving {len(tickers)} symbols..."):
+            with st.spinner(f"Downloading, analysing and planning {len(tickers)} symbols..."):
                 market = download_history(tickers, period=period)
                 results = run_scan(market.prices)
+                plan_candidates = filter_trade_plan_candidates(results)
+                plans = build_trade_plans(plan_candidates, market.prices)
+
                 saved = save_scan(results)
 
                 st.session_state["scan_results"] = results
+                st.session_state["trade_plans"] = plans
                 st.session_state["scan_errors"] = market.errors
                 st.session_state["scan_time"] = saved.saved_at if saved else ""
                 st.session_state["scan_id"] = saved.scan_id if saved else ""
@@ -62,13 +85,14 @@ def render_market_scan() -> None:
                     st.session_state["scan_comparison"] = compare_scans(results, previous)
 
     frame = st.session_state.get("scan_results", pd.DataFrame())
+    plans = st.session_state.get("trade_plans", pd.DataFrame())
     errors = st.session_state.get("scan_errors", {})
     comparison = st.session_state.get("scan_comparison", pd.DataFrame())
 
     if frame is None or frame.empty:
         empty_state(
             "No scan results yet",
-            "Press Run Market Scan to download prices, score the universe and save the result.",
+            "Press Run Market Scan to download prices, score the universe and build target/stop plans.",
             "🔎",
         )
         return
@@ -84,7 +108,7 @@ def render_market_scan() -> None:
     c1.metric("Scanned", len(frame))
     c2.metric("BUY", int((frame["signal"] == "BUY").sum()))
     c3.metric("WATCH", int((frame["signal"] == "WATCH").sum()))
-    c4.metric("Errors", len(errors))
+    c4.metric("Plans", len(plans) if plans is not None else 0)
 
     scan_id = st.session_state.get("scan_id", "")
     if scan_id:
@@ -121,20 +145,44 @@ def render_market_scan() -> None:
         filtered[DISPLAY_COLUMNS],
         use_container_width=True,
         hide_index=True,
-        height=520,
-        column_config={
-            "ticker": st.column_config.TextColumn("Ticker", width="small"),
-            "signal": st.column_config.TextColumn("Signal", width="small"),
-            "score": st.column_config.NumberColumn("Score", width="small"),
-            "close": st.column_config.NumberColumn("Close", format="%.2f", width="small"),
-            "change_1d_pct": st.column_config.NumberColumn("1D %", format="%.2f", width="small"),
-            "change_20d_pct": st.column_config.NumberColumn("20D %", format="%.2f", width="small"),
-            "rsi_14": st.column_config.NumberColumn("RSI", format="%.1f", width="small"),
-            "volume_ratio": st.column_config.NumberColumn("Vol", format="%.2f", width="small"),
-            "trend": st.column_config.TextColumn("Trend", width="medium"),
-            "reason": st.column_config.TextColumn("Reason", width="large"),
-        },
+        height=420,
     )
+
+    if plans is not None and not plans.empty:
+        st.markdown("### Target & Stop Plans")
+        visible_plans = plans.copy()
+        if signal_filter == "BUY & WATCH":
+            visible_plans = visible_plans[visible_plans["signal"].isin(["BUY", "WATCH"])]
+        elif signal_filter != "All":
+            visible_plans = visible_plans[visible_plans["signal"] == signal_filter]
+
+        st.dataframe(
+            visible_plans[[col for col in PLAN_COLUMNS if col in visible_plans.columns]],
+            use_container_width=True,
+            hide_index=True,
+            height=420,
+            column_config={
+                "ticker": st.column_config.TextColumn("Ticker", width="small"),
+                "signal": st.column_config.TextColumn("Signal", width="small"),
+                "score": st.column_config.NumberColumn("Score", width="small"),
+                "entry_price": st.column_config.NumberColumn("Entry", format="%.2f", width="small"),
+                "target_price": st.column_config.NumberColumn("Target", format="%.2f", width="small"),
+                "stop_loss": st.column_config.NumberColumn("Stop", format="%.2f", width="small"),
+                "risk_pct": st.column_config.NumberColumn("Risk %", format="%.2f", width="small"),
+                "reward_pct": st.column_config.NumberColumn("Reward %", format="%.2f", width="small"),
+                "risk_reward": st.column_config.NumberColumn("R/R", format="%.2f", width="small"),
+                "position_quality": st.column_config.TextColumn("Quality", width="small"),
+                "plan_reason": st.column_config.TextColumn("Reason", width="large"),
+            },
+        )
+
+        st.download_button(
+            "Download trade plans CSV",
+            visible_plans.to_csv(index=False).encode("utf-8"),
+            file_name="catalyst_trade_plans.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
 
     st.download_button(
         "Download scan CSV",
