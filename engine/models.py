@@ -1,8 +1,4 @@
-from __future__ import annotations
-
-from dataclasses import dataclass, asdict
-
-
+from dataclasses import asdict, dataclass
 @dataclass(frozen=True)
 class ScanResult:
     ticker: str
@@ -18,6 +14,5 @@ class ScanResult:
     volume_ratio: float
     trend: str
     reason: str
-
     def to_dict(self) -> dict:
         return asdict(self)
