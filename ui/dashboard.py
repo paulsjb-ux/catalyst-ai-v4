@@ -9,7 +9,7 @@ TOP_COLUMNS = ["ticker", "signal", "score", "close", "change_20d_pct", "rsi_14",
 
 
 def render_dashboard(version: str, scan_results: pd.DataFrame | None = None) -> None:
-    section_header("Command Dashboard", "Live market intelligence, saved scan status and operating overview.")
+    section_header("Command Dashboard", "Live market intelligence, saved scan status and validation readiness.")
 
     frame = scan_results if scan_results is not None else pd.DataFrame()
     scans = list_saved_scans()
@@ -20,10 +20,10 @@ def render_dashboard(version: str, scan_results: pd.DataFrame | None = None) -> 
     c1.markdown(metric_card("Universe", str(len(frame)) if not frame.empty else "Not loaded", "latest session scan"), unsafe_allow_html=True)
     c2.markdown(metric_card("BUY", str(buys), "high-conviction candidates"), unsafe_allow_html=True)
     c3.markdown(metric_card("WATCH", str(watches), "developing candidates"), unsafe_allow_html=True)
-    c4.markdown(metric_card("Saved Scans", str(len(scans)), "local history records"), unsafe_allow_html=True)
+    c4.markdown(metric_card("Saved Scans", str(len(scans)), "validation-ready history"), unsafe_allow_html=True)
 
     st.markdown("### System Status")
-    status_card("Part 4 storage layer is active. Scans now save locally.", "positive")
+    status_card("Sprint 2 Part 1 forward-validation engine is installed.", "positive")
     st.caption(f"Version: {version}")
 
     if frame.empty:
@@ -38,24 +38,9 @@ def render_dashboard(version: str, scan_results: pd.DataFrame | None = None) -> 
         if top.empty:
             empty_state("No qualifying candidates", "The current universe produced no BUY or WATCH signals.", "🛡️")
         else:
-            st.dataframe(
-                top[TOP_COLUMNS],
-                use_container_width=True,
-                hide_index=True,
-                height=420,
-                column_config={
-                    "ticker": st.column_config.TextColumn("Ticker", width="small"),
-                    "signal": st.column_config.TextColumn("Signal", width="small"),
-                    "score": st.column_config.NumberColumn("Score", width="small"),
-                    "close": st.column_config.NumberColumn("Close", format="%.2f", width="small"),
-                    "change_20d_pct": st.column_config.NumberColumn("20D %", format="%.2f", width="small"),
-                    "rsi_14": st.column_config.NumberColumn("RSI", format="%.1f", width="small"),
-                    "trend": st.column_config.TextColumn("Trend", width="medium"),
-                    "reason": st.column_config.TextColumn("Reason", width="large"),
-                },
-            )
+            st.dataframe(top[TOP_COLUMNS], use_container_width=True, hide_index=True, height=420)
 
-    st.markdown("### Recent Saved Scans")
+    st.markdown("### Validation Status")
     if scans.empty:
         empty_state("No saved scans yet", "Market Scan will automatically save each completed run.", "💾")
     else:
