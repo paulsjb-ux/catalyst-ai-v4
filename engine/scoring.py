@@ -15,12 +15,20 @@ def _safe_float(value, default: float = 0.0) -> float:
         return default
 
 
+def _get(row: pd.Series, *names: str, default=0.0):
+    """Get a value from row using new or legacy column names."""
+    for name in names:
+        if name in row:
+            return row.get(name)
+    return default
+
+
 def score_trend_strength(row: pd.Series) -> int:
     """Score how cleanly price is trending above key moving averages."""
-    close = _safe_float(row.get("close"))
-    sma_20 = _safe_float(row.get("sma_20"))
-    sma_50 = _safe_float(row.get("sma_50"))
-    sma_200 = _safe_float(row.get("sma_200"))
+    close = _safe_float(_get(row, "close", "Close"))
+    sma_20 = _safe_float(_get(row, "sma_20", "SMA20"))
+    sma_50 = _safe_float(_get(row, "sma_50", "SMA50"))
+    sma_200 = _safe_float(_get(row, "sma_200", "SMA200"))
 
     score = 0
 
@@ -40,9 +48,9 @@ def score_trend_strength(row: pd.Series) -> int:
 
 def score_momentum(row: pd.Series) -> int:
     """Reward constructive medium-term momentum but avoid pure blow-off moves."""
-    change_20d = _safe_float(row.get("change_20d_pct"))
-    change_60d = _safe_float(row.get("change_60d_pct"))
-    rsi = _safe_float(row.get("rsi_14"))
+    change_20d = _safe_float(_get(row, "change_20d_pct", "Change20D"))
+    change_60d = _safe_float(_get(row, "change_60d_pct", "Change60D"))
+    rsi = _safe_float(_get(row, "rsi_14", "RSI14"), 50)
 
     score = 0
 
@@ -76,7 +84,7 @@ def score_momentum(row: pd.Series) -> int:
 
 def score_volume_confirmation(row: pd.Series) -> int:
     """Reward demand confirmation without overreacting to one-day spikes."""
-    volume_ratio = _safe_float(row.get("volume_ratio"))
+    volume_ratio = _safe_float(_get(row, "volume_ratio", "VolumeRatio"), 1)
 
     if 1.15 <= volume_ratio <= 2.5:
         return 12
@@ -90,15 +98,11 @@ def score_volume_confirmation(row: pd.Series) -> int:
 
 
 def score_relative_strength_proxy(row: pd.Series) -> int:
-    """Proxy relative strength using price position and multi-period returns.
-
-    This is not true benchmark-relative strength yet. It is a simple internal
-    proxy until market index context is added.
-    """
-    close = _safe_float(row.get("close"))
-    high_52w = _safe_float(row.get("high_52w"))
-    change_20d = _safe_float(row.get("change_20d_pct"))
-    change_60d = _safe_float(row.get("change_60d_pct"))
+    """Proxy relative strength using price position and multi-period returns."""
+    close = _safe_float(_get(row, "close", "Close"))
+    high_52w = _safe_float(_get(row, "high_52w", "High52W"))
+    change_20d = _safe_float(_get(row, "change_20d_pct", "Change20D"))
+    change_60d = _safe_float(_get(row, "change_60d_pct", "Change60D"))
 
     score = 0
 
@@ -121,7 +125,7 @@ def score_relative_strength_proxy(row: pd.Series) -> int:
 
 def penalty_volatility(row: pd.Series) -> int:
     """Penalise unusually jumpy names."""
-    volatility_20d = _safe_float(row.get("volatility_20d_pct"))
+    volatility_20d = _safe_float(_get(row, "volatility_20d_pct", "Volatility20D"))
 
     if volatility_20d <= 0:
         return 0
@@ -136,10 +140,10 @@ def penalty_volatility(row: pd.Series) -> int:
 
 def penalty_overextension(row: pd.Series) -> int:
     """Penalise candidates too extended above short-term trend."""
-    close = _safe_float(row.get("close"))
-    sma_20 = _safe_float(row.get("sma_20"))
-    rsi = _safe_float(row.get("rsi_14"))
-    change_20d = _safe_float(row.get("change_20d_pct"))
+    close = _safe_float(_get(row, "close", "Close"))
+    sma_20 = _safe_float(_get(row, "sma_20", "SMA20"))
+    rsi = _safe_float(_get(row, "rsi_14", "RSI14"), 50)
+    change_20d = _safe_float(_get(row, "change_20d_pct", "Change20D"))
 
     penalty = 0
 
@@ -204,7 +208,6 @@ def assign_signal(row: pd.Series) -> str:
     volatility_penalty = _safe_float(row.get("volatility_penalty"))
     extension_penalty = _safe_float(row.get("extension_penalty"))
 
-    # Guardrails: no BUY if the setup is too extended or too volatile.
     if score >= 78 and trend_score >= 22 and momentum_score >= 12 and volatility_penalty > -10 and extension_penalty > -10:
         return "BUY"
 
@@ -244,3 +247,42 @@ def explain_score(row: pd.Series) -> str:
         parts.append("mixed setup")
 
     return "; ".join(parts)
+
+
+def classify_legacy_trend(row: pd.Series) -> str:
+    close = _safe_float(_get(row, "close", "Close"))
+    sma_20 = _safe_float(_get(row, "sma_20", "SMA20"))
+    sma_50 = _safe_float(_get(row, "sma_50", "SMA50"))
+    sma_200 = _safe_float(_get(row, "sma_200", "SMA200"))
+
+    if close > sma_20 > sma_50 > sma_200 > 0:
+        return "TREND"
+    if close > sma_20 > sma_50 > 0:
+        return "TREND"
+    if close > sma_20 > 0 and sma_20 < sma_50:
+        return "RECOVERING"
+    if close < sma_50 and close < sma_200:
+        return "WEAK"
+    return "MIXED"
+
+
+def score_latest(row: pd.Series | dict):
+    """Legacy compatibility function.
+
+    Older tests expect:
+        score, signal, trend, reason = score_latest(row)
+
+    Keep that API while using the smarter Sprint 2 Part 3 component scoring.
+    """
+    series = row if isinstance(row, pd.Series) else pd.Series(row)
+    components = score_quality(series)
+    merged = series.to_dict()
+    merged.update(components)
+
+    scored_series = pd.Series(merged)
+    score = components["score"]
+    signal = assign_signal(scored_series)
+    trend = classify_legacy_trend(series)
+    reason = explain_score(scored_series)
+
+    return score, signal, trend, reason

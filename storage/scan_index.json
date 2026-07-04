@@ -62,5 +62,21 @@
     "row_count": 29,
     "buy_count": 6,
     "watch_count": 9
+  },
+  {
+    "scan_id": "20260704_110916",
+    "saved_at": "2026-07-04T11:09:16.656552+00:00",
+    "file_path": "storage/scans/scan_20260704_110916.csv",
+    "row_count": 29,
+    "buy_count": 0,
+    "watch_count": 3
+  },
+  {
+    "scan_id": "20260704_110936",
+    "saved_at": "2026-07-04T11:09:36.276064+00:00",
+    "file_path": "storage/scans/scan_20260704_110936.csv",
+    "row_count": 29,
+    "buy_count": 0,
+    "watch_count": 3
   }
 ]
