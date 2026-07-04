@@ -1,4 +1,6 @@
+import pandas as pd
 import streamlit as st
+
 from config import CONFIG
 from logging_config import configure_logging
 from ui.components import render_header,top_navigation
@@ -18,7 +20,7 @@ CURRENT_HOLDINGS:list[dict]=[]
 
 def route_page(page: str) -> None:
     routes={
-        "Dashboard":lambda:render_dashboard(APP_VERSION),
+        "Dashboard":lambda:render_dashboard(APP_VERSION,st.session_state.get("scan_results",pd.DataFrame())),
         "Market Scan":render_market_scan,
         "Trade Universe":render_trade_universe,
         "Validation":render_validation,
