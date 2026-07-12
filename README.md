@@ -51,3 +51,9 @@ Current version: `5.0.0-sprint3-part1`
 Adds configurable alerts, persistent history, SMTP/webhook delivery and a scheduler-ready workflow.
 
 Current version: `5.2.0-sprint3-part3`
+
+## Sprint 3 Part 4 — Live Scheduler
+
+Catalyst now includes retry-safe scheduled alert execution, persistent delivery health, last-run diagnostics and a weekday GitHub Actions workflow.
+
+Current version: `5.3.0-sprint3-part4`

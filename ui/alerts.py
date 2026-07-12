@@ -6,6 +6,8 @@ import streamlit as st
 from alerts.config import AlertConfig, load_alert_config, save_alert_config
 from alerts.delivery import delivery_readiness, deliver_event
 from alerts.history import alert_history_frame, delivery_history_frame
+from alerts.health import scheduler_health
+from alerts.runner import run_alert_job
 from alerts.models import AlertEvent
 from alerts.service import run_alert_cycle
 from data.alert_store import load_market_regime, load_portfolio_monitor, save_market_regime, save_portfolio_monitor
@@ -103,10 +105,25 @@ def render_alerts() -> None:
     if not readiness["any_ready"]:
         st.info("Alert rules work now. Add email or webhook secrets to enable external delivery.")
 
+
+    st.markdown("### Scheduler & Delivery Health")
+    health = scheduler_health(config)
+    h1, h2, h3, h4 = st.columns(4)
+    h1.metric("Scheduler Status", str(health["last_status"]).title())
+    h2.metric("Delivery Ready", "Yes" if health["delivery_ready"] else "No")
+    h3.metric("Last Sent", health["last_sent_count"])
+    h4.metric("Last Failed", health["last_failed_count"])
+    if health["last_finished_at"]:
+        st.caption(f"Last completed: {health['last_finished_at']} · Trigger: {health['last_trigger'] or 'unknown'}")
+    else:
+        st.caption("No scheduled alert cycle has completed yet.")
+    if health["last_error"]:
+        st.error(f"Last delivery error: {health['last_error']}")
+
     c1, c2 = st.columns(2)
     if c1.button("Evaluate alerts now", use_container_width=True):
         comparison, monitor, regime = _current_inputs()
-        result = run_alert_cycle(comparison, monitor, regime, config=config, send=True)
+        result = run_alert_job(comparison=comparison, monitor=monitor, regime=regime, config=config, trigger="manual_ui")
         if result["quiet"]:
             st.success("Quiet mode: nothing important changed, so no notification was sent.")
         elif result["event_count"]:
@@ -128,6 +145,12 @@ def render_alerts() -> None:
         else:
             st.warning("No test notification was sent. Check the delivery secrets below.")
         st.json(results)
+
+
+    with st.expander("Live scheduler setup"):
+        st.markdown("1. Add the required GitHub repository secrets.\n2. Enable the included workflow.\n3. Run it manually once.\n4. Confirm this page shows **Scheduler Status: Success**.")
+        st.code("python3 scripts/run_daily_alerts.py --trigger manual_test", language="bash")
+        st.caption("The GitHub Actions workflow runs at 08:00 UTC Monday to Friday and can also be started manually.")
 
     with st.expander("Required Streamlit secrets"):
         st.code('''# Email via SMTP\nSMTP_HOST = "smtp.example.com"\nSMTP_PORT = "587"\nSMTP_USERNAME = "your-user"\nSMTP_PASSWORD = "your-password"\nSMTP_FROM = "alerts@example.com"\nSMTP_USE_TLS = "true"\n\n# Optional webhook\nALERT_WEBHOOK_URL = "https://..."''', language="toml")
