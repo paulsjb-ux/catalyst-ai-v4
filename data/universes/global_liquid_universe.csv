@@ -1,0 +1,324 @@
+ticker,market
+SPY,US Core ETFs
+QQQ,US Core ETFs
+DIA,US Core ETFs
+IWM,US Core ETFs
+VTI,US Core ETFs
+VOO,US Core ETFs
+RSP,US Core ETFs
+MDY,US Core ETFs
+IJH,US Core ETFs
+IJR,US Core ETFs
+VT,US Core ETFs
+ACWI,US Core ETFs
+VEA,US Core ETFs
+VWO,US Core ETFs
+XLK,US Sectors
+XLF,US Sectors
+XLV,US Sectors
+XLY,US Sectors
+XLP,US Sectors
+XLI,US Sectors
+XLE,US Sectors
+XLU,US Sectors
+XLRE,US Sectors
+XLB,US Sectors
+XLC,US Sectors
+SMH,US Sectors
+SOXX,US Sectors
+IGV,US Sectors
+IBB,US Sectors
+XBI,US Sectors
+ARKK,US Sectors
+TLT,Rates Commodities FX
+IEF,Rates Commodities FX
+SHY,Rates Commodities FX
+HYG,Rates Commodities FX
+LQD,Rates Commodities FX
+TIP,Rates Commodities FX
+GLD,Rates Commodities FX
+SLV,Rates Commodities FX
+GDX,Rates Commodities FX
+GDXJ,Rates Commodities FX
+USO,Rates Commodities FX
+UNG,Rates Commodities FX
+DBA,Rates Commodities FX
+DBC,Rates Commodities FX
+UUP,Rates Commodities FX
+FXE,Rates Commodities FX
+FXY,Rates Commodities FX
+FXB,Rates Commodities FX
+EWU,International ETFs
+EWG,International ETFs
+EWQ,International ETFs
+EWI,International ETFs
+EWP,International ETFs
+EWL,International ETFs
+EWN,International ETFs
+EWD,International ETFs
+EWO,International ETFs
+EWK,International ETFs
+EIRL,International ETFs
+EIS,International ETFs
+EZA,International ETFs
+EWA,International ETFs
+EWC,International ETFs
+EWH,International ETFs
+EWS,International ETFs
+EWT,International ETFs
+EWJ,International ETFs
+EWY,International ETFs
+INDA,International ETFs
+MCHI,International ETFs
+ASHR,International ETFs
+EWW,International ETFs
+EWZ,International ETFs
+ECH,International ETFs
+EPU,International ETFs
+ARGT,International ETFs
+TUR,International ETFs
+GREK,International ETFs
+FM,International ETFs
+FRDM,International ETFs
+AAPL,US Mega Large
+MSFT,US Mega Large
+NVDA,US Mega Large
+AMZN,US Mega Large
+META,US Mega Large
+GOOGL,US Mega Large
+GOOG,US Mega Large
+AVGO,US Mega Large
+TSLA,US Mega Large
+BRK-B,US Mega Large
+LLY,US Mega Large
+JPM,US Mega Large
+V,US Mega Large
+MA,US Mega Large
+WMT,US Mega Large
+XOM,US Mega Large
+UNH,US Mega Large
+COST,US Mega Large
+ORCL,US Mega Large
+NFLX,US Mega Large
+HD,US Mega Large
+PG,US Mega Large
+JNJ,US Mega Large
+ABBV,US Mega Large
+BAC,US Mega Large
+CRM,US Mega Large
+KO,US Mega Large
+PEP,US Mega Large
+CVX,US Mega Large
+MRK,US Mega Large
+TMO,US Mega Large
+CSCO,US Mega Large
+ACN,US Mega Large
+MCD,US Mega Large
+AMD,US Mega Large
+LIN,US Mega Large
+ABT,US Mega Large
+DIS,US Mega Large
+WFC,US Mega Large
+IBM,US Mega Large
+INTU,US Mega Large
+QCOM,US Mega Large
+CAT,US Mega Large
+GE,US Mega Large
+AMGN,US Mega Large
+NOW,US Mega Large
+TXN,US Mega Large
+PM,US Mega Large
+ISRG,US Mega Large
+GS,US Mega Large
+MS,US Mega Large
+AXP,US Mega Large
+BLK,US Mega Large
+SPGI,US Mega Large
+RTX,US Mega Large
+HON,US Mega Large
+LOW,US Mega Large
+BKNG,US Mega Large
+UBER,US Mega Large
+PANW,US Mega Large
+ADBE,US Mega Large
+MU,US Mega Large
+AMAT,US Mega Large
+LRCX,US Mega Large
+KLAC,US Mega Large
+ADI,US Mega Large
+SNPS,US Mega Large
+CDNS,US Mega Large
+REGN,US Mega Large
+GILD,US Mega Large
+VRTX,US Mega Large
+MDLZ,US Mega Large
+SBUX,US Mega Large
+PYPL,US Mega Large
+SHOP,US Mega Large
+MELI,US Mega Large
+COIN,US Mega Large
+PLTR,US Mega Large
+SHEL.L,UK Large Caps
+AZN.L,UK Large Caps
+HSBA.L,UK Large Caps
+ULVR.L,UK Large Caps
+BP.L,UK Large Caps
+RIO.L,UK Large Caps
+GSK.L,UK Large Caps
+REL.L,UK Large Caps
+DGE.L,UK Large Caps
+NG.L,UK Large Caps
+LSEG.L,UK Large Caps
+BA.L,UK Large Caps
+BARC.L,UK Large Caps
+LLOY.L,UK Large Caps
+RR.L,UK Large Caps
+GLEN.L,UK Large Caps
+AAL.L,UK Large Caps
+VOD.L,UK Large Caps
+EXPN.L,UK Large Caps
+CPG.L,UK Large Caps
+III.L,UK Large Caps
+PRU.L,UK Large Caps
+STAN.L,UK Large Caps
+IMB.L,UK Large Caps
+BATS.L,UK Large Caps
+TSCO.L,UK Large Caps
+SSE.L,UK Large Caps
+ANTO.L,UK Large Caps
+SGE.L,UK Large Caps
+NWG.L,UK Large Caps
+IHG.L,UK Large Caps
+WTB.L,UK Large Caps
+ASML.AS,Europe Large Caps
+SAP.DE,Europe Large Caps
+SIE.DE,Europe Large Caps
+ALV.DE,Europe Large Caps
+DTE.DE,Europe Large Caps
+AIR.PA,Europe Large Caps
+MC.PA,Europe Large Caps
+OR.PA,Europe Large Caps
+SU.PA,Europe Large Caps
+BNP.PA,Europe Large Caps
+SAN.PA,Europe Large Caps
+TTE.PA,Europe Large Caps
+RMS.PA,Europe Large Caps
+KER.PA,Europe Large Caps
+DG.PA,Europe Large Caps
+EL.PA,Europe Large Caps
+ENEL.MI,Europe Large Caps
+ISP.MI,Europe Large Caps
+UCG.MI,Europe Large Caps
+ENI.MI,Europe Large Caps
+RACE.MI,Europe Large Caps
+IBE.MC,Europe Large Caps
+SAN.MC,Europe Large Caps
+ITX.MC,Europe Large Caps
+ADS.DE,Europe Large Caps
+MBG.DE,Europe Large Caps
+BMW.DE,Europe Large Caps
+BAS.DE,Europe Large Caps
+IFX.DE,Europe Large Caps
+DB1.DE,Europe Large Caps
+MUV2.DE,Europe Large Caps
+NOVO-B.CO,Europe Large Caps
+NESN.SW,Europe Large Caps
+NOVN.SW,Europe Large Caps
+ROG.SW,Europe Large Caps
+UBSG.SW,Europe Large Caps
+ZURN.SW,Europe Large Caps
+SREN.SW,Europe Large Caps
+CSGN.SW,Europe Large Caps
+PRX.AS,Europe Large Caps
+ADYEN.AS,Europe Large Caps
+7203.T,Japan Large Caps
+6758.T,Japan Large Caps
+9984.T,Japan Large Caps
+8306.T,Japan Large Caps
+6861.T,Japan Large Caps
+8035.T,Japan Large Caps
+6501.T,Japan Large Caps
+9432.T,Japan Large Caps
+9433.T,Japan Large Caps
+6098.T,Japan Large Caps
+4063.T,Japan Large Caps
+6954.T,Japan Large Caps
+8058.T,Japan Large Caps
+8001.T,Japan Large Caps
+8766.T,Japan Large Caps
+8316.T,Japan Large Caps
+7267.T,Japan Large Caps
+4519.T,Japan Large Caps
+4502.T,Japan Large Caps
+9983.T,Japan Large Caps
+7974.T,Japan Large Caps
+6367.T,Japan Large Caps
+7741.T,Japan Large Caps
+6902.T,Japan Large Caps
+6981.T,Japan Large Caps
+0700.HK,Asia Pacific Large Caps
+9988.HK,Asia Pacific Large Caps
+3690.HK,Asia Pacific Large Caps
+1299.HK,Asia Pacific Large Caps
+0005.HK,Asia Pacific Large Caps
+1810.HK,Asia Pacific Large Caps
+9618.HK,Asia Pacific Large Caps
+2318.HK,Asia Pacific Large Caps
+1211.HK,Asia Pacific Large Caps
+0388.HK,Asia Pacific Large Caps
+005930.KS,Asia Pacific Large Caps
+000660.KS,Asia Pacific Large Caps
+035420.KS,Asia Pacific Large Caps
+005380.KS,Asia Pacific Large Caps
+051910.KS,Asia Pacific Large Caps
+373220.KS,Asia Pacific Large Caps
+2330.TW,Asia Pacific Large Caps
+2317.TW,Asia Pacific Large Caps
+2454.TW,Asia Pacific Large Caps
+2308.TW,Asia Pacific Large Caps
+BHP.AX,Asia Pacific Large Caps
+CBA.AX,Asia Pacific Large Caps
+CSL.AX,Asia Pacific Large Caps
+NAB.AX,Asia Pacific Large Caps
+WBC.AX,Asia Pacific Large Caps
+ANZ.AX,Asia Pacific Large Caps
+WES.AX,Asia Pacific Large Caps
+MQG.AX,Asia Pacific Large Caps
+RIO.AX,Asia Pacific Large Caps
+WOW.AX,Asia Pacific Large Caps
+RY.TO,Canada Large Caps
+TD.TO,Canada Large Caps
+ENB.TO,Canada Large Caps
+CNR.TO,Canada Large Caps
+CP.TO,Canada Large Caps
+BNS.TO,Canada Large Caps
+BMO.TO,Canada Large Caps
+CNQ.TO,Canada Large Caps
+SU.TO,Canada Large Caps
+TRP.TO,Canada Large Caps
+SHOP.TO,Canada Large Caps
+BCE.TO,Canada Large Caps
+T.TO,Canada Large Caps
+MFC.TO,Canada Large Caps
+SLF.TO,Canada Large Caps
+ABX.TO,Canada Large Caps
+WCN.TO,Canada Large Caps
+ATD.TO,Canada Large Caps
+CSU.TO,Canada Large Caps
+NTR.TO,Canada Large Caps
+INFY,India ADRs
+IBN,India ADRs
+HDB,India ADRs
+WIT,India ADRs
+RDY,India ADRs
+SIFY,India ADRs
+NU,Latin America ADRs
+PBR,Latin America ADRs
+VALE,Latin America ADRs
+ITUB,Latin America ADRs
+BBD,Latin America ADRs
+AMX,Latin America ADRs
+FMX,Latin America ADRs
+CIB,Latin America ADRs
+EC,Latin America ADRs
+SQM,Latin America ADRs
