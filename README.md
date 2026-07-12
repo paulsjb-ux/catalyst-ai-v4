@@ -44,3 +44,10 @@ Catalyst AI v4 is decision-support software only. It does not place trades and d
 Catalyst supports optional Supabase persistence with automatic local fallback, migration, backups and restore controls.
 
 Current version: `5.0.0-sprint3-part1`
+
+
+## Sprint 3 Part 3 — Automated Alerts & Scheduled Delivery
+
+Adds configurable alerts, persistent history, SMTP/webhook delivery and a scheduler-ready workflow.
+
+Current version: `5.2.0-sprint3-part3`
