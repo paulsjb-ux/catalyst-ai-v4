@@ -1,13 +1,16 @@
 from __future__ import annotations
 
-from pathlib import Path
 from datetime import datetime, timezone
+from pathlib import Path
 
 import pandas as pd
+
+from data.storage_service import dataframe_to_records, get, put, records_to_dataframe
 
 
 DATA_DIR = Path("data/local")
 WATCHLIST_FILE = DATA_DIR / "watchlist.csv"
+WATCHLIST_KEY = "watchlist"
 
 WATCHLIST_COLUMNS = [
     "ticker",
@@ -30,7 +33,6 @@ def _normalise(frame: pd.DataFrame) -> pd.DataFrame:
 
     output = frame.copy()
     output.columns = [str(col).strip().lower() for col in output.columns]
-
     aliases = {
         "symbol": "ticker",
         "shares": "quantity",
@@ -56,20 +58,23 @@ def _normalise(frame: pd.DataFrame) -> pd.DataFrame:
 
     output["quantity"] = output["quantity"].fillna(0.0)
     output["notes"] = output["notes"].fillna("").astype(str)
-    output["added_at"] = output["added_at"].fillna(
-        datetime.now(timezone.utc).isoformat()
-    )
-
+    output["added_at"] = output["added_at"].fillna(datetime.now(timezone.utc).isoformat())
     output = output.drop_duplicates(subset=["ticker"], keep="last")
     return output[WATCHLIST_COLUMNS].sort_values("ticker").reset_index(drop=True)
 
 
 def load_watchlist() -> pd.DataFrame:
+    records = get(WATCHLIST_KEY, None)
+    if isinstance(records, list):
+        return _normalise(records_to_dataframe(records, WATCHLIST_COLUMNS))
+
     if not WATCHLIST_FILE.exists():
         return _empty_watchlist()
 
     try:
-        return _normalise(pd.read_csv(WATCHLIST_FILE))
+        frame = _normalise(pd.read_csv(WATCHLIST_FILE))
+        put(WATCHLIST_KEY, dataframe_to_records(frame))
+        return frame
     except Exception:
         return _empty_watchlist()
 
@@ -78,6 +83,7 @@ def save_watchlist(frame: pd.DataFrame) -> Path:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     normalised = _normalise(frame)
     normalised.to_csv(WATCHLIST_FILE, index=False)
+    put(WATCHLIST_KEY, dataframe_to_records(normalised))
     return WATCHLIST_FILE
 
 
@@ -94,23 +100,20 @@ def add_or_update_item(
         return load_watchlist()
 
     frame = load_watchlist()
-    new_row = pd.DataFrame(
-        [{
-            "ticker": ticker,
-            "quantity": quantity or 0.0,
-            "entry_price": entry_price,
-            "target_price": target_price,
-            "stop_loss": stop_loss,
-            "notes": notes or "",
-            "added_at": datetime.now(timezone.utc).isoformat(),
-        }]
+    new_row = pd.DataFrame([{
+        "ticker": ticker,
+        "quantity": quantity or 0.0,
+        "entry_price": entry_price,
+        "target_price": target_price,
+        "stop_loss": stop_loss,
+        "notes": notes or "",
+        "added_at": datetime.now(timezone.utc).isoformat(),
+    }])
+
+    updated = new_row if frame.empty else pd.concat(
+        [frame[frame["ticker"] != ticker], new_row],
+        ignore_index=True,
     )
-
-    if frame.empty:
-        updated = new_row
-    else:
-        updated = pd.concat([frame[frame["ticker"] != ticker], new_row], ignore_index=True)
-
     save_watchlist(updated)
     return load_watchlist()
 
@@ -120,16 +123,13 @@ def remove_item(ticker: str) -> pd.DataFrame:
     frame = load_watchlist()
     if frame.empty:
         return frame
-
     updated = frame[frame["ticker"] != ticker].copy()
     save_watchlist(updated)
     return load_watchlist()
 
 
 def import_watchlist_csv(file_or_buffer) -> pd.DataFrame:
-    imported = pd.read_csv(file_or_buffer)
-    imported = _normalise(imported)
-
+    imported = _normalise(pd.read_csv(file_or_buffer))
     existing = load_watchlist()
     combined = pd.concat([existing, imported], ignore_index=True)
     save_watchlist(combined)

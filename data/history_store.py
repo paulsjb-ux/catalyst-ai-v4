@@ -7,10 +7,13 @@ import json
 
 import pandas as pd
 
+from data.storage_service import dataframe_to_records, get, put, records_to_dataframe
+
 
 STORAGE_DIR = Path("storage")
 SCAN_HISTORY_DIR = STORAGE_DIR / "scans"
 INDEX_FILE = STORAGE_DIR / "scan_index.json"
+SCAN_INDEX_KEY = "scan_index"
 
 
 @dataclass(frozen=True)
@@ -29,23 +32,29 @@ def ensure_storage() -> None:
         INDEX_FILE.write_text("[]", encoding="utf-8")
 
 
-def _load_index() -> list[dict]:
+def _load_local_index() -> list[dict]:
     ensure_storage()
     try:
         return json.loads(INDEX_FILE.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
+    except Exception:
         return []
+
+
+def _load_index() -> list[dict]:
+    cloud_or_cache = get(SCAN_INDEX_KEY, None)
+    if isinstance(cloud_or_cache, list):
+        return cloud_or_cache
+    return _load_local_index()
 
 
 def _save_index(index: list[dict]) -> None:
     ensure_storage()
     INDEX_FILE.write_text(json.dumps(index, indent=2), encoding="utf-8")
+    put(SCAN_INDEX_KEY, index)
 
 
 def save_scan(frame: pd.DataFrame) -> SavedScan | None:
-    """Persist a scan result to local CSV and update the scan index."""
     ensure_storage()
-
     if frame is None or frame.empty:
         return None
 
@@ -55,8 +64,10 @@ def save_scan(frame: pd.DataFrame) -> SavedScan | None:
     path = SCAN_HISTORY_DIR / f"scan_{scan_id}.csv"
 
     output = frame.copy()
-    output.insert(0, "saved_at", saved_at)
-    output.insert(0, "scan_id", scan_id)
+    if "saved_at" not in output.columns:
+        output.insert(0, "saved_at", saved_at)
+    if "scan_id" not in output.columns:
+        output.insert(0, "scan_id", scan_id)
     output.to_csv(path, index=False)
 
     buy_count = int((frame["signal"] == "BUY").sum()) if "signal" in frame.columns else 0
@@ -71,32 +82,41 @@ def save_scan(frame: pd.DataFrame) -> SavedScan | None:
         watch_count=watch_count,
     )
 
-    index = _load_index()
-    index.append(saved.__dict__)
-    index = index[-100:]
-    _save_index(index)
+    put(f"scan:{scan_id}", dataframe_to_records(output))
 
+    index = _load_index()
+    index = [item for item in index if item.get("scan_id") != scan_id]
+    index.append(saved.__dict__)
+    index = sorted(index, key=lambda item: item.get("saved_at", ""))[-100:]
+    _save_index(index)
     return saved
 
 
 def list_saved_scans() -> pd.DataFrame:
     index = _load_index()
+    columns = ["scan_id", "saved_at", "file_path", "row_count", "buy_count", "watch_count"]
     if not index:
-        return pd.DataFrame(columns=["scan_id", "saved_at", "file_path", "row_count", "buy_count", "watch_count"])
+        return pd.DataFrame(columns=columns)
     return pd.DataFrame(index).sort_values("saved_at", ascending=False).reset_index(drop=True)
 
 
 def load_scan(scan_id: str) -> pd.DataFrame:
+    records = get(f"scan:{scan_id}", None)
+    if isinstance(records, list) and records:
+        return records_to_dataframe(records)
+
     index = _load_index()
     match = next((item for item in index if item.get("scan_id") == scan_id), None)
     if not match:
         return pd.DataFrame()
 
-    path = Path(match["file_path"])
+    path = Path(match.get("file_path", ""))
     if not path.exists():
         return pd.DataFrame()
 
-    return pd.read_csv(path)
+    frame = pd.read_csv(path)
+    put(f"scan:{scan_id}", dataframe_to_records(frame))
+    return frame
 
 
 def load_latest_scan() -> pd.DataFrame:
@@ -121,22 +141,14 @@ def load_previous_scan(current_scan_id: str | None = None) -> pd.DataFrame:
 
 
 def compare_scans(current: pd.DataFrame, previous: pd.DataFrame) -> pd.DataFrame:
-    """Compare current scan with previous scan by ticker."""
     if current is None or current.empty or previous is None or previous.empty:
         return pd.DataFrame()
 
-    current_cols = ["ticker", "signal", "score", "close", "change_20d_pct"]
-    previous_cols = ["ticker", "signal", "score", "close", "change_20d_pct"]
+    wanted = ["ticker", "signal", "score", "close", "change_20d_pct"]
+    current_trim = current[[col for col in wanted if col in current.columns]].copy()
+    previous_trim = previous[[col for col in wanted if col in previous.columns]].copy()
 
-    current_trim = current[[col for col in current_cols if col in current.columns]].copy()
-    previous_trim = previous[[col for col in previous_cols if col in previous.columns]].copy()
-
-    merged = current_trim.merge(
-        previous_trim,
-        on="ticker",
-        how="left",
-        suffixes=("_now", "_prev"),
-    )
+    merged = current_trim.merge(previous_trim, on="ticker", how="left", suffixes=("_now", "_prev"))
 
     if "score_now" in merged.columns and "score_prev" in merged.columns:
         merged["score_change"] = merged["score_now"] - merged["score_prev"]
@@ -148,5 +160,4 @@ def compare_scans(current: pd.DataFrame, previous: pd.DataFrame) -> pd.DataFrame
             ),
             axis=1,
         )
-
     return merged
