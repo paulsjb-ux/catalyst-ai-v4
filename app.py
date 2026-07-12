@@ -12,6 +12,7 @@ from ui.settings import render_settings
 from ui.theme import apply_theme
 from ui.trade_universe import render_trade_universe
 from ui.validation import render_validation
+from ui.watchlist import render_watchlist
 from version import APP_VERSION
 
 
@@ -25,6 +26,7 @@ def route_page(page: str) -> None:
         "Dashboard": lambda: render_dashboard(APP_VERSION, st.session_state.get("scan_results", pd.DataFrame())),
         "Market Scan": render_market_scan,
         "Trade Universe": render_trade_universe,
+        "Watchlist": render_watchlist,
         "Validation": render_validation,
         "Repeat Winners": render_repeat_winners,
         "Reports": render_reports,

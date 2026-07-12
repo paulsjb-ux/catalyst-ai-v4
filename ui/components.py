@@ -11,7 +11,13 @@ def render_header(app_name: str, tagline: str, engine_name: str, version: str) -
     """, unsafe_allow_html=True)
 
 def top_navigation() -> str:
-    return st.radio("Navigation", ["Dashboard","Market Scan","Trade Universe","Validation","Repeat Winners","Reports","Settings"], horizontal=True, label_visibility="collapsed", key="primary_navigation")
+    return st.radio(
+        "Navigation",
+        ["Dashboard","Market Scan","Trade Universe","Watchlist","Validation","Repeat Winners","Reports","Settings"],
+        horizontal=True,
+        label_visibility="collapsed",
+        key="primary_navigation",
+    )
 
 def metric_card(label: str, value: str, note: str = "") -> str:
     return f'<div class="metric-card"><div class="metric-label">{html.escape(str(label))}</div><div class="metric-value">{html.escape(str(value))}</div><div class="metric-note">{html.escape(str(note))}</div></div>'
