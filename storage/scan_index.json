@@ -158,5 +158,37 @@
     "row_count": 29,
     "buy_count": 3,
     "watch_count": 5
+  },
+  {
+    "scan_id": "20260712_202002",
+    "saved_at": "2026-07-12T20:20:02.327131+00:00",
+    "file_path": "storage/scans/scan_20260712_202002.csv",
+    "row_count": 27,
+    "buy_count": 3,
+    "watch_count": 4
+  },
+  {
+    "scan_id": "20260712_202006",
+    "saved_at": "2026-07-12T20:20:06.053187+00:00",
+    "file_path": "storage/scans/scan_20260712_202006.csv",
+    "row_count": 27,
+    "buy_count": 3,
+    "watch_count": 5
+  },
+  {
+    "scan_id": "20260712_202433",
+    "saved_at": "2026-07-12T20:24:33.435948+00:00",
+    "file_path": "storage/scans/scan_20260712_202433.csv",
+    "row_count": 28,
+    "buy_count": 3,
+    "watch_count": 5
+  },
+  {
+    "scan_id": "20260712_202516",
+    "saved_at": "2026-07-12T20:25:16.341740+00:00",
+    "file_path": "storage/scans/scan_20260712_202516.csv",
+    "row_count": 29,
+    "buy_count": 3,
+    "watch_count": 5
   }
 ]
