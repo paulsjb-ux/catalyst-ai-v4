@@ -8,6 +8,7 @@ from ui.alerts import render_alerts
 from ui.dashboard import render_dashboard
 from ui.daily_brief import render_daily_brief
 from ui.market_scan import render_market_scan
+from ui.paper_trading import render_paper_trading
 from ui.reports import render_reports
 from ui.repeat_winners import render_repeat_winners
 from ui.settings import render_settings
@@ -26,6 +27,7 @@ def route_page(page: str) -> None:
         "Daily Brief": render_daily_brief,
         "Alerts": render_alerts,
         "Market Scan": render_market_scan,
+        "Paper Trading": render_paper_trading,
         "Trade Universe": render_trade_universe,
         "Watchlist": render_watchlist,
         "Validation": render_validation,

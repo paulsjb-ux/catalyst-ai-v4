@@ -1,0 +1,47 @@
+{
+  "active": true,
+  "started_at": "2026-07-18T14:22:26.146921+00:00",
+  "completed_at": null,
+  "config": {
+    "starting_cash": 10000.0,
+    "trial_days": 30,
+    "max_open_trades": 5,
+    "max_position_value": 2000.0,
+    "risk_per_trade_pct": 1.0,
+    "minimum_score": 75.0,
+    "minimum_risk_reward": 2.0,
+    "maximum_holding_days": 10,
+    "entry_slippage_pct": 0.1,
+    "exit_slippage_pct": 0.1
+  },
+  "cash": 10000.0,
+  "open_trades": [],
+  "closed_trades": [],
+  "daily_runs": [
+    {
+      "date": "2026-07-18",
+      "regime": "UNKNOWN",
+      "opened": [],
+      "closed": [],
+      "open_count": 0,
+      "equity": 10000.0
+    }
+  ],
+  "equity_history": [
+    {
+      "date": "2026-07-18",
+      "equity": 10000.0,
+      "cash": 10000.0
+    },
+    {
+      "date": "2026-07-18",
+      "equity": 10000.0,
+      "cash": 10000.0
+    }
+  ],
+  "benchmark": {
+    "ticker": "SPY",
+    "start_price": null,
+    "latest_price": null
+  }
+}

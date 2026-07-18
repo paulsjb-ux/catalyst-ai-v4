@@ -7,7 +7,7 @@ def render_header(app_name: str, tagline: str, engine_name: str, version: str) -
 
 
 def top_navigation() -> str:
-    return st.radio("Navigation", ["Dashboard", "Daily Brief", "Alerts", "Market Scan", "Trade Universe", "Watchlist", "Validation", "Repeat Winners", "Reports", "Settings"], horizontal=True, label_visibility="collapsed", key="primary_navigation")
+    return st.radio("Navigation", ["Dashboard", "Daily Brief", "Alerts", "Market Scan", "Paper Trading", "Trade Universe", "Watchlist", "Validation", "Repeat Winners", "Reports", "Settings"], horizontal=True, label_visibility="collapsed", key="primary_navigation")
 
 
 def metric_card(label: str, value: str, note: str = "") -> str:
