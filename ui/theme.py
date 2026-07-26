@@ -43,6 +43,39 @@ def apply_theme() -> None:
     [data-testid="stDataFrame"] *{font-size:.9rem}
     h1,h2,h3{color:#0f172a!important;letter-spacing:-.03em}
     .stCaptionContainer,.stCaptionContainer p{color:#64748b!important}
-    @media(max-width:900px){.block-container{padding-left:1rem;padding-right:1rem}div[data-testid="stRadio"] label{min-width:118px}}
+    @media(max-width:900px){
+        .block-container{padding-left:1rem;padding-right:1rem}
+        div[data-testid="stRadio"]{
+            position:static;
+            top:auto;
+            overflow:visible;
+            padding:8px;
+        }
+        div[data-testid="stRadio"] div[role="radiogroup"]{
+            display:grid;
+            grid-template-columns:repeat(2,minmax(0,1fr));
+            gap:8px;
+            overflow:visible;
+            width:100%;
+        }
+        div[data-testid="stRadio"] label{
+            min-width:0;
+            width:100%;
+            margin:0!important;
+            padding:10px 8px;
+            overflow:hidden;
+        }
+        div[data-testid="stRadio"] label p{
+            white-space:normal;
+            text-align:center;
+            line-height:1.15;
+            font-size:.92rem;
+        }
+    }
+    @media(max-width:430px){
+        div[data-testid="stRadio"] div[role="radiogroup"]{
+            grid-template-columns:1fr;
+        }
+    }
     </style>
     """, unsafe_allow_html=True)

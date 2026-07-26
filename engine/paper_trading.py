@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from math import floor
 from typing import Any
 
@@ -39,6 +39,8 @@ class PaperTrade:
     status: str = "OPEN"
     days_held: int = 0
     last_price: float | None = None
+    unrealised_pnl: float = 0.0
+    unrealised_return_pct: float = 0.0
     exit_date: str | None = None
     exit_price: float | None = None
     exit_reason: str | None = None
@@ -49,6 +51,13 @@ class PaperTrade:
 
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+def next_weekday(day: date) -> date:
+    candidate = day + timedelta(days=1)
+    while candidate.weekday() >= 5:
+        candidate += timedelta(days=1)
+    return candidate
 
 
 def new_state(config: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -84,16 +93,19 @@ def _text(row: pd.Series, names: list[str], default: str = "") -> str:
     return default
 
 
-def qualifying_candidates(scan: pd.DataFrame, state: dict[str, Any], regime: str = "UNKNOWN") -> pd.DataFrame:
+def candidate_evaluation(scan: pd.DataFrame, state: dict[str, Any], regime: str = "UNKNOWN") -> pd.DataFrame:
+    columns = [
+        "ticker", "signal", "score", "price", "target_price", "stop_price",
+        "risk_reward", "eligible", "reason",
+    ]
     if scan is None or scan.empty:
-        return pd.DataFrame()
+        return pd.DataFrame(columns=columns)
 
     cfg = state["config"]
-    if regime.upper() in {"RISK_OFF", "DEFENSIVE"}:
-        return pd.DataFrame()
-
     open_tickers = {trade["ticker"] for trade in state.get("open_trades", [])}
+    defensive = regime.upper() in {"RISK_OFF", "DEFENSIVE"}
     rows: list[dict[str, Any]] = []
+
     for _, row in scan.iterrows():
         ticker = _text(row, ["ticker", "symbol"]).upper().strip()
         signal = _text(row, ["signal"]).upper()
@@ -103,16 +115,30 @@ def qualifying_candidates(scan: pd.DataFrame, state: dict[str, Any], regime: str
         stop = _number(row, ["stop_loss", "stop_price", "stop"])
         rr = _number(row, ["risk_reward", "risk_reward_ratio"])
 
-        if not ticker or ticker in open_tickers or signal != "BUY" or price is None:
-            continue
-        if score < float(cfg["minimum_score"]):
-            continue
-        if target is None or stop is None or not (stop < price < target):
-            continue
-        calculated_rr = (target - price) / (price - stop) if price > stop else 0.0
-        rr = calculated_rr if rr is None else rr
-        if rr < float(cfg["minimum_risk_reward"]):
-            continue
+        eligible = True
+        reason = "QUALIFIED"
+
+        if not ticker:
+            eligible, reason = False, "MISSING TICKER"
+        elif ticker in open_tickers:
+            eligible, reason = False, "ALREADY OPEN"
+        elif signal != "BUY":
+            eligible, reason = False, f"SIGNAL {signal or 'MISSING'}"
+        elif defensive:
+            eligible, reason = False, f"REGIME {regime.upper()}"
+        elif score < float(cfg["minimum_score"]):
+            eligible, reason = False, f"SCORE BELOW {cfg['minimum_score']}"
+        elif price is None:
+            eligible, reason = False, "MISSING PRICE"
+        elif target is None or stop is None:
+            eligible, reason = False, "MISSING TARGET OR STOP"
+        elif not (stop < price < target):
+            eligible, reason = False, "INVALID TARGET/STOP"
+        else:
+            calculated_rr = (target - price) / (price - stop) if price > stop else 0.0
+            rr = calculated_rr if rr is None else rr
+            if rr < float(cfg["minimum_risk_reward"]):
+                eligible, reason = False, f"RISK/REWARD BELOW {cfg['minimum_risk_reward']}:1"
 
         rows.append({
             "ticker": ticker,
@@ -122,12 +148,21 @@ def qualifying_candidates(scan: pd.DataFrame, state: dict[str, Any], regime: str
             "target_price": target,
             "stop_price": stop,
             "risk_reward": rr,
-            "market_regime": regime,
+            "eligible": eligible,
+            "reason": reason,
         })
 
-    if not rows:
+    return pd.DataFrame(rows, columns=columns)
+
+
+def qualifying_candidates(scan: pd.DataFrame, state: dict[str, Any], regime: str = "UNKNOWN") -> pd.DataFrame:
+    evaluation = candidate_evaluation(scan, state, regime)
+    if evaluation.empty:
         return pd.DataFrame()
-    return pd.DataFrame(rows).sort_values(["score", "risk_reward"], ascending=[False, False]).reset_index(drop=True)
+    qualified = evaluation[evaluation["eligible"]].copy()
+    if qualified.empty:
+        return pd.DataFrame()
+    return qualified.sort_values(["score", "risk_reward"], ascending=[False, False]).reset_index(drop=True)
 
 
 def calculate_position(entry_price: float, stop_price: float, state: dict[str, Any]) -> tuple[int, float, float]:
@@ -176,6 +211,8 @@ def _close_trade(trade: dict[str, Any], raw_exit_price: float, reason: str, stat
         "net_pnl": round(net, 2),
         "return_pct": round((exit_price / float(trade["entry_price"]) - 1.0) * 100.0, 3),
         "last_price": raw_exit_price,
+        "unrealised_pnl": 0.0,
+        "unrealised_return_pct": 0.0,
     })
     state["cash"] = round(float(state["cash"]) + exit_price * int(trade["quantity"]), 2)
     state["closed_trades"].append(trade)
@@ -192,6 +229,7 @@ def process_day(state: dict[str, Any], scan: pd.DataFrame, regime: str = "UNKNOW
     prices = _price_map(scan)
     still_open: list[dict[str, Any]] = []
     closed_today: list[str] = []
+    close_details: list[dict[str, str]] = []
 
     for trade in state.get("open_trades", []):
         market = prices.get(trade["ticker"], {})
@@ -202,6 +240,12 @@ def process_day(state: dict[str, Any], scan: pd.DataFrame, regime: str = "UNKNOW
             still_open.append(trade)
             continue
         trade["last_price"] = price
+        trade["unrealised_pnl"] = round(
+            (float(price) - float(trade["entry_price"])) * int(trade["quantity"]), 2
+        )
+        trade["unrealised_return_pct"] = round(
+            (float(price) / float(trade["entry_price"]) - 1.0) * 100.0, 3
+        )
 
         reason = None
         exit_at = price
@@ -217,21 +261,35 @@ def process_day(state: dict[str, Any], scan: pd.DataFrame, regime: str = "UNKNOW
         if reason:
             _close_trade(trade, exit_at, reason, state, run_date)
             closed_today.append(trade["ticker"])
+            close_details.append({"ticker": trade["ticker"], "reason": reason})
         else:
             still_open.append(trade)
 
     state["open_trades"] = still_open
 
-    candidates = qualifying_candidates(scan, state, regime)
+    evaluation = candidate_evaluation(scan, state, regime)
+    candidates = evaluation[evaluation["eligible"]].copy() if not evaluation.empty else pd.DataFrame()
+    if not candidates.empty:
+        candidates = candidates.sort_values(["score", "risk_reward"], ascending=[False, False])
+
     opened_today: list[str] = []
+    open_details: list[dict[str, Any]] = []
+    skipped_capacity: list[str] = []
+    skipped_position_size: list[str] = []
     capacity = int(state["config"]["max_open_trades"]) - len(state["open_trades"])
+
     if capacity > 0 and not candidates.empty:
-        for _, candidate in candidates.head(capacity).iterrows():
+        for idx, (_, candidate) in enumerate(candidates.iterrows()):
+            if idx >= capacity:
+                skipped_capacity.append(str(candidate["ticker"]))
+                continue
             slip = float(state["config"]["entry_slippage_pct"]) / 100.0
             entry = float(candidate["price"]) * (1.0 + slip)
-            qty, value, _ = calculate_position(entry, float(candidate["stop_price"]), state)
+            qty, value, actual_risk = calculate_position(entry, float(candidate["stop_price"]), state)
             if qty <= 0:
+                skipped_position_size.append(str(candidate["ticker"]))
                 continue
+
             trade = PaperTrade(
                 trade_id=f"{run_date}:{candidate['ticker']}",
                 ticker=str(candidate["ticker"]),
@@ -246,21 +304,54 @@ def process_day(state: dict[str, Any], scan: pd.DataFrame, regime: str = "UNKNOW
                 stop_price=float(candidate["stop_price"]),
                 risk_reward=float(candidate["risk_reward"]),
                 last_price=float(candidate["price"]),
+                unrealised_pnl=round((float(candidate["price"]) - entry) * qty, 2),
+                unrealised_return_pct=round((float(candidate["price"]) / entry - 1.0) * 100.0, 3),
             )
             state["cash"] = round(float(state["cash"]) - value, 2)
             state["open_trades"].append(asdict(trade))
             opened_today.append(trade.ticker)
+            open_details.append({
+                "ticker": trade.ticker,
+                "entry_price": trade.entry_price,
+                "quantity": trade.quantity,
+                "position_value": trade.position_value,
+                "actual_risk": round(actual_risk, 2),
+                "score": trade.score,
+                "risk_reward": round(trade.risk_reward, 2),
+            })
+
+    eligible_count = int(evaluation["eligible"].sum()) if not evaluation.empty else 0
+    rejected = evaluation[~evaluation["eligible"]].copy() if not evaluation.empty else pd.DataFrame()
+    rejection_counts = (
+        rejected["reason"].value_counts().to_dict()
+        if not rejected.empty and "reason" in rejected.columns
+        else {}
+    )
 
     equity = portfolio_equity(state)
     state["daily_runs"].append({
         "date": run_date,
+        "recorded_at": now_iso(),
         "regime": regime,
+        "scan_count": int(len(scan)) if scan is not None else 0,
+        "buy_signal_count": int((scan["signal"] == "BUY").sum()) if scan is not None and not scan.empty and "signal" in scan.columns else 0,
+        "eligible_count": eligible_count,
         "opened": opened_today,
+        "opened_details": open_details,
         "closed": closed_today,
+        "closed_details": close_details,
+        "skipped_capacity": skipped_capacity,
+        "skipped_position_size": skipped_position_size,
+        "rejection_counts": rejection_counts,
         "open_count": len(state["open_trades"]),
+        "cash": round(float(state["cash"]), 2),
         "equity": round(equity, 2),
     })
-    state["equity_history"].append({"date": run_date, "equity": round(equity, 2), "cash": round(float(state["cash"]), 2)})
+    state["equity_history"].append({
+        "date": run_date,
+        "equity": round(equity, 2),
+        "cash": round(float(state["cash"]), 2),
+    })
 
     if len(state["daily_runs"]) >= int(state["config"]["trial_days"]):
         state["active"] = False
