@@ -12,7 +12,10 @@ from engine.paper_trading import (
     new_state,
     next_weekday,
     performance_metrics,
+    performance_by_setup,
     process_day,
+    ticker_currency,
+    trade_journal,
     trades_frame,
 )
 from ui.components import empty_state, section_header, status_card
@@ -52,6 +55,13 @@ def _latest_scan() -> pd.DataFrame:
 
 def _money(value: float) -> str:
     return f"£{value:,.2f}"
+
+
+def _native_money(value: float | None, currency: str = "USD") -> str:
+    if value is None or pd.isna(value):
+        return "—"
+    symbols = {"GBP": "£", "USD": "$", "EUR": "€", "JPY": "¥", "AUD": "A$", "CAD": "C$", "HKD": "HK$", "CHF": "CHF "}
+    return f"{symbols.get(currency, currency + ' ')}{float(value):,.2f}"
 
 
 def _format_timestamp(value: str | None) -> str:
@@ -197,6 +207,12 @@ def render_paper_trading() -> None:
     c4.metric("Open Trades", int(metrics["open_trades"]))
     c5.metric("Win Rate", f"{metrics['win_rate_pct']}%")
 
+    k1, k2, k3, k4 = st.columns(4)
+    k1.metric("Average Winner", _money(float(metrics["average_win"])))
+    k2.metric("Average Loser", _money(float(metrics["average_loss"])))
+    k3.metric("Expectancy / Trade", _money(float(metrics["expectancy"])))
+    k4.metric("Maximum Drawdown", f"{metrics['max_drawdown_pct']}%")
+
     scan = _latest_scan()
     latest_run = _latest_run(state)
     has_trade_plans = (
@@ -284,15 +300,16 @@ def render_paper_trading() -> None:
         st.caption("No open simulated positions.")
     else:
         wanted = [
-            "ticker", "entry_date", "entry_price", "quantity", "last_price",
-            "unrealised_pnl", "unrealised_return_pct",
-            "target_price", "stop_price", "score", "days_held",
+            "ticker", "setup", "currency", "entry_date", "entry_price", "quantity", "last_price",
+            "unrealised_pnl", "unrealised_return_pct", "target_price", "stop_price", "score", "days_held",
         ]
-        st.dataframe(
-            open_frame[[c for c in wanted if c in open_frame.columns]],
-            use_container_width=True,
-            hide_index=True,
-        )
+        view = open_frame[[c for c in wanted if c in open_frame.columns]].copy()
+        if "currency" not in view.columns:
+            view["currency"] = view["ticker"].map(ticker_currency)
+        for column in ["entry_price", "last_price", "target_price", "stop_price"]:
+            if column in view.columns:
+                view[column] = [_native_money(v, c) for v, c in zip(view[column], view["currency"])]
+        st.dataframe(view, use_container_width=True, hide_index=True)
 
     st.markdown("### Closed Trades")
     closed_frame = trades_frame(state, "CLOSED")
@@ -300,10 +317,15 @@ def render_paper_trading() -> None:
         st.caption("No completed simulated trades yet.")
     else:
         wanted = [
-            "ticker", "entry_date", "entry_price", "exit_date", "exit_price",
+            "ticker", "setup", "currency", "entry_date", "entry_price", "exit_date", "exit_price",
             "exit_reason", "quantity", "net_pnl", "return_pct",
         ]
-        view = closed_frame[[c for c in wanted if c in closed_frame.columns]]
+        view = closed_frame[[c for c in wanted if c in closed_frame.columns]].copy()
+        if "currency" not in view.columns:
+            view["currency"] = view["ticker"].map(ticker_currency)
+        for column in ["entry_price", "exit_price"]:
+            if column in view.columns:
+                view[column] = [_native_money(v, c) for v, c in zip(view[column], view["currency"])]
         st.dataframe(view, use_container_width=True, hide_index=True)
         st.download_button(
             "Download trade history CSV",
@@ -313,17 +335,45 @@ def render_paper_trading() -> None:
             use_container_width=True,
         )
 
-    st.markdown("### Performance")
+    st.markdown("### Performance Analytics")
     p1, p2, p3, p4 = st.columns(4)
     p1.metric("Completed Trades", int(metrics["closed_trades"]))
-    p2.metric("Profit Factor", metrics["profit_factor"])
-    p3.metric("Average Win", _money(float(metrics["average_win"])))
-    p4.metric("Maximum Drawdown", f"{metrics['max_drawdown_pct']}%")
+    p2.metric("Wins / Losses", f"{metrics['wins']} / {metrics['losses']}")
+    p3.metric("Profit Factor", metrics["profit_factor"])
+    p4.metric("Expectancy", _money(float(metrics["expectancy"])))
 
     history = pd.DataFrame(state.get("equity_history", []))
     if not history.empty and "date" in history.columns and "equity" in history.columns:
         history = history.drop_duplicates("date", keep="last").set_index("date")
+        st.markdown("#### Portfolio Equity Curve")
         st.line_chart(history[["equity"]])
+
+    st.markdown("#### Performance by Setup")
+    setup_frame = performance_by_setup(state)
+    if setup_frame.empty:
+        st.caption("Setup statistics will appear after the first trade closes.")
+    else:
+        st.dataframe(setup_frame, use_container_width=True, hide_index=True)
+
+    st.markdown("#### Trade Journal")
+    journal = trade_journal(state)
+    if journal.empty:
+        st.caption("The trade journal is empty.")
+    else:
+        journal_columns = [
+            "entry_date", "exit_date", "ticker", "setup", "status", "score",
+            "market_regime", "entry_price", "exit_price", "quantity",
+            "net_pnl", "return_pct", "exit_reason",
+        ]
+        journal_view = journal[[c for c in journal_columns if c in journal.columns]].copy()
+        st.dataframe(journal_view, use_container_width=True, hide_index=True)
+        st.download_button(
+            "Download full trade journal CSV",
+            journal.to_csv(index=False).encode("utf-8"),
+            "catalyst_paper_trading_journal.csv",
+            "text/csv",
+            use_container_width=True,
+        )
 
     with st.expander("Trial administration"):
         st.warning("Resetting permanently clears the current paper-trading trial.")

@@ -36,6 +36,8 @@ class PaperTrade:
     target_price: float
     stop_price: float
     risk_reward: float
+    setup: str = "TREND"
+    currency: str = "USD"
     status: str = "OPEN"
     days_held: int = 0
     last_price: float | None = None
@@ -58,6 +60,20 @@ def next_weekday(day: date) -> date:
     while candidate.weekday() >= 5:
         candidate += timedelta(days=1)
     return candidate
+
+
+def ticker_currency(ticker: str) -> str:
+    """Return the native quotation currency used for display only."""
+    symbol = str(ticker or "").upper()
+    suffixes = {
+        ".L": "GBP", ".AX": "AUD", ".TO": "CAD", ".V": "CAD",
+        ".HK": "HKD", ".T": "JPY", ".DE": "EUR", ".PA": "EUR",
+        ".AS": "EUR", ".MI": "EUR", ".MC": "EUR", ".SW": "CHF",
+    }
+    for suffix, currency in suffixes.items():
+        if symbol.endswith(suffix):
+            return currency
+    return "USD"
 
 
 def new_state(config: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -96,7 +112,7 @@ def _text(row: pd.Series, names: list[str], default: str = "") -> str:
 def candidate_evaluation(scan: pd.DataFrame, state: dict[str, Any], regime: str = "UNKNOWN") -> pd.DataFrame:
     columns = [
         "ticker", "signal", "score", "price", "target_price", "stop_price",
-        "risk_reward", "eligible", "reason",
+        "risk_reward", "setup", "currency", "eligible", "reason",
     ]
     if scan is None or scan.empty:
         return pd.DataFrame(columns=columns)
@@ -114,6 +130,8 @@ def candidate_evaluation(scan: pd.DataFrame, state: dict[str, Any], regime: str 
         target = _number(row, ["target_price", "target", "take_profit"])
         stop = _number(row, ["stop_loss", "stop_price", "stop"])
         rr = _number(row, ["risk_reward", "risk_reward_ratio"])
+        setup = _text(row, ["setup", "trend", "position_quality"], "TREND").upper()
+        currency = ticker_currency(ticker)
 
         eligible = True
         reason = "QUALIFIED"
@@ -148,6 +166,8 @@ def candidate_evaluation(scan: pd.DataFrame, state: dict[str, Any], regime: str 
             "target_price": target,
             "stop_price": stop,
             "risk_reward": rr,
+            "setup": setup,
+            "currency": currency,
             "eligible": eligible,
             "reason": reason,
         })
@@ -303,6 +323,8 @@ def process_day(state: dict[str, Any], scan: pd.DataFrame, regime: str = "UNKNOW
                 target_price=float(candidate["target_price"]),
                 stop_price=float(candidate["stop_price"]),
                 risk_reward=float(candidate["risk_reward"]),
+                setup=str(candidate.get("setup", "TREND")),
+                currency=str(candidate.get("currency", ticker_currency(str(candidate["ticker"])))),
                 last_price=float(candidate["price"]),
                 unrealised_pnl=round((float(candidate["price"]) - entry) * qty, 2),
                 unrealised_return_pct=round((float(candidate["price"]) / entry - 1.0) * 100.0, 3),
@@ -318,6 +340,8 @@ def process_day(state: dict[str, Any], scan: pd.DataFrame, regime: str = "UNKNOW
                 "actual_risk": round(actual_risk, 2),
                 "score": trade.score,
                 "risk_reward": round(trade.risk_reward, 2),
+                "setup": trade.setup,
+                "currency": trade.currency,
             })
 
     eligible_count = int(evaluation["eligible"].sum()) if not evaluation.empty else 0
@@ -376,6 +400,11 @@ def performance_metrics(state: dict[str, Any]) -> dict[str, float | int]:
     losers = [p for p in pnls if p < 0]
     gross_profit = sum(winners)
     gross_loss = abs(sum(losers))
+    average_win = sum(winners) / len(winners) if winners else 0.0
+    average_loss = sum(losers) / len(losers) if losers else 0.0
+    win_rate = len(winners) / len(closed) if closed else 0.0
+    loss_rate = len(losers) / len(closed) if closed else 0.0
+    expectancy = win_rate * average_win + loss_rate * average_loss
 
     history = [float(item.get("equity", start)) for item in state.get("equity_history", [])]
     peak = start
@@ -392,16 +421,60 @@ def performance_metrics(state: dict[str, Any]) -> dict[str, float | int]:
         "closed_trades": len(closed),
         "wins": len(winners),
         "losses": len(losers),
-        "win_rate_pct": round(len(winners) / len(closed) * 100.0, 2) if closed else 0.0,
+        "win_rate_pct": round(win_rate * 100.0, 2),
         "net_pnl": round(equity - start, 2),
         "return_pct": round((equity / start - 1.0) * 100.0, 2) if start else 0.0,
-        "average_win": round(sum(winners) / len(winners), 2) if winners else 0.0,
-        "average_loss": round(sum(losers) / len(losers), 2) if losers else 0.0,
+        "average_win": round(average_win, 2),
+        "average_loss": round(average_loss, 2),
+        "expectancy": round(expectancy, 2),
         "profit_factor": round(gross_profit / gross_loss, 2) if gross_loss else (999.0 if gross_profit else 0.0),
         "max_drawdown_pct": round(max_drawdown, 2),
         "cash": round(float(state.get("cash", 0.0)), 2),
         "equity": round(equity, 2),
     }
+
+
+def trade_journal(state: dict[str, Any]) -> pd.DataFrame:
+    """Return a single audit-friendly journal of open and closed trades."""
+    rows = []
+    for status, records in (("OPEN", state.get("open_trades", [])), ("CLOSED", state.get("closed_trades", []))):
+        for item in records:
+            row = dict(item)
+            row["status"] = status
+            row.setdefault("setup", "TREND")
+            row.setdefault("currency", ticker_currency(row.get("ticker", "")))
+            rows.append(row)
+    frame = pd.DataFrame(rows)
+    if frame.empty:
+        return frame
+    order = ["entry_date", "ticker", "status"]
+    return frame.sort_values([c for c in order if c in frame.columns], ascending=True).reset_index(drop=True)
+
+
+def performance_by_setup(state: dict[str, Any]) -> pd.DataFrame:
+    """Aggregate closed-trade performance by setup label."""
+    frame = pd.DataFrame(state.get("closed_trades", []))
+    columns = ["setup", "trades", "wins", "win_rate_pct", "net_pnl", "average_pnl", "expectancy"]
+    if frame.empty:
+        return pd.DataFrame(columns=columns)
+    frame["setup"] = frame.get("setup", pd.Series("TREND", index=frame.index)).fillna("TREND").astype(str)
+    pnl_source = frame["net_pnl"] if "net_pnl" in frame.columns else pd.Series(0.0, index=frame.index)
+    frame["net_pnl"] = pd.to_numeric(pnl_source, errors="coerce").fillna(0.0)
+    rows = []
+    for setup, group in frame.groupby("setup", dropna=False):
+        pnls = group["net_pnl"]
+        wins = int((pnls > 0).sum())
+        trades = int(len(group))
+        rows.append({
+            "setup": str(setup),
+            "trades": trades,
+            "wins": wins,
+            "win_rate_pct": round(wins / trades * 100.0, 2) if trades else 0.0,
+            "net_pnl": round(float(pnls.sum()), 2),
+            "average_pnl": round(float(pnls.mean()), 2) if trades else 0.0,
+            "expectancy": round(float(pnls.mean()), 2) if trades else 0.0,
+        })
+    return pd.DataFrame(rows, columns=columns).sort_values("net_pnl", ascending=False).reset_index(drop=True)
 
 
 def trades_frame(state: dict[str, Any], status: str) -> pd.DataFrame:

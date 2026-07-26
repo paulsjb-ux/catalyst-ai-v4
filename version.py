@@ -1,1 +1,1 @@
-APP_VERSION = "7.0.0-sprint2-executive-dashboard"
+APP_VERSION = "7.0.0-sprint3-paper-trading-2.0"
