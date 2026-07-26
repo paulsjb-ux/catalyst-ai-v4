@@ -214,11 +214,13 @@ def render_paper_trading() -> None:
     c2.metric("Next Available", next_run_date if today_already_run else "Today")
     c3.metric("Days Remaining", int(metrics["days_remaining"]))
 
+    # A paper-trading day should still be recordable when no candidates qualify
+    # or when plans are incomplete. The engine will record the run and explain
+    # every rejection rather than leaving the button silently disabled.
     run_disabled = (
         not state.get("active")
         or today_already_run
         or scan.empty
-        or not has_trade_plans
     )
 
     button_label = (
@@ -227,26 +229,29 @@ def render_paper_trading() -> None:
         else "▶ Run Today's Paper Trades"
     )
 
+    if not state.get("active"):
+        st.warning("The 30-day paper-trading trial is not active.")
+    elif scan.empty:
+        st.warning("No current scan is available. Run Daily Routine or Market Scan first.")
+    elif not has_trade_plans:
+        st.warning(
+            "Target/stop plans are incomplete. You can still record today's paper-trading run; "
+            "Catalyst will explain why no positions could be opened."
+        )
+
     if st.button(
         button_label,
         type="primary",
         use_container_width=True,
         disabled=run_disabled,
+        help="Records today's paper-trading decision, including a no-trade result and rejection reasons.",
     ):
         updated = process_day(state, scan, _regime_label(), today)
         save_paper_state(updated)
         st.success("Today's paper-trading run has been recorded.")
         st.rerun()
 
-    if scan.empty:
-        st.warning(
-            "No current scan is available. Run Daily Routine or Market Scan first."
-        )
-    elif not has_trade_plans:
-        st.warning(
-            "The scan has no target/stop plans. Run Market Scan before Paper Trading so Catalyst can size and manage real simulated positions."
-        )
-    elif today_already_run:
+    if today_already_run:
         st.info(
             f"Today's run is complete. The next paper-trading run is available on {next_run_date}."
         )
