@@ -8,6 +8,7 @@ import pandas as pd
 import streamlit as st
 
 from engine.daily_routine import run_daily_routine
+from data.daily_routine_store import save_latest_routine
 from ui.components import empty_state, section_header, status_card
 
 STATE_PATH = Path("storage/daily_routine_last_run.json")
@@ -83,6 +84,13 @@ def render_daily_routine() -> None:
         st.session_state["scan_id"] = result.scan_id
         st.session_state["daily_brief"] = result.brief
         _save_last_run(summary)
+        if result.success:
+            save_latest_routine(
+                scan=result.scan_results,
+                plans=result.trade_plans,
+                regime=result.regime,
+                summary=summary,
+            )
         progress_bar.progress(100, text="Daily Routine complete" if result.success else "Daily Routine stopped")
         st.rerun()
 

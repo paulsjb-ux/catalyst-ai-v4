@@ -25,6 +25,27 @@
       "closed": [],
       "open_count": 0,
       "equity": 10000.0
+    },
+    {
+      "date": "2026-07-26",
+      "recorded_at": "2026-07-26T10:58:57.721938+00:00",
+      "regime": "UNKNOWN",
+      "scan_count": 316,
+      "buy_signal_count": 0,
+      "eligible_count": 0,
+      "opened": [],
+      "opened_details": [],
+      "closed": [],
+      "closed_details": [],
+      "skipped_capacity": [],
+      "skipped_position_size": [],
+      "rejection_counts": {
+        "SIGNAL IGNORE": 242,
+        "SIGNAL WATCH": 74
+      },
+      "open_count": 0,
+      "cash": 10000.0,
+      "equity": 10000.0
     }
   ],
   "equity_history": [
@@ -35,6 +56,11 @@
     },
     {
       "date": "2026-07-18",
+      "equity": 10000.0,
+      "cash": 10000.0
+    },
+    {
+      "date": "2026-07-26",
       "equity": 10000.0,
       "cash": 10000.0
     }

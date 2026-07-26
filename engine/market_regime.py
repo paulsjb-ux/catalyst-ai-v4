@@ -5,7 +5,7 @@ import pandas as pd
 
 from engine.indicators import enrich_price_frame
 
-REGIME_TICKERS = ["SPY", "QQQ"]
+REGIME_TICKERS = ["SPY", "QQQ", "^VIX"]
 
 
 def _safe_float(value, default: float = 0.0) -> float:
@@ -101,7 +101,9 @@ def analyse_index(ticker: str, prices: pd.DataFrame) -> dict:
 
 
 def build_market_regime(price_map: dict[str, pd.DataFrame]) -> dict:
-    analyses = [analyse_index(ticker, price_map.get(ticker)) for ticker in REGIME_TICKERS]
+    index_tickers = ["SPY", "QQQ"]
+    analyses = [analyse_index(ticker, price_map.get(ticker)) for ticker in index_tickers]
+    vix = analyse_index("^VIX", price_map.get("^VIX"))
     ready = [item for item in analyses if item.get("status") == "READY"]
 
     if not ready:
@@ -112,6 +114,7 @@ def build_market_regime(price_map: dict[str, pd.DataFrame]) -> dict:
             "risk_label": "UNKNOWN",
             "reason": "No SPY/QQQ market data available",
             "indices": analyses,
+            "vix": vix,
         }
 
     score_map = {item["ticker"]: item["score"] for item in ready}
@@ -137,6 +140,7 @@ def build_market_regime(price_map: dict[str, pd.DataFrame]) -> dict:
         "risk_label": risk_label,
         "reason": "; ".join([f"{item['ticker']} {item['trend']} {item['score']}" for item in ready]),
         "indices": analyses,
+        "vix": vix,
     }
 
 

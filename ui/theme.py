@@ -37,7 +37,9 @@ def apply_theme() -> None:
     .status-info,.status-positive,.status-warning{border-radius:16px;padding:14px 16px;margin-bottom:10px;font-weight:700}
     .status-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a}
     .status-positive{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
-    .status-warning{background:#fffbeb;border:1px solid #fde68a;color:#92400e}
+    .status-warning{background:#fffbeb;border:1px solid #f59e0b;color:#78350f}
+    [data-testid="stAlert"]{border-radius:16px!important}
+    [data-testid="stAlert"] p,[data-testid="stAlert"] div{color:#422006!important;font-weight:750!important}
     .empty-state{background:rgba(255,255,255,.94);border:1px dashed #93c5fd;border-radius:20px;padding:28px;text-align:center;color:#475569}
     [data-testid="stDataFrame"]{background:#fff;border:1px solid #dbeafe;border-radius:18px;padding:6px;box-shadow:0 12px 28px rgba(15,23,42,.06)}
     [data-testid="stDataFrame"] *{font-size:.9rem}
