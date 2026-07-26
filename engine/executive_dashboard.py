@@ -14,6 +14,13 @@ def _number(value, default: float = 0.0) -> float:
         return default
 
 
+def _numeric_series(frame: pd.DataFrame, column: str, default: float = 0.0) -> pd.Series:
+    """Return a numeric Series aligned to frame.index, even when column is missing."""
+    if column in frame.columns:
+        return pd.to_numeric(frame[column], errors="coerce").fillna(default)
+    return pd.Series(default, index=frame.index, dtype=float)
+
+
 def confidence_grade(score: float) -> str:
     score = _number(score)
     if score >= 90:
@@ -45,8 +52,8 @@ def market_health(regime: dict | None, scan: pd.DataFrame | None) -> dict:
         above_50 = 0.0
         bullish = 0.0
     else:
-        close = pd.to_numeric(frame.get("close"), errors="coerce")
-        sma_50 = pd.to_numeric(frame.get("sma_50"), errors="coerce")
+        close = _numeric_series(frame, "close", default=float("nan"))
+        sma_50 = _numeric_series(frame, "sma_50", default=float("nan"))
         valid = close.notna() & sma_50.notna() & (sma_50 > 0)
         above_50 = float((close[valid] > sma_50[valid]).mean() * 100) if valid.any() else 0.0
         trends = frame.get("trend", pd.Series(index=frame.index, dtype=str)).astype(str)
@@ -111,9 +118,10 @@ def ranked_opportunities(scan: pd.DataFrame | None, plans: pd.DataFrame | None, 
         merge_cols = [c for c in ["ticker", "entry_price", "target_price", "stop_loss", "risk_reward", "position_quality"] if c in plan_frame.columns]
         selected = selected.merge(plan_frame[merge_cols], on="ticker", how="left")
 
-    selected["confidence"] = selected.get("score", 0).map(confidence_grade)
-    rr = pd.to_numeric(selected.get("risk_reward", 0), errors="coerce").fillna(0)
-    score = pd.to_numeric(selected.get("score", 0), errors="coerce").fillna(0)
+    score = _numeric_series(selected, "score")
+    selected["score"] = score
+    selected["confidence"] = score.map(confidence_grade)
+    rr = _numeric_series(selected, "risk_reward")
     selected["opportunity_rank"] = score + rr.clip(0, 5) * 2
     selected = selected.sort_values(["opportunity_rank", "score"], ascending=False).head(limit)
     columns = ["ticker", "signal", "confidence", "score", "trend", "change_20d_pct", "rsi_14", "entry_price", "target_price", "stop_loss", "risk_reward"]
