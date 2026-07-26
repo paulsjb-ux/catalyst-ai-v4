@@ -206,5 +206,13 @@
     "row_count": 315,
     "buy_count": 0,
     "watch_count": 74
+  },
+  {
+    "scan_id": "20260726_104719",
+    "saved_at": "2026-07-26T10:47:19.431192+00:00",
+    "file_path": "storage/scans/scan_20260726_104719.csv",
+    "row_count": 316,
+    "buy_count": 0,
+    "watch_count": 74
   }
 ]
