@@ -7,6 +7,7 @@ from ui.components import render_header, top_navigation
 from ui.alerts import render_alerts
 from ui.dashboard import render_dashboard
 from ui.daily_brief import render_daily_brief
+from ui.daily_routine import render_daily_routine
 from ui.market_scan import render_market_scan
 from ui.paper_trading import render_paper_trading
 from ui.reports import render_reports
@@ -23,6 +24,7 @@ logger = configure_logging()
 
 def route_page(page: str) -> None:
     routes = {
+        "Daily Routine": render_daily_routine,
         "Dashboard": lambda: render_dashboard(APP_VERSION, st.session_state.get("scan_results", pd.DataFrame())),
         "Daily Brief": render_daily_brief,
         "Alerts": render_alerts,
