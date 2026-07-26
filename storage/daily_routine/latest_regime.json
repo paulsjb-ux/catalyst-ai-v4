@@ -1,0 +1,54 @@
+{
+  "regime": "DEFENSIVE",
+  "market_score": 30,
+  "regime_adjustment": -5,
+  "risk_label": "Cautious",
+  "reason": "SPY BEARISH 36; QQQ BEARISH 26",
+  "indices": [
+    {
+      "ticker": "SPY",
+      "status": "READY",
+      "score": 36,
+      "trend": "BEARISH",
+      "close": 738.18,
+      "sma_20": 745.92,
+      "sma_50": 745.05,
+      "sma_200": 698.21,
+      "rsi_14": 44.7,
+      "change_20d_pct": 0.67,
+      "change_60d_pct": 3.22,
+      "volatility_20d_pct": 0.73,
+      "reason": "above 200D; 20D above 50D; 50D above 200D; controlled volatility"
+    },
+    {
+      "ticker": "QQQ",
+      "status": "READY",
+      "score": 26,
+      "trend": "BEARISH",
+      "close": 691.96,
+      "sma_20": 713.32,
+      "sma_50": 718.75,
+      "sma_200": 642.79,
+      "rsi_14": 41.1,
+      "change_20d_pct": -2.63,
+      "change_60d_pct": 4.17,
+      "volatility_20d_pct": 1.49,
+      "reason": "above 200D; 50D above 200D; controlled volatility"
+    }
+  ],
+  "vix": {
+    "ticker": "^VIX",
+    "status": "READY",
+    "score": 24,
+    "trend": "BEARISH",
+    "close": 18.7,
+    "sma_20": 16.97,
+    "sma_50": 17.33,
+    "sma_200": 18.72,
+    "rsi_14": 58.7,
+    "change_20d_pct": 0.38,
+    "change_60d_pct": 4.88,
+    "volatility_20d_pct": 6.73,
+    "reason": "above 20D; above 50D; constructive RSI; high volatility"
+  }
+}

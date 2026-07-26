@@ -3,26 +3,48 @@ from __future__ import annotations
 import pandas as pd
 import streamlit as st
 
+from data.daily_routine_store import load_latest_routine, save_latest_routine
 from data.history_store import list_saved_scans, load_latest_scan
-from data.daily_routine_store import load_latest_routine
 from data.watchlist_store import load_watchlist
+from engine.dashboard_integration import derive_regime_from_scan, index_detail, plans_are_complete, regime_is_complete, repair_plans
 from engine.executive_dashboard import best_trade, market_health, ranked_opportunities, vix_snapshot
 from engine.portfolio_monitor import portfolio_summary
+from engine.trade_plans import build_trade_plans, filter_trade_plan_candidates
 from ui.components import empty_state, metric_card, section_header, status_card
 
 
 def _money(value) -> str:
     try:
+        if pd.isna(value):
+            return "—"
         return f"£{float(value):,.2f}"
     except (TypeError, ValueError):
         return "—"
 
 
-def _index_detail(regime: dict, ticker: str) -> dict:
-    for item in regime.get("indices", []) if isinstance(regime, dict) else []:
-        if item.get("ticker") == ticker:
-            return item
-    return {}
+@st.cache_data(ttl=1800, show_spinner=False)
+def _download_market_context() -> dict:
+    """Refresh only SPY, QQQ and VIX when an older saved payload lacks them."""
+    try:
+        from data.market_data import download_history
+        from engine.market_regime import REGIME_TICKERS, build_market_regime
+
+        market = download_history(REGIME_TICKERS, period="1y")
+        if not market.prices:
+            return {}
+        return build_market_regime(market.prices)
+    except Exception:
+        return {}
+
+
+def _repair_plans(frame: pd.DataFrame, plans: pd.DataFrame) -> pd.DataFrame:
+    if _plans_are_complete(plans):
+        return plans
+    candidates = filter_trade_plan_candidates(frame)
+    if candidates.empty:
+        return pd.DataFrame()
+    # An empty price map deliberately uses the engine's tested 4% ATR fallback.
+    return build_trade_plans(candidates, {})
 
 
 def render_dashboard(version: str, scan_results: pd.DataFrame | None = None) -> None:
@@ -42,20 +64,35 @@ def render_dashboard(version: str, scan_results: pd.DataFrame | None = None) -> 
     if plans.empty:
         stored_plans = persisted.get("plans", pd.DataFrame())
         plans = stored_plans if isinstance(stored_plans, pd.DataFrame) else pd.DataFrame()
+    plans = repair_plans(frame, plans)
 
     regime = st.session_state.get("market_regime", {})
     regime = regime if isinstance(regime, dict) else {}
     if not regime:
         stored_regime = persisted.get("regime", {})
         regime = stored_regime if isinstance(stored_regime, dict) else {}
+    if not regime:
+        regime = derive_regime_from_scan(frame)
+    if not regime_is_complete(regime):
+        refreshed = _download_market_context()
+        if refreshed:
+            regime = refreshed
 
-    # Restore the payload into this browser session so all pages share the same run.
+    summary = persisted.get("summary", {}) if isinstance(persisted.get("summary", {}), dict) else {}
+
+    # Restore and repair the payload for all pages and future browser sessions.
     if not frame.empty:
         st.session_state["scan_results"] = frame
     if not plans.empty:
         st.session_state["trade_plans"] = plans
     if regime:
         st.session_state["market_regime"] = regime
+    if not frame.empty and (not plans.empty or regime):
+        try:
+            save_latest_routine(scan=frame, plans=plans, regime=regime, summary=summary)
+        except OSError:
+            pass
+
     monitor = st.session_state.get("portfolio_monitor", pd.DataFrame())
     watchlist = load_watchlist()
     scans = list_saved_scans()
@@ -64,8 +101,8 @@ def render_dashboard(version: str, scan_results: pd.DataFrame | None = None) -> 
     vix = vix_snapshot(regime)
     opportunities = ranked_opportunities(frame, plans)
     trade = best_trade(opportunities)
-    spy = _index_detail(regime, "SPY")
-    qqq = _index_detail(regime, "QQQ")
+    spy = index_detail(regime, "SPY")
+    qqq = index_detail(regime, "QQQ")
 
     st.markdown("### Market Health")
     c1, c2, c3, c4 = st.columns(4)
@@ -79,9 +116,9 @@ def render_dashboard(version: str, scan_results: pd.DataFrame | None = None) -> 
     st.markdown("### SPY & QQQ Trend")
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown(metric_card("SPY", spy.get("trend", "Not loaded"), f"Score {spy.get('score', 0)} · 20D {spy.get('change_20d_pct', 0):.1f}%" if spy else "Run Daily Routine"), unsafe_allow_html=True)
+        st.markdown(metric_card("SPY", spy.get("trend", "Not loaded"), f"Score {spy.get('score', 0)} · 20D {spy.get('change_20d_pct', 0):.1f}%" if spy else "Market context unavailable"), unsafe_allow_html=True)
     with c2:
-        st.markdown(metric_card("QQQ", qqq.get("trend", "Not loaded"), f"Score {qqq.get('score', 0)} · 20D {qqq.get('change_20d_pct', 0):.1f}%" if qqq else "Run Daily Routine"), unsafe_allow_html=True)
+        st.markdown(metric_card("QQQ", qqq.get("trend", "Not loaded"), f"Score {qqq.get('score', 0)} · 20D {qqq.get('change_20d_pct', 0):.1f}%" if qqq else "Market context unavailable"), unsafe_allow_html=True)
 
     st.markdown("### Best Trade of the Day")
     if not trade:
