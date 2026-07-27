@@ -7,7 +7,7 @@ def apply_theme() -> None:
         background:linear-gradient(180deg,#f8fbff 0%,#eef7ff 70%,#fff 100%);
         color:#0f172a;
     }
-    .block-container{max-width:1240px;padding-top:1rem;padding-bottom:3rem}
+    .block-container{max-width:1320px;padding-top:.75rem;padding-bottom:3rem}
     [data-testid="stHeader"]{background:rgba(248,251,255,.88);backdrop-filter:blur(14px)}
     #MainMenu,footer{visibility:hidden}
     .hero{background:linear-gradient(135deg,#fff,#eff6ff);border:1px solid #bfdbfe;border-radius:28px;padding:24px;box-shadow:0 18px 42px rgba(15,23,42,.08);margin-bottom:18px}
@@ -29,7 +29,7 @@ def apply_theme() -> None:
     .stButton button,.stDownloadButton button{background:linear-gradient(135deg,#2563eb,#06b6d4)!important;color:#fff!important;border:0!important;border-radius:16px!important;min-height:48px;font-weight:900!important;box-shadow:0 12px 28px rgba(37,99,235,.20)}
     div[data-testid="stMetric"]{background:#fff;border:1px solid #dbeafe;border-radius:18px;padding:14px 16px;box-shadow:0 10px 24px rgba(15,23,42,.05)}
     div[data-testid="stMetric"] label,div[data-testid="stMetric"] label p{color:#334155!important;font-weight:800!important}
-    div[data-testid="stMetricValue"],div[data-testid="stMetricValue"] div{color:#0f172a!important;font-weight:950!important}
+    div[data-testid="stMetricValue"],div[data-testid="stMetricValue"] div{color:#0f172a!important;font-weight:950!important;font-size:clamp(1.55rem,3vw,2.45rem)!important;white-space:normal!important;overflow-wrap:anywhere}
     .metric-card{background:#fff;border:1px solid #dbeafe;border-radius:20px;padding:18px;box-shadow:0 12px 28px rgba(15,23,42,.06);min-height:125px}
     .metric-label{font-size:.72rem;font-weight:900;letter-spacing:.14em;color:#64748b;text-transform:uppercase}
     .metric-value{font-size:2rem;font-weight:950;color:#0f172a;margin-top:8px;overflow-wrap:anywhere}
@@ -46,6 +46,13 @@ def apply_theme() -> None:
     h1,h2,h3{color:#0f172a!important;letter-spacing:-.03em}
     .stCaptionContainer,.stCaptionContainer p{color:#64748b!important}
     @media(max-width:900px){
+        .hero{padding:18px;border-radius:22px}
+        .hero h1{font-size:clamp(2.1rem,11vw,3.6rem)}
+        .metric-card{min-height:108px;padding:14px}
+        .metric-value{font-size:clamp(1.45rem,8vw,2rem)}
+        div[data-testid="column"]{min-width:0!important}
+        [data-testid="stDataFrame"]{overflow-x:auto}
+
         .block-container{padding-left:1rem;padding-right:1rem}
         div[data-testid="stRadio"]{
             position:static;
@@ -73,6 +80,13 @@ def apply_theme() -> None:
             line-height:1.15;
             font-size:.92rem;
         }
+    }
+    @media(max-width:520px){
+        .block-container{padding-left:.65rem;padding-right:.65rem}
+        div[data-testid="stHorizontalBlock"]{gap:.55rem}
+        div[data-testid="stMetric"]{padding:10px 12px}
+        .metric-label{font-size:.66rem}
+        .metric-note{font-size:.78rem}
     }
     @media(max-width:430px){
         div[data-testid="stRadio"] div[role="radiogroup"]{

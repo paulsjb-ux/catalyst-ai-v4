@@ -13,6 +13,7 @@ from data.storage_admin import (
     restore_latest_cloud_backup,
 )
 from ui.components import section_header, status_card
+from ui.professional_tools import render_professional_tools
 
 
 def render_settings(version: str) -> None:
@@ -93,6 +94,9 @@ def render_settings(version: str) -> None:
 
     with st.expander("Application health details"):
         st.json(status)
+
+    st.markdown("### Professional Finish")
+    render_professional_tools(version)
 
     st.markdown("### Guardrails")
     st.write("- Persistent data uses Supabase when configured.")
