@@ -1,1 +1,56 @@
-{}
+{
+  "success": true,
+  "started_at": "2026-07-27T04:41:17.912361+00:00",
+  "finished_at": "2026-07-27T04:42:07.455608+00:00",
+  "duration_seconds": 49.54,
+  "symbols_scanned": 318,
+  "buy_count": 0,
+  "watch_count": 75,
+  "trade_plan_count": 75,
+  "data_error_count": 3,
+  "alerts_generated": 0,
+  "exports_created": 5,
+  "scan_id": "20260727_044207",
+  "stages": [
+    {
+      "stage": "Universe",
+      "status": "complete",
+      "detail": "323 symbols selected"
+    },
+    {
+      "stage": "Market data",
+      "status": "complete",
+      "detail": "321 symbols loaded; 3 errors"
+    },
+    {
+      "stage": "Market regime",
+      "status": "complete",
+      "detail": "DEFENSIVE"
+    },
+    {
+      "stage": "Universe scan",
+      "status": "complete",
+      "detail": "318 symbols scored"
+    },
+    {
+      "stage": "Trade plans",
+      "status": "complete",
+      "detail": "75 plans generated"
+    },
+    {
+      "stage": "Daily Brief",
+      "status": "complete",
+      "detail": "Brief generated"
+    },
+    {
+      "stage": "Alerts",
+      "status": "warning",
+      "detail": "Alert refresh failed: Cloud storage is not configured."
+    },
+    {
+      "stage": "Exports",
+      "status": "complete",
+      "detail": "5 files created"
+    }
+  ]
+}
