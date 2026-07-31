@@ -30,7 +30,7 @@ def render_settings(version: str) -> None:
     c1.metric("Files OK", "Yes" if status["files_ok"] else "No")
     c2.metric("Packages OK", "Yes" if status["packages_ok"] else "No")
     c3.metric("Storage", storage["backend"])
-    c4.metric("Cloud Ready", "Yes" if storage["table_ready"] else "No")
+    c4.metric("Cloud Ready", "Yes" if storage.get("write_ready") else "No")
 
     st.markdown("### Application")
     st.write("**Application:**", CONFIG.app_name)
@@ -39,8 +39,8 @@ def render_settings(version: str) -> None:
     st.write("**Default universe cap:**", CONFIG.max_default_tickers)
 
     st.markdown("### Persistent Storage")
-    if storage["table_ready"]:
-        status_card("Supabase cloud storage is connected and ready.", "positive")
+    if storage.get("write_ready"):
+        status_card("Supabase cloud storage is connected, readable and writable.", "positive")
     elif storage["configured"]:
         status_card(f"Cloud credentials found, but storage is unavailable: {storage['error']}", "warning")
     else:
@@ -64,7 +64,7 @@ def render_settings(version: str) -> None:
         except Exception as exc:
             st.error(str(exc))
 
-    if c2.button("Migrate local data to cloud", width="stretch", disabled=not storage["table_ready"]):
+    if c2.button("Migrate local data to cloud", width="stretch", disabled=not storage.get("write_ready")):
         try:
             result = migrate_local_to_cloud()
             st.success("Local data migrated to Supabase.")
@@ -74,7 +74,7 @@ def render_settings(version: str) -> None:
 
     c3, c4 = st.columns(2)
 
-    if c3.button("Restore latest cloud backup", width="stretch", disabled=not storage["table_ready"]):
+    if c3.button("Restore latest cloud backup", width="stretch", disabled=not storage.get("write_ready")):
         try:
             result = restore_latest_cloud_backup()
             st.success("Latest cloud backup restored.")
