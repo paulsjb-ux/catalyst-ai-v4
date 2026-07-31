@@ -4,6 +4,11 @@ import streamlit as st
 
 from config import CONFIG
 from data.cloud_store import health_check
+
+
+@st.cache_data(ttl=60, show_spinner=False)
+def cached_storage_health() -> dict:
+    return health_check()
 from data.health import health_summary
 from data.storage_admin import (
     backup_all,
@@ -19,7 +24,7 @@ from ui.professional_tools import render_professional_tools
 def render_settings(version: str) -> None:
     section_header("Settings", "Application configuration, health checks and persistent storage.")
     status = health_summary()
-    storage = health_check()
+    storage = cached_storage_health()
 
     if status["files_ok"] and status["packages_ok"]:
         status_card("Catalyst AI application health check passed.", "positive")
@@ -30,7 +35,7 @@ def render_settings(version: str) -> None:
     c1.metric("Files OK", "Yes" if status["files_ok"] else "No")
     c2.metric("Packages OK", "Yes" if status["packages_ok"] else "No")
     c3.metric("Storage", storage["backend"])
-    c4.metric("Cloud Ready", "Yes" if storage.get("write_ready") else "No")
+    c4.metric("Cloud Ready", "Yes" if storage["table_ready"] else "No")
 
     st.markdown("### Application")
     st.write("**Application:**", CONFIG.app_name)
@@ -39,8 +44,8 @@ def render_settings(version: str) -> None:
     st.write("**Default universe cap:**", CONFIG.max_default_tickers)
 
     st.markdown("### Persistent Storage")
-    if storage.get("write_ready"):
-        status_card("Supabase cloud storage is connected, readable and writable.", "positive")
+    if storage["table_ready"]:
+        status_card("Supabase cloud storage is connected and ready.", "positive")
     elif storage["configured"]:
         status_card(f"Cloud credentials found, but storage is unavailable: {storage['error']}", "warning")
     else:
@@ -64,7 +69,7 @@ def render_settings(version: str) -> None:
         except Exception as exc:
             st.error(str(exc))
 
-    if c2.button("Migrate local data to cloud", width="stretch", disabled=not storage.get("write_ready")):
+    if c2.button("Migrate local data to cloud", width="stretch", disabled=not storage["table_ready"]):
         try:
             result = migrate_local_to_cloud()
             st.success("Local data migrated to Supabase.")
@@ -74,7 +79,7 @@ def render_settings(version: str) -> None:
 
     c3, c4 = st.columns(2)
 
-    if c3.button("Restore latest cloud backup", width="stretch", disabled=not storage.get("write_ready")):
+    if c3.button("Restore latest cloud backup", width="stretch", disabled=not storage["table_ready"]):
         try:
             result = restore_latest_cloud_backup()
             st.success("Latest cloud backup restored.")

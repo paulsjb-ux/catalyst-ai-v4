@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import hashlib
 import json
 
@@ -181,16 +182,26 @@ def download_history(
             prices[ticker] = frame
             _write_cache(ticker, period, interval, frame, fetched_at)
 
-        for ticker in retry:
-            try:
-                frame = _clean_frame(_download_single(ticker, period, interval))
-                if len(frame) < MIN_HISTORY_ROWS:
-                    errors[ticker] = "Insufficient price history"
-                    continue
-                prices[ticker] = frame
-                _write_cache(ticker, period, interval, frame, fetched_at)
-            except Exception as exc:
-                errors[ticker] = str(exc)
+        if retry:
+            # Retry failed symbols concurrently, but keep the pool deliberately small
+            # to avoid hammering Yahoo Finance during partial outages.
+            max_workers = min(8, len(retry))
+            with ThreadPoolExecutor(max_workers=max_workers, thread_name_prefix="market-retry") as executor:
+                futures = {
+                    executor.submit(_download_single, ticker, period, interval): ticker
+                    for ticker in retry
+                }
+                for future in as_completed(futures):
+                    ticker = futures[future]
+                    try:
+                        frame = _clean_frame(future.result())
+                        if len(frame) < MIN_HISTORY_ROWS:
+                            errors[ticker] = "Insufficient price history"
+                            continue
+                        prices[ticker] = frame
+                        _write_cache(ticker, period, interval, frame, fetched_at)
+                    except Exception as exc:
+                        errors[ticker] = str(exc)
 
     return MarketDataResult(
         prices=prices,

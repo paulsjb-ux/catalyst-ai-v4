@@ -1,4 +1,4 @@
-# Catalyst AI v8.1.0 — Today’s Decision
+# Catalyst AI v8.0.1 — Today’s Decision
 
 Version 8 adds a simplified front door to the existing Catalyst trading desk.
 

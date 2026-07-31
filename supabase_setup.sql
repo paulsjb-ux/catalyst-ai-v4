@@ -1,5 +1,5 @@
--- Catalyst AI persistent storage — Phase 1 reliability setup
--- Safe to run repeatedly in the Supabase SQL Editor.
+-- Catalyst AI v8.1 persistent storage
+-- Run once in the Supabase SQL Editor. Safe to run again.
 
 create table if not exists public.catalyst_store (
     key text primary key,
@@ -9,41 +9,27 @@ create table if not exists public.catalyst_store (
 
 alter table public.catalyst_store enable row level security;
 
+-- The app uses a publishable/anon key and is intended as a private single-user
+-- deployment. Replace these policies with per-user authenticated policies if
+-- the application is ever made public or shared with multiple users.
 drop policy if exists "Catalyst read access" on public.catalyst_store;
-drop policy if exists "Catalyst insert access" on public.catalyst_store;
-drop policy if exists "Catalyst update access" on public.catalyst_store;
-drop policy if exists "Catalyst delete access" on public.catalyst_store;
 drop policy if exists "Catalyst write access" on public.catalyst_store;
 
--- Private, single-user deployment using the project's publishable/anon key.
--- Replace these policies with authenticated per-user rules before making the
--- application publicly accessible to multiple users.
 create policy "Catalyst read access"
 on public.catalyst_store
 for select
 to anon, authenticated
 using (true);
 
-create policy "Catalyst insert access"
+create policy "Catalyst write access"
 on public.catalyst_store
-for insert
-to anon, authenticated
-with check (true);
-
-create policy "Catalyst update access"
-on public.catalyst_store
-for update
+for all
 to anon, authenticated
 using (true)
 with check (true);
 
-create policy "Catalyst delete access"
-on public.catalyst_store
-for delete
-to anon, authenticated
-using (true);
-
-grant usage on schema public to anon, authenticated;
+-- Explicit table privileges remove ambiguity for projects whose default grants
+-- have been customised.
 grant select, insert, update, delete on table public.catalyst_store to anon, authenticated;
 
 create index if not exists catalyst_store_updated_at_idx
