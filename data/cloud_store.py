@@ -52,12 +52,23 @@ def _endpoint(key: str | None = None) -> str:
 
 
 def _headers(prefer: str | None = None) -> dict[str, str]:
+    """Build Supabase REST headers for both modern and legacy keys.
+
+    Supabase's modern ``sb_publishable_`` and ``sb_secret_`` keys are API keys,
+    not JWT access tokens. Sending either as ``Authorization: Bearer ...`` can
+    produce a 401 response. Legacy anon/service-role JWT keys (normally
+    beginning with ``eyJ``) still support the Bearer header.
+    """
     config = get_storage_config()
     headers = {
         "apikey": config.key,
-        "Authorization": f"Bearer {config.key}",
         "Content-Type": "application/json",
     }
+
+    # Only JWT-shaped legacy keys belong in the Authorization header.
+    if config.key.startswith("eyJ"):
+        headers["Authorization"] = f"Bearer {config.key}"
+
     if prefer:
         headers["Prefer"] = prefer
     return headers

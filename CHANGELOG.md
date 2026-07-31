@@ -1,5 +1,12 @@
 # Changelog
 
+## 8.0.1 — Supabase API-key compatibility
+
+- Fixed HTTP 401 errors when using modern `sb_publishable_` Supabase keys.
+- Modern Supabase API keys are now sent only in the `apikey` header.
+- Legacy JWT-style anon/service-role keys continue to use Bearer authentication.
+- Added regression tests for both key formats.
+
 ## 8.0.0 — Today’s Decision
 
 - Added a simplified default landing page with TRADE, WATCH or NO TRADE.
