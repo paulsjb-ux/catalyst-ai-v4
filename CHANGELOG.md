@@ -1,5 +1,11 @@
 # Changelog
 
+## 7.0.2 — Alert Simplification
+
+- Removed Pushover configuration, delivery code, UI controls, secrets and tests.
+- Retained SMTP email and generic webhook alerts.
+- Updated release version to 7.0.2.
+
 ## 4.3.2-sprint2-part3-score-latest-return
 
 - Added smarter scoring compatibility patch
@@ -45,3 +51,9 @@
 ## 4.0.0-sprint1-part5
 
 - Completed Sprint 1 production foundation
+
+## 7.0.1 — Stability & Speed
+- Added batched market-data downloads, cache and failed-symbol retries.
+- Added Supabase retry/backoff and explicit degraded fallback status.
+- Added export retention and cleaner release packaging.
+- Aligned version metadata and fixed RSI pandas warning.

@@ -153,7 +153,16 @@ def render_alerts() -> None:
         st.caption("The GitHub Actions workflow runs at 08:00 UTC Monday to Friday and can also be started manually.")
 
     with st.expander("Required Streamlit secrets"):
-        st.code('''# Email via SMTP\nSMTP_HOST = "smtp.example.com"\nSMTP_PORT = "587"\nSMTP_USERNAME = "your-user"\nSMTP_PASSWORD = "your-password"\nSMTP_FROM = "alerts@example.com"\nSMTP_USE_TLS = "true"\n\n# Optional webhook\nALERT_WEBHOOK_URL = "https://..."''', language="toml")
+        st.code('''# Email via SMTP
+SMTP_HOST = "smtp.example.com"
+SMTP_PORT = "587"
+SMTP_USERNAME = "your-user"
+SMTP_PASSWORD = "your-password"
+SMTP_FROM = "alerts@example.com"
+SMTP_USE_TLS = "true"
+
+# Optional webhook
+ALERT_WEBHOOK_URL = "https://..."''', language="toml")
         st.caption("Keep these in Streamlit Secrets. Never commit them to GitHub.")
 
     st.markdown("### Alert History")

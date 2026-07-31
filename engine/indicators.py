@@ -11,9 +11,9 @@ def calculate_rsi(close: pd.Series, window: int = 14) -> pd.Series:
     average_gain = gain.rolling(window=window, min_periods=window).mean()
     average_loss = loss.rolling(window=window, min_periods=window).mean()
 
-    rs = average_gain / average_loss.replace(0, pd.NA)
+    rs = average_gain / average_loss.mask(average_loss.eq(0))
     rsi = 100 - (100 / (1 + rs))
-    return rsi.fillna(50)
+    return rsi.astype("float64").fillna(50.0)
 
 
 def enrich_price_frame(frame: pd.DataFrame) -> pd.DataFrame:

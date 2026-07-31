@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 import json
 from typing import Any
+from datetime import datetime, timezone
 
 import pandas as pd
 
@@ -10,6 +11,7 @@ from data.cloud_store import cloud_enabled, get_json, put_json
 
 
 LOCAL_KV_DIR = Path("storage/kv")
+_STORAGE_STATUS: dict[str, Any] = {"backend": "local", "degraded": False, "last_error": "", "updated_at": ""}
 
 
 def _local_path(key: str) -> Path:
@@ -32,12 +34,31 @@ def local_get_json(key: str, default: Any = None) -> Any:
         return default
 
 
+def _set_status(backend: str, degraded: bool = False, error: str = "") -> None:
+    _STORAGE_STATUS.update({
+        "backend": backend,
+        "degraded": degraded,
+        "last_error": error,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    })
+
+
+def storage_status() -> dict[str, Any]:
+    return dict(_STORAGE_STATUS)
+
+
 def put(key: str, value: Any) -> str:
-    """Write to cloud when configured, always retaining a local fallback copy."""
+    """Write locally first; use cloud when configured and expose degraded state."""
     local_put_json(key, value)
     if cloud_enabled():
-        put_json(key, value)
-        return "cloud+local"
+        try:
+            put_json(key, value)
+            _set_status("cloud+local")
+            return "cloud+local"
+        except Exception as exc:
+            _set_status("local fallback", True, str(exc))
+            return "local-fallback"
+    _set_status("local")
     return "local"
 
 
@@ -49,8 +70,10 @@ def get(key: str, default: Any = None) -> Any:
             if cloud_value is not None:
                 local_put_json(key, cloud_value)
                 return cloud_value
-        except Exception:
-            pass
+        except Exception as exc:
+            _set_status("local fallback", True, str(exc))
+            return local_get_json(key, default)
+    _set_status("local")
     return local_get_json(key, default)
 
 
@@ -80,3 +103,12 @@ def records_to_dataframe(records: list[dict] | None, columns: list[str] | None =
                 frame[column] = None
         frame = frame[columns]
     return frame
+
+
+# Backwards-compatible aliases used by the alert health subsystem.
+def put_json(key: str, value: Any) -> str:
+    return put(key, value)
+
+
+def get_json(key: str, default: Any = None) -> Any:
+    return get(key, default)

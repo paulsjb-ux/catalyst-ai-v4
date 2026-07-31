@@ -6,12 +6,16 @@ from pathlib import Path
 from time import perf_counter
 from typing import Callable
 import json
+import logging
 
 import pandas as pd
 
 from engine.daily_brief import build_daily_brief, daily_brief_to_markdown
 
 ProgressCallback = Callable[[str, int, str], None]
+LOGGER = logging.getLogger(__name__)
+DEFAULT_EXPORT_RETENTION_DAYS = 30
+DEFAULT_EXPORT_RETENTION_FILES = 120
 
 
 @dataclass
@@ -59,8 +63,26 @@ def _record(result: RoutineResult, stage: str, status: str, detail: str) -> None
     result.stages.append({"stage": stage, "status": status, "detail": detail})
 
 
+
+def _cleanup_exports(export_dir: Path, max_age_days: int = DEFAULT_EXPORT_RETENTION_DAYS, max_files: int = DEFAULT_EXPORT_RETENTION_FILES) -> int:
+    if not export_dir.exists():
+        return 0
+    files = sorted((p for p in export_dir.iterdir() if p.is_file() and p.name.startswith("catalyst_")), key=lambda p: p.stat().st_mtime, reverse=True)
+    cutoff = datetime.now(timezone.utc).timestamp() - max_age_days * 86400
+    removed = 0
+    for index, path in enumerate(files):
+        if index >= max_files or path.stat().st_mtime < cutoff:
+            try:
+                path.unlink()
+                removed += 1
+            except OSError:
+                pass
+    return removed
+
+
 def _write_exports(result: RoutineResult, export_dir: Path) -> list[str]:
     export_dir.mkdir(parents=True, exist_ok=True)
+    _cleanup_exports(export_dir)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     paths: list[Path] = []
     for name, frame in (("scan", result.scan_results), ("trade_plans", result.trade_plans), ("comparison", result.comparison)):
@@ -176,6 +198,7 @@ def run_daily_routine(
         _record(result, "Exports", "complete", f"{len(result.exports)} files created")
         result.success = True
     except Exception as exc:
+        LOGGER.exception("Daily Routine failed")
         _record(result, "Routine", "failed", str(exc))
         result.success = False
     finally:

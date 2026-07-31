@@ -78,6 +78,7 @@ def _send_webhook(event: AlertEvent) -> None:
             raise RuntimeError(f"Webhook returned HTTP {response.status}")
 
 
+
 def deliver_event(event: AlertEvent, config: AlertConfig, force: bool = False) -> list[dict]:
     event = event.normalised()
     if not force and recently_sent(event.fingerprint, config.dedupe_hours):

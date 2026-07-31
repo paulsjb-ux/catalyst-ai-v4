@@ -13,3 +13,4 @@ def test_webhook_ready_with_secret(monkeypatch):
     monkeypatch.setenv("ALERT_WEBHOOK_URL", "https://example.com/hook")
     status = delivery_readiness(AlertConfig(webhook_enabled=True))
     assert status["webhook_ready"] is True
+

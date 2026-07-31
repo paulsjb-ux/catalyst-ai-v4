@@ -4,7 +4,6 @@ from dataclasses import asdict, dataclass
 
 from data.storage_service import get, put
 
-
 ALERT_CONFIG_KEY = "alert_config"
 
 

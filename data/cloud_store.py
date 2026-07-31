@@ -6,6 +6,7 @@ import json
 import os
 from pathlib import Path
 from typing import Any
+import time
 from urllib import error, parse, request
 
 
@@ -68,24 +69,27 @@ def _request(
     payload: Any | None = None,
     prefer: str | None = None,
     timeout: int = 12,
+    retries: int = 3,
 ) -> tuple[int, Any]:
     body = None if payload is None else json.dumps(payload).encode("utf-8")
-    req = request.Request(
-        url=url,
-        data=body,
-        headers=_headers(prefer),
-        method=method,
-    )
-    try:
-        with request.urlopen(req, timeout=timeout) as response:
-            raw = response.read().decode("utf-8")
-            parsed = json.loads(raw) if raw else None
-            return response.status, parsed
-    except error.HTTPError as exc:
-        raw = exc.read().decode("utf-8", errors="replace")
-        raise RuntimeError(f"Cloud storage HTTP {exc.code}: {raw}") from exc
-    except error.URLError as exc:
-        raise RuntimeError(f"Cloud storage connection failed: {exc.reason}") from exc
+    last_error: Exception | None = None
+    for attempt in range(max(1, retries)):
+        req = request.Request(url=url, data=body, headers=_headers(prefer), method=method)
+        try:
+            with request.urlopen(req, timeout=timeout) as response:
+                raw = response.read().decode("utf-8")
+                parsed = json.loads(raw) if raw else None
+                return response.status, parsed
+        except error.HTTPError as exc:
+            raw = exc.read().decode("utf-8", errors="replace")
+            last_error = RuntimeError(f"Cloud storage HTTP {exc.code}: {raw}")
+            if exc.code < 500 and exc.code != 429:
+                raise last_error from exc
+        except error.URLError as exc:
+            last_error = RuntimeError(f"Cloud storage connection failed: {exc.reason}")
+        if attempt < retries - 1:
+            time.sleep(0.35 * (2 ** attempt))
+    raise last_error or RuntimeError("Cloud storage request failed")
 
 
 def put_json(key: str, value: Any) -> None:
