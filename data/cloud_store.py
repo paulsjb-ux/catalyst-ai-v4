@@ -35,6 +35,8 @@ class StorageConfig:
     url: str
     key: str
     enabled: bool
+    key_source: str = ""
+    key_type: str = "unknown"
 
 
 def _secret(name: str, default: str = "") -> str:
@@ -49,10 +51,40 @@ def _secret(name: str, default: str = "") -> str:
     return str(os.getenv(name, default) or default).strip()
 
 
+def _normalise_credential(value: str) -> str:
+    """Remove accidental spaces/newlines introduced while copying credentials."""
+    return "".join(str(value or "").split())
+
+
+def _key_type(key: str) -> str:
+    if key.startswith("sb_publishable_"):
+        return "publishable"
+    if key.startswith("sb_secret_"):
+        return "secret"
+    if key.startswith("eyJ"):
+        return "legacy-jwt"
+    return "unknown"
+
+
 def get_storage_config() -> StorageConfig:
-    url = _secret("SUPABASE_URL").rstrip("/")
-    key = _secret("SUPABASE_KEY")
-    return StorageConfig(url=url, key=key, enabled=bool(url and key))
+    url = _normalise_credential(_secret("SUPABASE_URL")).rstrip("/")
+
+    # Streamlit is server-side, so an explicitly configured secret key is
+    # supported. Otherwise use the standard SUPABASE_KEY/publishable key.
+    candidates = (
+        ("SUPABASE_SECRET_KEY", _secret("SUPABASE_SECRET_KEY")),
+        ("SUPABASE_KEY", _secret("SUPABASE_KEY")),
+        ("SUPABASE_PUBLISHABLE_KEY", _secret("SUPABASE_PUBLISHABLE_KEY")),
+    )
+    source, raw_key = next(((name, value) for name, value in candidates if value), ("", ""))
+    key = _normalise_credential(raw_key)
+    return StorageConfig(
+        url=url,
+        key=key,
+        enabled=bool(url and key),
+        key_source=source,
+        key_type=_key_type(key),
+    )
 
 
 def cloud_enabled() -> bool:
@@ -289,6 +321,9 @@ def health_check(*, force: bool = False) -> dict:
         "read_ready": False,
         "write_ready": False,
         "backend": "Supabase" if config.enabled else "Local fallback",
+        "key_source": config.key_source or None,
+        "key_type": config.key_type,
+        "project_ref": config.url.removeprefix("https://").split(".", 1)[0] if config.url else None,
         "error": None,
     }
     if not config.enabled:

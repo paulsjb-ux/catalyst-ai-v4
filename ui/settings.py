@@ -49,7 +49,7 @@ def render_settings(version: str) -> None:
     with st.expander("Storage health details"):
         st.json(storage)
 
-    st.caption("Configure SUPABASE_URL and SUPABASE_KEY in Streamlit secrets. Run the supplied SQL file once in Supabase.")
+    st.caption("Configure SUPABASE_URL plus SUPABASE_KEY (publishable) or SUPABASE_SECRET_KEY (server-side) in Streamlit secrets. Run the supplied SQL file once in Supabase.")
 
     c1, c2 = st.columns(2)
 
