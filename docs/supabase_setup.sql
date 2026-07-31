@@ -27,3 +27,7 @@ with check (true);
 
 create index if not exists catalyst_store_updated_at_idx
 on public.catalyst_store(updated_at desc);
+
+-- Data API privileges required by publishable/anon clients.
+grant usage on schema public to anon, authenticated;
+grant select, insert, update, delete on table public.catalyst_store to anon, authenticated;

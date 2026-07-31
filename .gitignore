@@ -1,0 +1,10 @@
+
+# macOS / Python / local runtime
+.DS_Store
+__MACOSX/
+__pycache__/
+*.py[cod]
+.agents/
+storage/kv/
+storage/backups/
+storage/*.json
