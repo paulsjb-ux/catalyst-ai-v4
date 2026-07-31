@@ -1,0 +1,2909 @@
+[
+  {
+    "ticker": "0005.HK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "000660.KS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "005380.KS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "005930.KS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "035420.KS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "0388.HK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "051910.KS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "0700.HK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "1211.HK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "1299.HK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "1810.HK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "2308.TW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "2317.TW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "2318.HK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "2330.TW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "2454.TW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "3690.HK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "373220.KS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "4063.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "4502.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "4519.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "6098.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "6367.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "6501.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "6758.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "6861.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "6902.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "6954.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "6981.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "7203.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "7267.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "7741.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "7974.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "8001.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "8035.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "8058.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "8306.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "8316.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "8766.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "9432.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "9433.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "9618.HK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "9983.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "9984.T",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "9988.HK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AAL.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AAPL",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ABBV",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ABT",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ABX.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ACN",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ACWI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ADBE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ADI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ADS.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ADYEN.AS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AIR.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ALV.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AMAT",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AMD",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AMGN",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AMX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AMZN",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ANTO.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ANZ.AX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ARGT",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ARKK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ASHR",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ASML.AS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ATD.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AVGO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AXP",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "AZN.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BA.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BAC",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BARC.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BAS.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BATS.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BBD",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BCE.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BHP.AX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BKNG",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BLK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BMO.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BMW.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BNP.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BNS.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BP.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "BRK-B",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CAT",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CBA.AX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CDNS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CIB",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CNQ.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CNR.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "COIN",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "COST",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CP.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CPG.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CRM",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CSCO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CSGN.SW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CSL.AX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CSU.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "CVX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "DB1.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "DBA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "DBC",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "DG.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "DGE.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "DIA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "DIS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "DTE.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EC",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ECH",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EIRL",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EIS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EL.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ENB.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ENEL.MI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ENI.MI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EPU",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWC",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWD",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWG",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWH",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWJ",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWL",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWN",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWP",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWQ",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWT",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWU",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWY",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EWZ",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EXPN.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "EZA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "FM",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "FMX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "FRDM",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "FXB",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "FXE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "FXY",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GDX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GDXJ",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GILD",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GLD",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GLEN.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GOOG",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GOOGL",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GREK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "GSK.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "HD",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "HDB",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "HON",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "HSBA.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "HYG",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IBB",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IBE.MC",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IBM",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IBN",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IEF",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IFX.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IGV",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IHG.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "III.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IJH",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IJR",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IMB.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "INDA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "INFY",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "INTU",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ISP.MI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ISRG",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ITUB",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ITX.MC",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "IWM",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "JNJ",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "JPM",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "KER.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "KLAC",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "KO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "LIN",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "LLOY.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "LLY",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "LOW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "LQD",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "LRCX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "LSEG.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MBG.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MC.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MCD",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MCHI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MDLZ",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MDY",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MELI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "META",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MFC.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MQG.AX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MRK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MSFT",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MU",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "MUV2.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NAB.AX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NESN.SW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NFLX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NG.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NOVN.SW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NOVO-B.CO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NOW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NTR.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NU",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NVDA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "NWG.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "OR.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ORCL",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "PANW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "PBR",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "PEP",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "PG",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "PLTR",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "PM",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "PRU.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "PRX.AS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "PYPL",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "QCOM",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "QQQ",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "RACE.MI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "RDY",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "REGN",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "REL.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "RIO.AX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "RIO.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "RMS.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ROG.SW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "RR.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "RSP",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "RTX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "RY.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SAN.MC",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SAN.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SAP.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SBUX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SGE.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SHEL.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SHOP",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SHOP.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SHY",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SIE.DE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SIFY",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SLF.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SLV",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SMH",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SNPS",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SOXX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SPGI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SPY",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SQM",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SREN.SW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SSE.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "STAN.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SU.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "SU.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "T.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "TD.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "TIP",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "TLT",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "TMO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "TRP.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "TSCO.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "TSLA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "TTE.PA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "TUR",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "TXN",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "UBER",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "UBSG.SW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "UCG.MI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ULVR.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "UNG",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "UNH",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "USO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "UUP",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "V",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "VALE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "VEA",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "VOD.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "VOO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "VRTX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "VT",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "VTI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "VWO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "WBC.AX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "WCN.TO",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "WES.AX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "WFC",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "WIT",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "WMT",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "WOW.AX",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "WTB.L",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XBI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLB",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLC",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLF",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLI",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLK",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLP",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLRE",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLU",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLV",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XLY",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "XOM",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  },
+  {
+    "ticker": "ZURN.SW",
+    "quantity": 0.0,
+    "entry_price": null,
+    "target_price": null,
+    "stop_loss": null,
+    "notes": "",
+    "added_at": "2026-07-12T20:24:08.187427+00:00"
+  }
+]
