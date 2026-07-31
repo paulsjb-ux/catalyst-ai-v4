@@ -38,6 +38,15 @@ def apply_theme() -> None:
     .status-info{background:#eff6ff;border:1px solid #bfdbfe;color:#1e3a8a}
     .status-positive{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
     .status-warning{background:#fffbeb;border:1px solid #f59e0b;color:#78350f}
+    .decision-hero{border-radius:26px;padding:28px;margin:10px 0 22px;box-shadow:0 20px 45px rgba(15,23,42,.10);border:1px solid transparent}
+    .decision-trade{background:linear-gradient(135deg,#ecfdf5,#dcfce7);border-color:#86efac}
+    .decision-watch{background:linear-gradient(135deg,#fffbeb,#fef3c7);border-color:#fbbf24}
+    .decision-no-trade{background:linear-gradient(135deg,#fff1f2,#ffe4e6);border-color:#fda4af}
+    .decision-kicker{font-size:.75rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase;color:#64748b}
+    .decision-action{font-size:clamp(2.5rem,7vw,5rem);font-weight:950;letter-spacing:-.06em;color:#0f172a;margin-top:8px}
+    .decision-headline{font-size:clamp(1.15rem,2.5vw,1.65rem);font-weight:900;color:#1e293b;margin-top:8px}
+    .decision-guidance{font-size:1rem;color:#475569;margin-top:6px;max-width:850px}
+    .opportunity-title{display:flex;justify-content:space-between;gap:16px;align-items:center;background:#fff;border:1px solid #dbeafe;border-radius:18px;padding:16px 18px;margin-bottom:12px;font-weight:900;color:#0f172a;box-shadow:0 10px 24px rgba(15,23,42,.05)}
     [data-testid="stAlert"]{border-radius:16px!important}
     [data-testid="stAlert"] p,[data-testid="stAlert"] div{color:#422006!important;font-weight:750!important}
     .empty-state{background:rgba(255,255,255,.94);border:1px dashed #93c5fd;border-radius:20px;padding:28px;text-align:center;color:#475569}

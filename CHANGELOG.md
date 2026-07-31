@@ -1,5 +1,13 @@
 # Changelog
 
+## 8.0.0 — Today’s Decision
+
+- Added a simplified default landing page with TRADE, WATCH or NO TRADE.
+- Added conservative decision rules and plain-English explanations.
+- Added leading-opportunity summary and one-click navigation.
+- Added decision-engine regression tests.
+- Updated release metadata to 8.0.0.
+
 ## 7.0.2 — Alert Simplification
 
 - Removed Pushover configuration, delivery code, UI controls, secrets and tests.

@@ -15,6 +15,7 @@ from ui.repeat_winners import render_repeat_winners
 from ui.settings import render_settings
 from ui.theme import apply_theme
 from ui.trade_universe import render_trade_universe
+from ui.todays_decision import render_todays_decision
 from ui.validation import render_validation
 from ui.watchlist import render_watchlist
 from version import APP_VERSION
@@ -24,6 +25,7 @@ logger = configure_logging()
 
 def route_page(page: str) -> None:
     routes = {
+        "Today’s Decision": render_todays_decision,
         "Daily Routine": render_daily_routine,
         "Dashboard": lambda: render_dashboard(APP_VERSION, st.session_state.get("scan_results", pd.DataFrame())),
         "Daily Brief": render_daily_brief,
