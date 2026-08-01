@@ -108,6 +108,7 @@ def run_daily_routine(
     export_dir: str | Path = "storage/exports",
     progress: ProgressCallback | None = None,
     send_alerts: bool = True,
+    scan_workers: int | None = None,
 ) -> RoutineResult:
     started = datetime.now(timezone.utc)
     timer = perf_counter()
@@ -153,7 +154,12 @@ def run_daily_routine(
         _record(result, "Market regime", "complete", result.regime.get("regime", "Disabled"))
 
         _notify(progress, "scan", 52, "Scoring the universe")
-        result.scan_results = run_scan(market.prices, market_regime=result.regime or None)
+        scan_kwargs = {"workers": scan_workers} if scan_workers else {}
+        result.scan_results = run_scan(
+            market.prices,
+            market_regime=result.regime or None,
+            **scan_kwargs,
+        )
         if result.scan_results.empty:
             raise RuntimeError("The market scan returned no results.")
         saved = save_scan(result.scan_results)

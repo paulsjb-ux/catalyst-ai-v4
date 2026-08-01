@@ -1,10 +1,18 @@
 from __future__ import annotations
 
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from threading import RLock
+from typing import Any
+import logging
+import os
+
 import pandas as pd
 
 from engine.indicators import enrich_price_frame
 from engine.market_regime import apply_market_regime
 from engine.scoring import assign_signal, explain_score, score_quality
+
+LOGGER = logging.getLogger(__name__)
 
 OUTPUT_COLUMNS = [
     "ticker", "signal", "score", "base_score", "market_regime", "market_score",
@@ -14,6 +22,13 @@ OUTPUT_COLUMNS = [
     "relative_strength_score", "volatility_penalty", "extension_penalty",
     "reason", "regime_reason", "sma_20", "sma_50", "sma_200", "high_52w",
 ]
+
+# Synthetic benchmarks show pandas rolling calculations are faster serially
+# at this universe size. Parallel mode remains available as an override.
+DEFAULT_SCAN_WORKERS = 1
+_INDICATOR_CACHE_MAX = 2500
+_INDICATOR_CACHE_LOCK = RLock()
+_INDICATOR_CACHE: dict[tuple[Any, ...], dict] = {}
 
 
 def classify_trend(row: pd.Series) -> str:
@@ -32,7 +47,66 @@ def classify_trend(row: pd.Series) -> str:
     return "MIXED"
 
 
+def _scalar(value: Any, default: float = 0.0) -> float:
+    try:
+        if pd.isna(value):
+            return default
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _frame_fingerprint(ticker: str, prices: pd.DataFrame) -> tuple[Any, ...]:
+    if prices is None or prices.empty:
+        return ticker, 0, None, None, None
+
+    last_index = prices.index[-1] if len(prices.index) else None
+    close_value: Any = None
+    volume_value: Any = None
+
+    if "Close" in prices.columns:
+        close = prices["Close"]
+        if isinstance(close, pd.DataFrame):
+            close = close.iloc[:, 0]
+        if len(close):
+            close_value = _scalar(close.iloc[-1], default=float("nan"))
+
+    if "Volume" in prices.columns:
+        volume = prices["Volume"]
+        if isinstance(volume, pd.DataFrame):
+            volume = volume.iloc[:, 0]
+        if len(volume):
+            volume_value = _scalar(volume.iloc[-1], default=float("nan"))
+
+    return ticker, len(prices), str(last_index), close_value, volume_value
+
+
+def clear_indicator_cache() -> None:
+    with _INDICATOR_CACHE_LOCK:
+        _INDICATOR_CACHE.clear()
+
+
+def _get_cached_row(key: tuple[Any, ...]) -> dict | None:
+    with _INDICATOR_CACHE_LOCK:
+        value = _INDICATOR_CACHE.get(key)
+        return dict(value) if value is not None else None
+
+
+def _put_cached_row(key: tuple[Any, ...], row: dict) -> None:
+    with _INDICATOR_CACHE_LOCK:
+        if len(_INDICATOR_CACHE) >= _INDICATOR_CACHE_MAX:
+            trim = max(1, _INDICATOR_CACHE_MAX // 4)
+            for old_key in list(_INDICATOR_CACHE)[:trim]:
+                _INDICATOR_CACHE.pop(old_key, None)
+        _INDICATOR_CACHE[key] = dict(row)
+
+
 def _latest_indicator_row(ticker: str, prices: pd.DataFrame) -> dict | None:
+    cache_key = _frame_fingerprint(ticker, prices)
+    cached = _get_cached_row(cache_key)
+    if cached is not None:
+        return cached
+
     enriched = enrich_price_frame(prices)
     if enriched.empty:
         return None
@@ -40,40 +114,76 @@ def _latest_indicator_row(ticker: str, prices: pd.DataFrame) -> dict | None:
 
     row = {
         "ticker": ticker,
-        "close": round(float(latest.get("Close", 0) or 0), 2),
-        "change_1d_pct": round(float(latest.get("change_1d_pct", 0) or 0), 2),
-        "change_20d_pct": round(float(latest.get("change_20d_pct", 0) or 0), 2),
-        "change_60d_pct": round(float(latest.get("change_60d_pct", 0) or 0), 2),
-        "rsi_14": round(float(latest.get("rsi_14", 50) or 50), 1),
-        "volume_ratio": round(float(latest.get("volume_ratio", 1) or 1), 2),
-        "volatility_20d_pct": round(float(latest.get("volatility_20d_pct", 0) or 0), 2),
-        "sma_20": round(float(latest.get("sma_20", 0) or 0), 2),
-        "sma_50": round(float(latest.get("sma_50", 0) or 0), 2),
-        "sma_200": round(float(latest.get("sma_200", 0) or 0), 2),
-        "high_52w": round(float(latest.get("high_52w", 0) or 0), 2),
+        "close": round(_scalar(latest.get("Close", 0)), 2),
+        "change_1d_pct": round(_scalar(latest.get("change_1d_pct", 0)), 2),
+        "change_20d_pct": round(_scalar(latest.get("change_20d_pct", 0)), 2),
+        "change_60d_pct": round(_scalar(latest.get("change_60d_pct", 0)), 2),
+        "rsi_14": round(_scalar(latest.get("rsi_14", 50), 50), 1),
+        "volume_ratio": round(_scalar(latest.get("volume_ratio", 1), 1), 2),
+        "volatility_20d_pct": round(_scalar(latest.get("volatility_20d_pct", 0)), 2),
+        "sma_20": round(_scalar(latest.get("sma_20", 0)), 2),
+        "sma_50": round(_scalar(latest.get("sma_50", 0)), 2),
+        "sma_200": round(_scalar(latest.get("sma_200", 0)), 2),
+        "high_52w": round(_scalar(latest.get("high_52w", 0)), 2),
     }
     row["trend"] = classify_trend(pd.Series(row))
     row.update(score_quality(pd.Series(row)))
     row["signal"] = assign_signal(pd.Series(row))
     row["reason"] = explain_score(pd.Series(row))
+    _put_cached_row(cache_key, row)
     return row
 
 
-def run_scan(price_map: dict[str, pd.DataFrame], market_regime: dict | None = None) -> pd.DataFrame:
+def _score_one(item: tuple[str, pd.DataFrame]) -> tuple[str, dict | None, str | None]:
+    ticker, prices = item
+    ticker = str(ticker).upper()
+    if ticker in {"SPY", "QQQ"}:
+        return ticker, None, None
+    try:
+        return ticker, _latest_indicator_row(ticker, prices), None
+    except Exception as exc:
+        return ticker, None, str(exc)
+
+
+def run_scan(
+    price_map: dict[str, pd.DataFrame],
+    market_regime: dict | None = None,
+    *,
+    workers: int = DEFAULT_SCAN_WORKERS,
+) -> pd.DataFrame:
+    """Score symbols concurrently while preserving deterministic results."""
     if not price_map:
         return pd.DataFrame(columns=OUTPUT_COLUMNS)
 
-    rows = []
-    for ticker, prices in price_map.items():
-        ticker = str(ticker).upper()
-        if ticker in {"SPY", "QQQ"}:
-            continue
-        try:
-            row = _latest_indicator_row(ticker, prices)
-            if row:
-                rows.append(row)
-        except Exception:
-            continue
+    items = list(price_map.items())
+    rows: list[dict] = []
+    failures: list[tuple[str, str]] = []
+    worker_count = max(1, min(int(workers), len(items)))
+
+    if worker_count == 1:
+        results = [_score_one(item) for item in items]
+    else:
+        results = []
+        with ThreadPoolExecutor(
+            max_workers=worker_count,
+            thread_name_prefix="catalyst-score",
+        ) as pool:
+            futures = [pool.submit(_score_one, item) for item in items]
+            for future in as_completed(futures):
+                results.append(future.result())
+
+    for ticker, row, error in results:
+        if row:
+            rows.append(row)
+        elif error:
+            failures.append((ticker, error))
+
+    if failures:
+        LOGGER.warning(
+            "Scanner skipped %s symbols; first failures: %s",
+            len(failures),
+            failures[:5],
+        )
 
     if not rows:
         return pd.DataFrame(columns=OUTPUT_COLUMNS)
@@ -94,6 +204,8 @@ def run_scan(price_map: dict[str, pd.DataFrame], market_regime: dict | None = No
 
     signal_order = {"BUY": 0, "WATCH": 1, "IGNORE": 2}
     frame["_signal_order"] = frame["signal"].map(signal_order).fillna(9)
-    frame = frame.sort_values(["_signal_order", "score", "ticker"], ascending=[True, False, True])
-    frame = frame.drop(columns=["_signal_order"])
+    frame = frame.sort_values(
+        ["_signal_order", "score", "ticker"],
+        ascending=[True, False, True],
+    ).drop(columns=["_signal_order"])
     return frame[OUTPUT_COLUMNS].reset_index(drop=True)
