@@ -6,8 +6,32 @@ def render_header(app_name: str, tagline: str, engine_name: str, version: str) -
     st.markdown(f'''<div class="hero"><h1>🚀 {html.escape(app_name)}</h1><p><strong>{html.escape(tagline)}</strong><br>Powered by the {html.escape(engine_name)}</p><span class="badge">Version {html.escape(version)} · Market Intelligence Only</span></div>''', unsafe_allow_html=True)
 
 
+PRIMARY_NAVIGATION = [
+    "Today’s Decision",
+    "Daily Routine",
+    "Dashboard",
+    "Daily Brief",
+    "Alerts",
+    "Market Scan",
+    "Paper Trading",
+    "Backtesting",
+    "Trade Universe",
+    "Watchlist",
+    "Validation",
+    "Repeat Winners",
+    "Reports",
+    "Settings",
+]
+
+
 def top_navigation() -> str:
-    return st.radio("Navigation", ["Today’s Decision", "Daily Routine", "Dashboard", "Daily Brief", "Alerts", "Market Scan", "Paper Trading", "Trade Universe", "Watchlist", "Validation", "Repeat Winners", "Reports", "Settings"], horizontal=True, label_visibility="collapsed", key="primary_navigation")
+    return st.radio(
+        "Navigation",
+        PRIMARY_NAVIGATION,
+        horizontal=True,
+        label_visibility="collapsed",
+        key="primary_navigation",
+    )
 
 
 def metric_card(label: str, value: str, note: str = "") -> str:
