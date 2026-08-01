@@ -9,6 +9,7 @@ import pandas as pd
 from engine.indicators import enrich_price_frame
 from engine.risk import atr
 from engine.adaptive_risk import adaptive_risk_plan
+from engine.confidence_calibration import apply_walk_forward_calibration
 from engine.scoring import assign_signal, score_quality
 
 
@@ -32,6 +33,16 @@ TRADE_COLUMNS = [
     "portfolio_return_pct",
     "risk_label",
     "risk_rationale",
+    "score_band",
+    "evidence_label",
+    "evidence_multiplier",
+    "evidence_trades",
+    "evidence_win_rate_pct",
+    "evidence_profit_factor",
+    "evidence_average_return_pct",
+    "calibrated_position_size_pct",
+    "calibrated_portfolio_return_pct",
+    "evidence_rationale",
 ]
 
 
@@ -271,6 +282,9 @@ def calculate_metrics(trades: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
             "portfolio_compounded_return_pct": 0.0,
             "portfolio_max_drawdown_pct": 0.0,
             "average_position_size_pct": 0.0,
+            "calibrated_compounded_return_pct": 0.0,
+            "calibrated_max_drawdown_pct": 0.0,
+            "average_calibrated_position_size_pct": 0.0,
         }
         return metrics, pd.DataFrame(columns=["trade_number", "equity"])
 
@@ -288,8 +302,21 @@ def calculate_metrics(trades: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
         else pd.Series(100.0, index=ordered.index),
         errors="coerce",
     ).fillna(100.0)
+    calibrated_returns = pd.to_numeric(
+        ordered["calibrated_portfolio_return_pct"]
+        if "calibrated_portfolio_return_pct" in ordered.columns
+        else portfolio_returns,
+        errors="coerce",
+    ).fillna(0)
+    calibrated_sizes = pd.to_numeric(
+        ordered["calibrated_position_size_pct"]
+        if "calibrated_position_size_pct" in ordered.columns
+        else position_sizes,
+        errors="coerce",
+    ).fillna(position_sizes)
     equity = (1 + returns / 100).cumprod()
     portfolio_equity = (1 + portfolio_returns / 100).cumprod()
+    calibrated_equity = (1 + calibrated_returns / 100).cumprod()
     winners = returns[returns > 0]
     losers = returns[returns <= 0]
     gross_profit = float(winners.sum())
@@ -316,12 +343,25 @@ def calculate_metrics(trades: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
         "portfolio_compounded_return_pct": round(float((portfolio_equity.iloc[-1] - 1) * 100), 2),
         "portfolio_max_drawdown_pct": round(_max_drawdown(portfolio_equity), 2),
         "average_position_size_pct": round(float(position_sizes.mean()), 2),
+        "calibrated_compounded_return_pct": round(
+            float((calibrated_equity.iloc[-1] - 1) * 100),
+            2,
+        ),
+        "calibrated_max_drawdown_pct": round(
+            _max_drawdown(calibrated_equity),
+            2,
+        ),
+        "average_calibrated_position_size_pct": round(
+            float(calibrated_sizes.mean()),
+            2,
+        ),
     }
     curve = pd.DataFrame(
         {
             "trade_number": range(1, len(equity) + 1),
             "equity": equity.values,
             "portfolio_equity": portfolio_equity.values,
+            "calibrated_equity": calibrated_equity.values,
         }
     )
     return metrics, curve
@@ -349,6 +389,22 @@ def run_backtest(
         if all_trades
         else pd.DataFrame(columns=TRADE_COLUMNS)
     )
+    combined = apply_walk_forward_calibration(
+        combined,
+        enabled=bool(kwargs.get("walk_forward_calibration", True)),
+        minimum_evidence_trades=int(
+            kwargs.get("minimum_evidence_trades", 20)
+        ),
+        full_size_profit_factor=float(
+            kwargs.get("full_size_profit_factor", 1.20)
+        ),
+        full_size_win_rate_pct=float(
+            kwargs.get("full_size_win_rate_pct", 48.0)
+        ),
+        full_size_average_return_pct=float(
+            kwargs.get("full_size_average_return_pct", 0.15)
+        ),
+    )
     metrics, curve = calculate_metrics(combined)
 
     assumptions = {
@@ -362,6 +418,19 @@ def run_backtest(
         "target_stop": bool(kwargs.get("use_target_stop", True)),
         "adaptive_risk": bool(kwargs.get("adaptive_risk", True)),
         "base_position_pct": kwargs.get("base_position_pct", 20.0),
+        "walk_forward_calibration": bool(
+            kwargs.get("walk_forward_calibration", True)
+        ),
+        "minimum_evidence_trades": kwargs.get(
+            "minimum_evidence_trades", 20
+        ),
+        "full_size_evidence_thresholds": {
+            "profit_factor": kwargs.get("full_size_profit_factor", 1.20),
+            "win_rate_pct": kwargs.get("full_size_win_rate_pct", 48.0),
+            "average_return_pct": kwargs.get(
+                "full_size_average_return_pct", 0.15
+            ),
+        },
     }
     return BacktestResult(
         trades=combined,
