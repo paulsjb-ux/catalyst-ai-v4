@@ -58,8 +58,8 @@ PLAN_COLUMNS = [
     "plan_reason",
 ]
 
-UNIVERSE_VERSION = "global-323"
-DEFAULT_MAX_TICKERS = 323
+UNIVERSE_VERSION = "global-523-v2"
+DEFAULT_MAX_TICKERS = 523
 
 
 def _build_default_universe() -> list[str]:
