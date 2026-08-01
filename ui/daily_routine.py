@@ -43,7 +43,7 @@ def render_daily_routine() -> None:
     with c1:
         period = st.selectbox("Price history", ["6mo", "1y", "2y"], index=1)
     with c2:
-        max_tickers = st.number_input("Maximum symbols", min_value=25, max_value=650, value=323, step=25)
+        max_tickers = st.number_input("Maximum symbols", min_value=25, max_value=650, value=523, step=25)
 
     send_alerts = st.toggle("Refresh and deliver configured alerts", value=True)
     confirm_repeat = st.checkbox("Allow another run today", value=False, help="Prevents accidental duplicate routines.")
