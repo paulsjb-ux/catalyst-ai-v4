@@ -49,4 +49,10 @@ def filter_trade_plan_candidates(frame: pd.DataFrame) -> pd.DataFrame:
     """Keep rows suitable for trade planning."""
     if frame is None or frame.empty or "signal" not in frame.columns:
         return pd.DataFrame()
-    return frame[frame["signal"].isin(["BUY", "WATCH"])].copy()
+    candidates = frame[frame["signal"].isin(["BUY", "WATCH"])].copy()
+    if "priority_score" in candidates.columns:
+        candidates = candidates.sort_values(
+            ["priority_score", "score"],
+            ascending=[False, False],
+        )
+    return candidates

@@ -14,6 +14,9 @@ from ui.components import empty_state, section_header, status_card
 DISPLAY_COLUMNS = [
     "ticker",
     "signal",
+    "priority_rank",
+    "confidence_band",
+    "priority_score",
     "score",
     "base_score",
     "market_adjustment",
@@ -31,6 +34,12 @@ DISPLAY_COLUMNS = [
 SCORE_COLUMNS = [
     "ticker",
     "signal",
+    "priority_rank",
+    "confidence_band",
+    "priority_score",
+    "relative_strength_percentile",
+    "momentum_consistency",
+    "risk_quality",
     "score",
     "base_score",
     "market_regime",
@@ -47,6 +56,9 @@ SCORE_COLUMNS = [
 PLAN_COLUMNS = [
     "ticker",
     "signal",
+    "priority_rank",
+    "confidence_band",
+    "priority_score",
     "score",
     "entry_price",
     "target_price",
@@ -257,6 +269,30 @@ def render_market_scan() -> None:
             "🛡️",
         )
         return
+
+    top_candidates = filtered[
+        filtered["signal"].isin(["BUY", "WATCH"])
+    ].head(20)
+
+    if not top_candidates.empty:
+        st.markdown("### Top 20 Candidates")
+        st.caption(
+            "Ranked across the current universe. The original BUY/WATCH signal "
+            "remains unchanged; priority score improves ordering."
+        )
+        top_columns = [
+            "priority_rank", "ticker", "signal", "confidence_band",
+            "priority_score", "score", "relative_strength_percentile",
+            "momentum_consistency", "risk_quality", "close", "reason",
+        ]
+        st.dataframe(
+            top_candidates[
+                [column for column in top_columns if column in top_candidates.columns]
+            ],
+            use_container_width=True,
+            hide_index=True,
+            height=420,
+        )
 
     st.markdown("### Candidate Results")
     st.dataframe(

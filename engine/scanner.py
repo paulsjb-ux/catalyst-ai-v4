@@ -10,6 +10,7 @@ import pandas as pd
 
 from engine.indicators import enrich_price_frame
 from engine.market_regime import apply_market_regime
+from engine.ranking import RANKING_COLUMNS, rank_candidates
 from engine.scoring import assign_signal, explain_score, score_quality
 
 LOGGER = logging.getLogger(__name__)
@@ -20,6 +21,8 @@ OUTPUT_COLUMNS = [
     "change_60d_pct", "rsi_14", "volume_ratio", "volatility_20d_pct",
     "trend", "trend_score", "momentum_score", "volume_score",
     "relative_strength_score", "volatility_penalty", "extension_penalty",
+    "priority_rank", "priority_score", "confidence_band",
+    "relative_strength_percentile", "momentum_consistency", "risk_quality",
     "reason", "regime_reason", "sma_20", "sma_50", "sma_200", "high_52w",
 ]
 
@@ -202,10 +205,10 @@ def run_scan(
         if column not in frame.columns:
             frame[column] = None
 
-    signal_order = {"BUY": 0, "WATCH": 1, "IGNORE": 2}
-    frame["_signal_order"] = frame["signal"].map(signal_order).fillna(9)
-    frame = frame.sort_values(
-        ["_signal_order", "score", "ticker"],
-        ascending=[True, False, True],
-    ).drop(columns=["_signal_order"])
+    frame = rank_candidates(frame)
+
+    for column in OUTPUT_COLUMNS:
+        if column not in frame.columns:
+            frame[column] = None
+
     return frame[OUTPUT_COLUMNS].reset_index(drop=True)

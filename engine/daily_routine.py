@@ -46,6 +46,8 @@ class RoutineResult:
             "symbols_scanned": int(len(scan)),
             "buy_count": int((scan.get("signal", pd.Series(dtype=str)) == "BUY").sum()),
             "watch_count": int((scan.get("signal", pd.Series(dtype=str)) == "WATCH").sum()),
+            "confidence_a_count": int((scan.get("confidence_band", pd.Series(dtype=str)) == "A").sum()),
+            "confidence_b_count": int((scan.get("confidence_band", pd.Series(dtype=str)) == "B").sum()),
             "trade_plan_count": int(len(self.trade_plans)),
             "data_error_count": int(len(self.market_errors)),
             "universe_health": self.universe_health,

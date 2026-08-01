@@ -105,11 +105,12 @@ def render_daily_routine() -> None:
     else:
         status_card("The routine stopped before all stages completed. Review the stage log below.", "warning")
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3, c4, c5 = st.columns(5)
     c1.metric("Scanned", summary.get("symbols_scanned", 0))
     c2.metric("BUY", summary.get("buy_count", 0))
     c3.metric("WATCH", summary.get("watch_count", 0))
-    c4.metric("Trade Plans", summary.get("trade_plan_count", 0))
+    c4.metric("A Confidence", summary.get("confidence_a_count", 0))
+    c5.metric("Trade Plans", summary.get("trade_plan_count", 0))
 
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Data Errors", summary.get("data_error_count", 0))
