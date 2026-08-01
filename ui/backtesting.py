@@ -95,7 +95,13 @@ def render_backtesting() -> None:
             step=5,
         )
 
-    if st.button("Run Historical Backtest", type="primary", use_container_width=True):
+    run_clicked = st.button(
+        "Run Historical Backtest",
+        type="primary",
+        use_container_width=True,
+    )
+
+    if run_clicked:
         tickers = list(
             dict.fromkeys(
                 token.strip().upper()
@@ -103,17 +109,45 @@ def render_backtesting() -> None:
                 if token.strip()
             )
         )
+        st.session_state.pop("backtest_run_error", None)
+        st.session_state.pop("backtest_run_summary", None)
+
         if not tickers:
-            st.error("Enter at least one ticker.")
+            st.session_state["backtest_run_error"] = (
+                "Enter at least one ticker before running the backtest."
+            )
         else:
-            with st.spinner(
-                f"Downloading {period} of history and testing {len(tickers)} symbols..."
-            ):
+            progress = st.progress(0, text="Preparing historical backtest...")
+            try:
+                progress.progress(10, text="Downloading historical prices...")
                 market = download_history(
                     tickers,
                     period=period,
                     cache_minutes=60,
                 )
+
+                loaded = len(market.prices)
+                failed = len(market.errors)
+                stale = getattr(market, "stale_cache_hits", 0)
+                st.session_state["backtest_run_summary"] = {
+                    "requested": len(tickers),
+                    "loaded": loaded,
+                    "failed": failed,
+                    "cache_hits": market.cache_hits,
+                    "stale_cache_hits": stale,
+                }
+
+                if loaded == 0:
+                    details = "; ".join(
+                        f"{ticker}: {message}"
+                        for ticker, message in list(market.errors.items())[:5]
+                    )
+                    raise RuntimeError(
+                        "No historical price data loaded. "
+                        + (details or "The market-data provider returned no usable data.")
+                    )
+
+                progress.progress(45, text=f"Testing {loaded} loaded symbols...")
                 signals = ("BUY", "WATCH") if include_watch else ("BUY",)
                 result = run_backtest(
                     market.prices,
@@ -128,7 +162,33 @@ def render_backtesting() -> None:
                     minimum_evidence_trades=int(minimum_evidence_trades),
                 )
                 result.errors.update(market.errors)
+                progress.progress(90, text="Calculating portfolio metrics...")
+
+                # Store a completed result only after the full run succeeds.
                 st.session_state["backtest_result"] = result
+                progress.progress(100, text="Backtest complete")
+                st.success(
+                    f"Backtest complete: {loaded}/{len(tickers)} symbols loaded, "
+                    f"{result.metrics.get('trades', 0)} trades generated."
+                )
+            except Exception as exc:
+                st.session_state["backtest_run_error"] = str(exc)
+                progress.empty()
+
+    run_error = st.session_state.get("backtest_run_error")
+    if run_error:
+        st.error(f"Backtest could not run: {run_error}")
+
+    run_summary = st.session_state.get("backtest_run_summary")
+    if run_summary:
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric("Requested", run_summary.get("requested", 0))
+        c2.metric("Price Data Loaded", run_summary.get("loaded", 0))
+        c3.metric("Data Failures", run_summary.get("failed", 0))
+        c4.metric(
+            "Cache Fallbacks",
+            run_summary.get("stale_cache_hits", 0),
+        )
 
     result = st.session_state.get("backtest_result")
     if result is None:

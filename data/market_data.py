@@ -33,6 +33,7 @@ class MarketDataResult:
     errors: dict[str, str]
     fetched_at: datetime
     cache_hits: int = 0
+    stale_cache_hits: int = 0
 
 
 def _clean_frame(frame: pd.DataFrame) -> pd.DataFrame:
@@ -108,7 +109,14 @@ def _cache_paths(ticker: str, period: str, interval: str) -> tuple[Path, Path]:
     return CACHE_DIR / f"{key}.pkl", CACHE_DIR / f"{key}.json"
 
 
-def _read_cache(ticker: str, period: str, interval: str, max_age_minutes: int) -> pd.DataFrame | None:
+def _read_cache(
+    ticker: str,
+    period: str,
+    interval: str,
+    max_age_minutes: int,
+    *,
+    allow_expired: bool = False,
+) -> pd.DataFrame | None:
     memory_key = (ticker, period, interval)
     now = time.monotonic()
     with _MEMORY_CACHE_LOCK:
@@ -127,7 +135,11 @@ def _read_cache(ticker: str, period: str, interval: str, max_age_minutes: int) -
         fetched_at = datetime.fromisoformat(str(meta["fetched_at"]))
         if fetched_at.tzinfo is None:
             fetched_at = fetched_at.replace(tzinfo=timezone.utc)
-        if datetime.now(timezone.utc) - fetched_at > timedelta(minutes=max_age_minutes):
+        if (
+            not allow_expired
+            and datetime.now(timezone.utc) - fetched_at
+            > timedelta(minutes=max_age_minutes)
+        ):
             return None
         frame = pd.read_pickle(frame_path)
         frame = _clean_frame(frame)
@@ -259,6 +271,7 @@ def download_history(
     errors: dict[str, str] = {}
     fetched_at = datetime.now(timezone.utc)
     cache_hits = 0
+    stale_cache_hits = 0
     pending: list[str] = []
 
     for ticker in requested:
@@ -321,9 +334,29 @@ def download_history(
                 except Exception as exc:
                     errors[ticker] = str(exc)
 
+    # Live data providers can temporarily rate-limit or return empty frames.
+    # For backtests, an older complete cache is safer than silently returning
+    # no data. Fresh cache is still preferred; this is only a final fallback.
+    unresolved = [ticker for ticker in requested if ticker not in prices]
+    if use_cache and unresolved:
+        for ticker in unresolved:
+            stale = _read_cache(
+                ticker,
+                period,
+                interval,
+                max_age_minutes=cache_minutes,
+                allow_expired=True,
+            )
+            if stale is None:
+                continue
+            prices[ticker] = stale
+            stale_cache_hits += 1
+            errors.pop(ticker, None)
+
     return MarketDataResult(
         prices=prices,
         errors=errors,
         fetched_at=fetched_at,
         cache_hits=cache_hits,
+        stale_cache_hits=stale_cache_hits,
     )
