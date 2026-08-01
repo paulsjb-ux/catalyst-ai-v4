@@ -24,7 +24,70 @@ PRIMARY_NAVIGATION = [
 ]
 
 
+def navigation_overflow_fix() -> None:
+    st.markdown(
+        """
+<style>
+/* Catalyst primary navigation: wrap instead of horizontal scrolling */
+div[data-testid="stRadio"][aria-label="Navigation"] {
+    width: 100%;
+    overflow: visible !important;
+}
+
+div[data-testid="stRadio"][aria-label="Navigation"] > div {
+    width: 100%;
+    overflow: visible !important;
+}
+
+div[data-testid="stRadio"][aria-label="Navigation"] div[role="radiogroup"] {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.65rem !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: visible !important;
+    padding-bottom: 0.15rem !important;
+}
+
+div[data-testid="stRadio"][aria-label="Navigation"] label {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    white-space: nowrap !important;
+    margin: 0 !important;
+}
+
+/* Prevent the app canvas itself from sliding horizontally */
+html,
+body,
+[data-testid="stAppViewContainer"],
+[data-testid="stMain"],
+section.main,
+.main .block-container {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+/* Keep navigation usable on narrower screens */
+@media (max-width: 900px) {
+    div[data-testid="stRadio"][aria-label="Navigation"] label {
+        flex: 1 1 calc(33.333% - 0.65rem) !important;
+    }
+}
+
+@media (max-width: 640px) {
+    div[data-testid="stRadio"][aria-label="Navigation"] label {
+        flex: 1 1 calc(50% - 0.65rem) !important;
+    }
+}
+</style>
+""",
+        unsafe_allow_html=True,
+    )
+
+
 def top_navigation() -> str:
+    navigation_overflow_fix()
     return st.radio(
         "Navigation",
         PRIMARY_NAVIGATION,
