@@ -11,6 +11,9 @@ from typing import Any
 import pandas as pd
 
 from engine.adaptive_confidence import holding_period_diagnostics, confidence_diagnostics
+from engine.research_diagnostics import (
+    confidence_calibration, decision_filter_diagnostics, feature_attribution, stress_decomposition,
+)
 
 
 @dataclass(frozen=True)
@@ -135,6 +138,8 @@ def build_proof_report(
     by_score_band = _group_report(prepared, "score_band")
     by_regime = _group_report(prepared, "confidence_regime")
     stressed = stress_test(prepared)
+    return_basis = _return_column(prepared) if not prepared.empty else "none"
+    stress_breakdown = stress_decomposition(prepared, return_column=return_basis) if return_basis != "none" else pd.DataFrame()
 
     profitable_year_ratio = 0.0
     if not by_year.empty:
@@ -160,7 +165,7 @@ def build_proof_report(
             "configuration_hash": configuration_hash(configuration),
             "trades_hash": trades_hash(prepared),
             "analysis_runtime_seconds": round(float(elapsed), 4),
-            "return_basis": _return_column(prepared) if not prepared.empty else "none",
+            "return_basis": return_basis,
         },
         "verdict": verdict,
         "checks_passed": passed,
@@ -174,10 +179,17 @@ def build_proof_report(
         "by_ticker": by_ticker.sort_values("total_return_pct", ascending=False).to_dict(orient="records") if not by_ticker.empty else [],
         "by_score_band": by_score_band.to_dict(orient="records"),
         "by_regime": by_regime.to_dict(orient="records"),
+        "by_holding_period": holding_period_diagnostics(prepared).to_dict(orient="records"),
+        "by_adaptive_confidence": confidence_diagnostics(prepared).to_dict(orient="records"),
+        "decision_filter_diagnostics": decision_filter_diagnostics(prepared).to_dict(orient="records"),
+        "stress_decomposition": stress_breakdown.to_dict(orient="records"),
+        "feature_attribution": feature_attribution(prepared).to_dict(orient="records"),
+        "confidence_calibration": confidence_calibration(prepared).to_dict(orient="records"),
         "disclosures": [
             "Historical performance is not a guarantee of future results.",
             "Validation uses completed trades supplied by the backtest engine.",
             "Stress results subtract an additional 0.20% cost and 0.15% delayed-entry penalty per trade.",
+            "v14.1 diagnostics are descriptive and do not alter trade selection or historical returns.",
             "Survivorship bias and data-provider adjustments must be reviewed before live deployment.",
         ],
     }

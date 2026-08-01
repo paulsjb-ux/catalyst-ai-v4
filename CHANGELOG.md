@@ -92,3 +92,11 @@
 - Fixed navigation overlap with Streamlit's fixed top header.
 - Grouped specialist pages into Trading tools, Analytics and System.
 - Preserved the one-button swing desk and all trading logic.
+
+## v14.1 — Research Diagnostics
+- Added adaptive restriction diagnostics.
+- Added separate cost, delay and combined stress scenarios.
+- Added confidence-component outcome attribution.
+- Added confidence-band calibration against observed win rates.
+- Added all diagnostics to Validation Centre and PDF/JSON exports.
+- Trading rules and v14 returns remain unchanged.

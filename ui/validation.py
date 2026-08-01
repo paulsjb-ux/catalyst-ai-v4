@@ -134,7 +134,7 @@ def _render_proof_validation() -> None:
         st.caption("Positive change is not automatically better for trade count; use profit factor, expectancy, drawdown and stress survival as the main evidence.")
         st.dataframe(summary_frame(report, baseline), use_container_width=True, hide_index=True)
 
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["By Year", "Score Bands", "Tickers", "Regimes", "Holding Period", "Adaptive Confidence"])
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7, tab8, tab9, tab10 = st.tabs(["By Year", "Score Bands", "Tickers", "Regimes", "Holding Period", "Adaptive Confidence", "Restrictions", "Stress Drivers", "Attribution", "Calibration"])
     with tab1:
         st.dataframe(pd.DataFrame(report["by_year"]), use_container_width=True, hide_index=True)
     with tab2:
@@ -147,6 +147,18 @@ def _render_proof_validation() -> None:
         st.dataframe(pd.DataFrame(report.get("by_holding_period", [])), use_container_width=True, hide_index=True)
     with tab6:
         st.dataframe(pd.DataFrame(report.get("by_adaptive_confidence", [])), use_container_width=True, hide_index=True)
+    with tab7:
+        st.caption("Why adaptive confidence reduced or blocked position size. A trade may appear under more than one reason.")
+        st.dataframe(pd.DataFrame(report.get("decision_filter_diagnostics", [])), use_container_width=True, hide_index=True)
+    with tab8:
+        st.caption("Separates the impact of costs and delayed entry instead of reporting only the combined stress result.")
+        st.dataframe(pd.DataFrame(report.get("stress_decomposition", [])), use_container_width=True, hide_index=True)
+    with tab9:
+        st.caption("Observed component differences between winning and losing completed trades. This is attribution, not causal proof.")
+        st.dataframe(pd.DataFrame(report.get("feature_attribution", [])), use_container_width=True, hide_index=True)
+    with tab10:
+        st.caption("Compares adaptive confidence bands with realised win rates. Large gaps indicate confidence is not yet calibrated as a probability.")
+        st.dataframe(pd.DataFrame(report.get("confidence_calibration", [])), use_container_width=True, hide_index=True)
 
     st.markdown("#### Execution Stress Test")
     st.caption("Subtracts an additional 0.20% cost and 0.15% delayed-entry penalty from every completed trade.")

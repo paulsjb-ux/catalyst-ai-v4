@@ -204,6 +204,12 @@ def build_validation_pdf(
     add_breakdown("Score-band performance", report.get("by_score_band", []), 20)
     add_breakdown("Ticker performance", report.get("by_ticker", []), 20)
     add_breakdown("Regime performance", report.get("by_regime", []), 20)
+    add_breakdown("Holding-period performance", report.get("by_holding_period", []), 20)
+    add_breakdown("Adaptive confidence performance", report.get("by_adaptive_confidence", []), 20)
+    add_breakdown("Adaptive restrictions", report.get("decision_filter_diagnostics", []), 20)
+    add_breakdown("Stress-driver decomposition", report.get("stress_decomposition", []), 20)
+    add_breakdown("Feature attribution", report.get("feature_attribution", []), 20)
+    add_breakdown("Confidence calibration", report.get("confidence_calibration", []), 20)
     story.extend([
         Spacer(1, 8),
         Paragraph("Disclosures", styles["Heading2"]),

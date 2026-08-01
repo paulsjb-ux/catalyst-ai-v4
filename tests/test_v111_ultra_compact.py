@@ -1,7 +1,7 @@
 from pathlib import Path
 
 def test_v111_version():
-    assert '14.0' in Path('version.py').read_text()
+    assert '14.1' in Path('version.py').read_text()
 
 def test_ultra_compact_overrides():
     text = Path('ui/theme.py').read_text()
