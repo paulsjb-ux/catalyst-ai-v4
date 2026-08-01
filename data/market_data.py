@@ -4,6 +4,9 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Iterable
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
+import time
 import hashlib
 import json
 
@@ -12,6 +15,9 @@ import pandas as pd
 CACHE_DIR = Path("storage/market_cache")
 DEFAULT_CACHE_MINUTES = 20
 MIN_HISTORY_ROWS = 60
+DEFAULT_RETRY_WORKERS = 6
+_MEMORY_CACHE_LOCK = threading.RLock()
+_MEMORY_CACHE: dict[tuple[str, str, str], tuple[float, pd.DataFrame]] = {}
 
 
 @dataclass(frozen=True)
@@ -51,6 +57,16 @@ def _cache_paths(ticker: str, period: str, interval: str) -> tuple[Path, Path]:
 
 
 def _read_cache(ticker: str, period: str, interval: str, max_age_minutes: int) -> pd.DataFrame | None:
+    memory_key = (ticker, period, interval)
+    now = time.monotonic()
+    with _MEMORY_CACHE_LOCK:
+        memory_item = _MEMORY_CACHE.get(memory_key)
+        if memory_item is not None:
+            expires_at, memory_frame = memory_item
+            if now < expires_at:
+                return memory_frame.copy()
+            _MEMORY_CACHE.pop(memory_key, None)
+
     frame_path, meta_path = _cache_paths(ticker, period, interval)
     if not frame_path.exists() or not meta_path.exists():
         return None
@@ -63,7 +79,11 @@ def _read_cache(ticker: str, period: str, interval: str, max_age_minutes: int) -
             return None
         frame = pd.read_pickle(frame_path)
         frame = _clean_frame(frame)
-        return frame if len(frame) >= MIN_HISTORY_ROWS else None
+        if len(frame) < MIN_HISTORY_ROWS:
+            return None
+        with _MEMORY_CACHE_LOCK:
+            _MEMORY_CACHE[memory_key] = (now + max_age_minutes * 60, frame.copy())
+        return frame
     except Exception:
         return None
 
@@ -74,6 +94,11 @@ def _write_cache(ticker: str, period: str, interval: str, frame: pd.DataFrame, f
         frame_path, meta_path = _cache_paths(ticker, period, interval)
         frame.to_pickle(frame_path)
         meta_path.write_text(json.dumps({"fetched_at": fetched_at.isoformat()}), encoding="utf-8")
+        with _MEMORY_CACHE_LOCK:
+            _MEMORY_CACHE[(ticker, period, interval)] = (
+                time.monotonic() + DEFAULT_CACHE_MINUTES * 60,
+                frame.copy(),
+            )
     except Exception:
         # Caching is an optimisation only and must never stop a scan.
         pass
@@ -147,6 +172,7 @@ def download_history(
     batch_size: int = 80,
     cache_minutes: int = DEFAULT_CACHE_MINUTES,
     use_cache: bool = True,
+    retry_workers: int = DEFAULT_RETRY_WORKERS,
 ) -> MarketDataResult:
     """Download history efficiently using batches, cache and single-symbol retries."""
     requested = _normalise_tickers(tickers)
@@ -181,16 +207,21 @@ def download_history(
             prices[ticker] = frame
             _write_cache(ticker, period, interval, frame, fetched_at)
 
-        for ticker in retry:
-            try:
-                frame = _clean_frame(_download_single(ticker, period, interval))
-                if len(frame) < MIN_HISTORY_ROWS:
-                    errors[ticker] = "Insufficient price history"
-                    continue
-                prices[ticker] = frame
-                _write_cache(ticker, period, interval, frame, fetched_at)
-            except Exception as exc:
-                errors[ticker] = str(exc)
+        if retry:
+            workers = max(1, min(int(retry_workers), len(retry)))
+            with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="market-retry") as pool:
+                futures = {pool.submit(_download_single, ticker, period, interval): ticker for ticker in retry}
+                for future in as_completed(futures):
+                    ticker = futures[future]
+                    try:
+                        frame = _clean_frame(future.result())
+                        if len(frame) < MIN_HISTORY_ROWS:
+                            errors[ticker] = "Insufficient price history"
+                            continue
+                        prices[ticker] = frame
+                        _write_cache(ticker, period, interval, frame, fetched_at)
+                    except Exception as exc:
+                        errors[ticker] = str(exc)
 
     return MarketDataResult(
         prices=prices,
