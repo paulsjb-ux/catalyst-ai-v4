@@ -16,6 +16,7 @@ PJB_WATCHLIST_PATH = UNIVERSE_DIR / "pjb_watchlist.csv"
 STARTER_LARGE_UNIVERSE_PATH = UNIVERSE_DIR / "starter_large_universe.csv"
 SP500_FALLBACK_PATH = UNIVERSE_DIR / "sp500.csv"
 NASDAQ100_FALLBACK_PATH = UNIVERSE_DIR / "nasdaq100.csv"
+BROAD_US_PATH = UNIVERSE_DIR / "broad_us_equities.csv"
 
 HTTP_TIMEOUT_SECONDS = 12
 USER_AGENT = "CatalystAI/8.4.4"
@@ -114,7 +115,9 @@ def build_scan_universe(
     include_watchlist: bool = True,
     include_starter_large_universe: bool = True,
     include_global_liquid: bool = True,
+    include_broad_us: bool = True,
     custom_tickers: Iterable[str] | None = None,
+    excluded_tickers: Iterable[str] | None = None,
     max_tickers: int | None = 650,
 ) -> list[str]:
     tickers: list[str] = []
@@ -127,12 +130,17 @@ def build_scan_universe(
         tickers.extend(custom_tickers)
     if include_sp500:
         tickers.extend(fetch_sp500_tickers())
+    if include_broad_us:
+        tickers.extend(load_universe_csv(BROAD_US_PATH))
     if include_nasdaq100:
         tickers.extend(fetch_nasdaq100_tickers())
     if include_starter_large_universe:
         tickers.extend(load_universe_csv(STARTER_LARGE_UNIVERSE_PATH))
 
     cleaned = clean_ticker_list(tickers)
+    excluded = {clean_ticker(t) for t in (excluded_tickers or [])}
+    if excluded:
+        cleaned = [t for t in cleaned if t not in excluded]
     requested = int(max_tickers) if max_tickers and max_tickers > 0 else None
     selected = cleaned[:requested] if requested else cleaned
 
@@ -151,6 +159,7 @@ def universe_source_summary(**kwargs) -> dict:
         "global_liquid": len(load_universe_csv(GLOBAL_LIQUID_PATH)),
         "sp500": len(fetch_sp500_tickers()) if kwargs.get("include_sp500", True) else 0,
         "nasdaq100": len(fetch_nasdaq100_tickers()) if kwargs.get("include_nasdaq100", True) else 0,
+        "broad_us": len(load_universe_csv(BROAD_US_PATH)) if kwargs.get("include_broad_us", True) else 0,
         "total_unique": len(total),
         "max_tickers": kwargs.get("max_tickers", 650),
         "coverage": (

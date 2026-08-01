@@ -43,7 +43,7 @@ def render_daily_routine() -> None:
     with c1:
         period = st.selectbox("Price history", ["6mo", "1y", "2y"], index=1)
     with c2:
-        max_tickers = st.number_input("Maximum symbols", min_value=25, max_value=650, value=523, step=25)
+        max_tickers = st.number_input("Maximum symbols", min_value=25, max_value=1200, value=750, step=25)
 
     send_alerts = st.toggle("Refresh and deliver configured alerts", value=True)
     confirm_repeat = st.checkbox("Allow another run today", value=False, help="Prevents accidental duplicate routines.")
@@ -111,10 +111,11 @@ def render_daily_routine() -> None:
     c3.metric("WATCH", summary.get("watch_count", 0))
     c4.metric("Trade Plans", summary.get("trade_plan_count", 0))
 
-    c1, c2, c3 = st.columns(3)
+    c1, c2, c3, c4 = st.columns(4)
     c1.metric("Data Errors", summary.get("data_error_count", 0))
-    c2.metric("Alerts", summary.get("alerts_generated", 0))
-    c3.metric("Exports", summary.get("exports_created", 0))
+    c2.metric("Data Success", f"{summary.get('market_success_rate_pct', 0)}%")
+    c3.metric("Quarantined", summary.get("quarantined_count", 0))
+    c4.metric("Exports", summary.get("exports_created", 0))
 
     stages = pd.DataFrame(summary.get("stages", []))
     if not stages.empty:

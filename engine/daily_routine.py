@@ -34,6 +34,7 @@ class RoutineResult:
     alert_result: dict = field(default_factory=dict)
     exports: list[str] = field(default_factory=list)
     scan_id: str = ""
+    universe_health: dict = field(default_factory=dict)
 
     def summary(self) -> dict:
         scan = self.scan_results if self.scan_results is not None else pd.DataFrame()
@@ -47,6 +48,9 @@ class RoutineResult:
             "watch_count": int((scan.get("signal", pd.Series(dtype=str)) == "WATCH").sum()),
             "trade_plan_count": int(len(self.trade_plans)),
             "data_error_count": int(len(self.market_errors)),
+            "universe_health": self.universe_health,
+            "market_success_rate_pct": self.universe_health.get("success_rate_pct", 0),
+            "quarantined_count": self.universe_health.get("quarantined", 0),
             "alerts_generated": int(self.alert_result.get("generated", self.alert_result.get("alert_count", 0)) or 0),
             "exports_created": int(len(self.exports)),
             "scan_id": self.scan_id,
@@ -103,7 +107,7 @@ def _write_exports(result: RoutineResult, export_dir: Path) -> list[str]:
 def run_daily_routine(
     *,
     period: str = "1y",
-    max_tickers: int = 523,
+    max_tickers: int = 750,
     include_regime: bool = True,
     export_dir: str | Path = "storage/exports",
     progress: ProgressCallback | None = None,
@@ -120,23 +124,27 @@ def run_daily_routine(
         from alerts.runner import run_alert_job
         from data.history_store import compare_scans, load_previous_scan, save_scan
         from data.market_data import download_history
+        from data.universe_health import quarantined_tickers, update_universe_health
         from engine.market_regime import REGIME_TICKERS, build_market_regime
         from engine.scanner import run_scan
         from engine.trade_plans import build_trade_plans, filter_trade_plan_candidates
         from engine.universe_builder import build_scan_universe
 
-        _notify(progress, "universe", 5, "Building the liquid-market universe")
+        _notify(progress, "universe", 5, "Building the quality-controlled market universe")
+        quarantine = quarantined_tickers()
         tickers = build_scan_universe(
             include_sp500=True,
             include_nasdaq100=True,
             include_global_liquid=True,
             include_watchlist=True,
             include_starter_large_universe=True,
+            include_broad_us=True,
+            excluded_tickers=quarantine,
             max_tickers=max_tickers,
         )
         if not tickers:
             raise RuntimeError("The scan universe is empty.")
-        _record(result, "Universe", "complete", f"{len(tickers)} symbols selected")
+        _record(result, "Universe", "complete", f"{len(tickers)} symbols selected; {len(quarantine)} quarantined")
 
         download_tickers = list(tickers)
         for ticker in REGIME_TICKERS:
@@ -145,9 +153,10 @@ def run_daily_routine(
         _notify(progress, "market_data", 20, f"Downloading market data for {len(download_tickers)} symbols ({len(tickers)} scan symbols plus {len(download_tickers) - len(tickers)} regime symbols)")
         market = download_history(download_tickers, period=period)
         result.market_errors = market.errors
+        result.universe_health = update_universe_health(tickers, market.prices.keys(), market.errors)
         if not market.prices:
             raise RuntimeError("No market data was downloaded.")
-        _record(result, "Market data", "complete", f"{len(market.prices)} symbols loaded; {len(market.errors)} errors")
+        _record(result, "Market data", "complete", f"{len(market.prices)} symbols loaded; {len(market.errors)} errors; "f"{result.universe_health.get('success_rate_pct', 0)}% success")
 
         _notify(progress, "regime", 35, "Detecting SPY/QQQ market regime")
         result.regime = build_market_regime(market.prices) if include_regime else {}
