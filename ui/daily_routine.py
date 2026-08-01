@@ -96,7 +96,7 @@ def render_daily_routine() -> None:
         </div>
         <div class="routine-command v101-command">
           <div class="routine-brand-row">
-            <div class="routine-title">Daily Routine <span>· v13.0</span></div>
+            <div class="routine-title">Daily Routine <span>· v13.1</span></div>
             <div class="routine-subtitle">Press Run to generate today’s complete swing-trading desk.</div>
           </div>
         </div>

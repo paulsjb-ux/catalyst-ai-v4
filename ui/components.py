@@ -108,7 +108,7 @@ def top_navigation() -> str:
 
     with st.sidebar:
         st.markdown(
-            '<div class="sidebar-brand"><span>🚀</span><div><strong>Catalyst AI</strong><small>v13.0</small></div></div>',
+            '<div class="sidebar-brand"><span>🚀</span><div><strong>Catalyst AI</strong><small>v13.1</small></div></div>',
             unsafe_allow_html=True,
         )
         
