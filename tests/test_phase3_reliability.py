@@ -10,7 +10,7 @@ from version import APP_VERSION
 
 
 def test_phase3_version():
-    assert APP_VERSION == "9.0.0"
+    assert APP_VERSION == "9.0.1"
 
 
 def test_logging_is_idempotent():

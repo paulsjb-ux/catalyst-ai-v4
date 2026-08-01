@@ -19,7 +19,7 @@ NASDAQ100_FALLBACK_PATH = UNIVERSE_DIR / "nasdaq100.csv"
 BROAD_US_PATH = UNIVERSE_DIR / "broad_us_equities.csv"
 
 HTTP_TIMEOUT_SECONDS = 12
-USER_AGENT = "CatalystAI/8.4.4"
+USER_AGENT = "CatalystAI/9.0.1"
 
 
 def clean_ticker(ticker: str) -> str:
