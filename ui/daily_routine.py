@@ -11,6 +11,7 @@ from data.daily_routine_store import load_latest_routine, save_latest_routine
 from engine.daily_routine import run_daily_routine
 from engine.swing_focus import build_swing_desk, load_proof_report, policy_from_proof, swing_desk_summary
 from ui.components import empty_state, metric_card, status_card
+from version import APP_VERSION
 
 STATE_PATH = Path("storage/daily_routine_last_run.json")
 
@@ -96,7 +97,7 @@ def render_daily_routine() -> None:
         </div>
         <div class="routine-command v101-command">
           <div class="routine-brand-row">
-            <div class="routine-title">Daily Routine <span>· v13.1</span></div>
+            <div class="routine-title">Daily Routine <span>· v{APP_VERSION}</span></div>
             <div class="routine-subtitle">Press Run to generate today’s complete swing-trading desk.</div>
           </div>
         </div>

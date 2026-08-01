@@ -73,7 +73,7 @@ def _baseline_report() -> dict | None:
 
 
 def _render_proof_validation() -> None:
-    st.markdown("### v13.1 Validation Centre")
+    st.markdown("### v14 Adaptive Research Centre")
     st.caption("Generate a reproducible proof report, compare it with the locked v9.2.1 baseline and archive every run.")
 
     trades, configuration, source = _validation_trades()
@@ -91,7 +91,7 @@ def _render_proof_validation() -> None:
     c3.metric("Build", APP_VERSION)
     c4.metric("Baseline", f"v{baseline.get('metadata', {}).get('build', '-')}" if baseline else "Not found")
 
-    if st.button("Generate v13.1 Validation Report", type="primary", use_container_width=True):
+    if st.button("Generate v14 Validation Report", type="primary", use_container_width=True):
         with st.spinner("Running profitability, consistency, drawdown, stress and calibration checks..."):
             report = build_proof_report(
                 trades,
@@ -134,7 +134,7 @@ def _render_proof_validation() -> None:
         st.caption("Positive change is not automatically better for trade count; use profit factor, expectancy, drawdown and stress survival as the main evidence.")
         st.dataframe(summary_frame(report, baseline), use_container_width=True, hide_index=True)
 
-    tab1, tab2, tab3, tab4 = st.tabs(["By Year", "Score Bands", "Tickers", "Regimes"])
+    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs(["By Year", "Score Bands", "Tickers", "Regimes", "Holding Period", "Adaptive Confidence"])
     with tab1:
         st.dataframe(pd.DataFrame(report["by_year"]), use_container_width=True, hide_index=True)
     with tab2:
@@ -143,6 +143,10 @@ def _render_proof_validation() -> None:
         st.dataframe(pd.DataFrame(report["by_ticker"]), use_container_width=True, hide_index=True, height=360)
     with tab4:
         st.dataframe(pd.DataFrame(report["by_regime"]), use_container_width=True, hide_index=True)
+    with tab5:
+        st.dataframe(pd.DataFrame(report.get("by_holding_period", [])), use_container_width=True, hide_index=True)
+    with tab6:
+        st.dataframe(pd.DataFrame(report.get("by_adaptive_confidence", [])), use_container_width=True, hide_index=True)
 
     st.markdown("#### Execution Stress Test")
     st.caption("Subtracts an additional 0.20% cost and 0.15% delayed-entry penalty from every completed trade.")

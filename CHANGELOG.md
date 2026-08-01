@@ -1,3 +1,7 @@
+# v14.0
+- Added walk-forward adaptive confidence, dynamic evidence sizing, and holding-period diagnostics.
+- UI frozen from v13.1.
+
 # Changelog
 
 ## 8.0.1 — Supabase API-key compatibility

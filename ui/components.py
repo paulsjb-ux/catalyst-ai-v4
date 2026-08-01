@@ -1,6 +1,7 @@
 import html
 import re
 import streamlit as st
+from version import APP_VERSION
 
 
 def render_header(app_name: str, tagline: str, engine_name: str, version: str, page_title: str = "") -> None:
@@ -108,7 +109,7 @@ def top_navigation() -> str:
 
     with st.sidebar:
         st.markdown(
-            '<div class="sidebar-brand"><span>🚀</span><div><strong>Catalyst AI</strong><small>v13.1</small></div></div>',
+            f'<div class="sidebar-brand"><span>🚀</span><div><strong>Catalyst AI</strong><small>v{APP_VERSION}</small></div></div>',
             unsafe_allow_html=True,
         )
         

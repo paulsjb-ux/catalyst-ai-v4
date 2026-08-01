@@ -10,6 +10,8 @@ from typing import Any
 
 import pandas as pd
 
+from engine.adaptive_confidence import holding_period_diagnostics, confidence_diagnostics
+
 
 @dataclass(frozen=True)
 class ValidationThresholds:
@@ -28,7 +30,7 @@ def _series(frame: pd.DataFrame, column: str, default: float = 0.0) -> pd.Series
 
 
 def _return_column(frame: pd.DataFrame) -> str:
-    for column in ("v92_portfolio_return_pct", "calibrated_portfolio_return_pct", "portfolio_return_pct", "return_pct"):
+    for column in ("v14_portfolio_return_pct", "v92_portfolio_return_pct", "calibrated_portfolio_return_pct", "portfolio_return_pct", "return_pct"):
         if column in frame.columns:
             return column
     return "return_pct"
