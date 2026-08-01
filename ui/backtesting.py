@@ -5,6 +5,7 @@ import streamlit as st
 
 from data.market_data import download_history
 from engine.backtest import run_backtest
+from engine.backtest_analysis import ticker_performance
 from ui.components import empty_state, section_header, status_card
 
 
@@ -54,6 +55,11 @@ def render_backtesting() -> None:
     c1, c2, c3 = st.columns(3)
     with c1:
         use_target_stop = st.toggle("Use ATR target and stop", value=True)
+        adaptive_risk = st.toggle(
+            "Adaptive exits and sizing",
+            value=True,
+            help="Uses only signal-date score, momentum and volatility.",
+        )
     with c2:
         transaction_cost = st.number_input(
             "Round-trip cost (%)",
@@ -65,6 +71,13 @@ def render_backtesting() -> None:
         )
     with c3:
         include_watch = st.toggle("Include WATCH signals", value=False)
+        base_position_pct = st.number_input(
+            "Base position size (%)",
+            min_value=2.5,
+            max_value=50.0,
+            value=20.0,
+            step=2.5,
+        )
 
     if st.button("Run Historical Backtest", type="primary", use_container_width=True):
         tickers = list(
@@ -93,6 +106,8 @@ def render_backtesting() -> None:
                     signals=signals,
                     use_target_stop=use_target_stop,
                     transaction_cost_pct=float(transaction_cost),
+                    adaptive_risk=adaptive_risk,
+                    base_position_pct=float(base_position_pct),
                 )
                 result.errors.update(market.errors)
                 st.session_state["backtest_result"] = result
@@ -111,26 +126,26 @@ def render_backtesting() -> None:
     c1.metric("Trades", metrics.get("trades", 0))
     c2.metric("Win Rate", f"{metrics.get('win_rate_pct', 0)}%")
     c3.metric("Average Trade", f"{metrics.get('average_return_pct', 0)}%")
-    c4.metric(
-        "Compounded Return",
-        f"{metrics.get('compounded_return_pct', 0)}%",
-    )
+    c4.metric("Profit Factor", metrics.get("profit_factor", 0))
 
+    st.markdown("### Position-Sized Portfolio")
     c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Max Drawdown", f"{metrics.get('max_drawdown_pct', 0)}%")
-    c2.metric("Profit Factor", metrics.get("profit_factor", 0))
-    c3.metric("Median Trade", f"{metrics.get('median_return_pct', 0)}%")
-    c4.metric(
-        "Average Hold",
-        f"{metrics.get('average_holding_days', 0)} days",
-    )
+    c1.metric("Portfolio Return", f"{metrics.get('portfolio_compounded_return_pct', 0)}%")
+    c2.metric("Portfolio Drawdown", f"{metrics.get('portfolio_max_drawdown_pct', 0)}%")
+    c3.metric("Average Position", f"{metrics.get('average_position_size_pct', 0)}%")
+    c4.metric("Average Hold", f"{metrics.get('average_holding_days', 0)} days")
+
+    with st.expander("Raw full-allocation comparison"):
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Raw Compounded Return", f"{metrics.get('compounded_return_pct', 0)}%")
+        c2.metric("Raw Max Drawdown", f"{metrics.get('max_drawdown_pct', 0)}%")
+        c3.metric("Median Trade", f"{metrics.get('median_return_pct', 0)}%")
 
     if not result.equity_curve.empty:
         st.markdown("### Compounded Trade Equity")
-        st.line_chart(
-            result.equity_curve.set_index("trade_number")["equity"],
-            height=320,
-        )
+        curve = result.equity_curve.set_index("trade_number")
+        chart_columns = [c for c in ["portfolio_equity", "equity"] if c in curve.columns]
+        st.line_chart(curve[chart_columns], height=320)
 
     if result.trades.empty:
         status_card(
@@ -139,6 +154,12 @@ def render_backtesting() -> None:
             "warning",
         )
     else:
+        performance = ticker_performance(result.trades)
+        if not performance.empty:
+            st.markdown("### Ticker Performance")
+            st.caption("Diagnostic only; not used to remove historical trades.")
+            st.dataframe(performance, use_container_width=True, hide_index=True, height=300)
+
         st.markdown("### Historical Trades")
         st.dataframe(
             result.trades.sort_values(

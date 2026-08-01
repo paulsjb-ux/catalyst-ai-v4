@@ -8,6 +8,7 @@ import pandas as pd
 
 from engine.indicators import enrich_price_frame
 from engine.risk import atr
+from engine.adaptive_risk import adaptive_risk_plan
 from engine.scoring import assign_signal, score_quality
 
 
@@ -25,6 +26,12 @@ TRADE_COLUMNS = [
     "exit_reason",
     "target_price",
     "stop_price",
+    "target_atr_multiple",
+    "stop_atr_multiple",
+    "position_size_pct",
+    "portfolio_return_pct",
+    "risk_label",
+    "risk_rationale",
 ]
 
 
@@ -122,6 +129,8 @@ def backtest_ticker(
     stop_atr_multiple: float = 1.3,
     transaction_cost_pct: float = 0.1,
     warmup_rows: int = 200,
+    adaptive_risk: bool = True,
+    base_position_pct: float = 20.0,
 ) -> pd.DataFrame:
     """Backtest one ticker with next-bar entry and no overlapping positions."""
     prices = _normalise_frame(frame)
@@ -166,11 +175,35 @@ def backtest_ticker(
 
         target_price = None
         stop_price = None
+        target_multiple = float(target_atr_multiple)
+        stop_multiple = float(stop_atr_multiple)
+        position_size_pct = float(base_position_pct)
+        risk_label = "FIXED"
+        risk_rationale = "fixed risk settings"
+
+        if adaptive_risk:
+            plan = adaptive_risk_plan(
+                score=score,
+                volatility_20d_pct=_safe_float(signal_row.get("volatility_20d_pct")),
+                change_20d_pct=_safe_float(signal_row.get("change_20d_pct")),
+                change_60d_pct=_safe_float(signal_row.get("change_60d_pct")),
+                rsi_14=_safe_float(signal_row.get("rsi_14"), 50),
+                signal=signal,
+                base_target_atr=target_atr_multiple,
+                base_stop_atr=stop_atr_multiple,
+                base_position_pct=base_position_pct,
+            )
+            target_multiple = plan.target_atr_multiple
+            stop_multiple = plan.stop_atr_multiple
+            position_size_pct = plan.position_size_pct
+            risk_label = plan.risk_label
+            risk_rationale = plan.rationale
+
         if use_target_stop:
             atr_value = _safe_float(atr_series.iloc[signal_position])
             if atr_value > 0:
-                target_price = entry_price + atr_value * float(target_atr_multiple)
-                stop_price = entry_price - atr_value * float(stop_atr_multiple)
+                target_price = entry_price + atr_value * target_multiple
+                stop_price = entry_price - atr_value * stop_multiple
 
         exit_date, exit_price, exit_reason = _exit_from_path(
             future,
@@ -181,6 +214,7 @@ def backtest_ticker(
         exit_position = prices.index.get_loc(exit_date)
         gross_return = (exit_price / entry_price - 1) * 100
         net_return = gross_return - max(0.0, float(transaction_cost_pct))
+        portfolio_return = net_return * position_size_pct / 100
 
         rows.append(
             {
@@ -201,6 +235,12 @@ def backtest_ticker(
                 "stop_price": (
                     round(stop_price, 4) if stop_price is not None else None
                 ),
+                "target_atr_multiple": round(target_multiple, 2),
+                "stop_atr_multiple": round(stop_multiple, 2),
+                "position_size_pct": round(position_size_pct, 2),
+                "portfolio_return_pct": round(portfolio_return, 4),
+                "risk_label": risk_label,
+                "risk_rationale": risk_rationale,
             }
         )
         position_until = exit_position
@@ -228,12 +268,28 @@ def calculate_metrics(trades: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
             "profit_factor": 0.0,
             "expectancy_pct": 0.0,
             "average_holding_days": 0.0,
+            "portfolio_compounded_return_pct": 0.0,
+            "portfolio_max_drawdown_pct": 0.0,
+            "average_position_size_pct": 0.0,
         }
         return metrics, pd.DataFrame(columns=["trade_number", "equity"])
 
     ordered = trades.sort_values(["exit_date", "ticker"]).reset_index(drop=True)
     returns = pd.to_numeric(ordered["return_pct"], errors="coerce").fillna(0)
+    portfolio_returns = pd.to_numeric(
+        ordered["portfolio_return_pct"]
+        if "portfolio_return_pct" in ordered.columns
+        else ordered["return_pct"],
+        errors="coerce",
+    ).fillna(0)
+    position_sizes = pd.to_numeric(
+        ordered["position_size_pct"]
+        if "position_size_pct" in ordered.columns
+        else pd.Series(100.0, index=ordered.index),
+        errors="coerce",
+    ).fillna(100.0)
     equity = (1 + returns / 100).cumprod()
+    portfolio_equity = (1 + portfolio_returns / 100).cumprod()
     winners = returns[returns > 0]
     losers = returns[returns <= 0]
     gross_profit = float(winners.sum())
@@ -257,11 +313,15 @@ def calculate_metrics(trades: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
             float(pd.to_numeric(ordered["holding_days"]).mean()),
             1,
         ),
+        "portfolio_compounded_return_pct": round(float((portfolio_equity.iloc[-1] - 1) * 100), 2),
+        "portfolio_max_drawdown_pct": round(_max_drawdown(portfolio_equity), 2),
+        "average_position_size_pct": round(float(position_sizes.mean()), 2),
     }
     curve = pd.DataFrame(
         {
             "trade_number": range(1, len(equity) + 1),
             "equity": equity.values,
+            "portfolio_equity": portfolio_equity.values,
         }
     )
     return metrics, curve
@@ -300,6 +360,8 @@ def run_backtest(
         "minimum_score": kwargs.get("minimum_score", 78),
         "signals": list(kwargs.get("signals", ("BUY",))),
         "target_stop": bool(kwargs.get("use_target_stop", True)),
+        "adaptive_risk": bool(kwargs.get("adaptive_risk", True)),
+        "base_position_pct": kwargs.get("base_position_pct", 20.0),
     }
     return BacktestResult(
         trades=combined,
