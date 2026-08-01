@@ -9,6 +9,8 @@ import threading
 import time
 import hashlib
 import json
+import os
+import tempfile
 
 import pandas as pd
 
@@ -20,6 +22,7 @@ CACHE_DIR = Path("storage/market_cache")
 DEFAULT_CACHE_MINUTES = 20
 MIN_HISTORY_ROWS = 60
 DEFAULT_RETRY_WORKERS = 6
+DEFAULT_BATCH_WORKERS = 2
 _MEMORY_CACHE_LOCK = threading.RLock()
 _MEMORY_CACHE: dict[tuple[str, str, str], tuple[float, pd.DataFrame]] = {}
 
@@ -68,7 +71,7 @@ def _read_cache(ticker: str, period: str, interval: str, max_age_minutes: int) -
         if memory_item is not None:
             expires_at, memory_frame = memory_item
             if now < expires_at:
-                return memory_frame.copy()
+                return memory_frame.copy(deep=False)
             _MEMORY_CACHE.pop(memory_key, None)
 
     frame_path, meta_path = _cache_paths(ticker, period, interval)
@@ -86,7 +89,7 @@ def _read_cache(ticker: str, period: str, interval: str, max_age_minutes: int) -
         if len(frame) < MIN_HISTORY_ROWS:
             return None
         with _MEMORY_CACHE_LOCK:
-            _MEMORY_CACHE[memory_key] = (now + max_age_minutes * 60, frame.copy())
+            _MEMORY_CACHE[memory_key] = (now + max_age_minutes * 60, frame.copy(deep=False))
         return frame
     except Exception as exc:
         LOGGER.warning("Market cache read failed for %s: %s", ticker, exc)
@@ -104,12 +107,30 @@ def _write_cache(
     try:
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         frame_path, meta_path = _cache_paths(ticker, period, interval)
-        frame.to_pickle(frame_path)
-        meta_path.write_text(json.dumps({"fetched_at": fetched_at.isoformat()}), encoding="utf-8")
+        with tempfile.NamedTemporaryFile(suffix=".pkl", dir=CACHE_DIR, delete=False) as handle:
+            frame_temp = Path(handle.name)
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            suffix=".json",
+            encoding="utf-8",
+            dir=CACHE_DIR,
+            delete=False,
+        ) as handle:
+            meta_temp = Path(handle.name)
+            handle.write(json.dumps({"fetched_at": fetched_at.isoformat()}))
+            handle.flush()
+            os.fsync(handle.fileno())
+        try:
+            frame.to_pickle(frame_temp)
+            os.replace(frame_temp, frame_path)
+            os.replace(meta_temp, meta_path)
+        finally:
+            frame_temp.unlink(missing_ok=True)
+            meta_temp.unlink(missing_ok=True)
         with _MEMORY_CACHE_LOCK:
             _MEMORY_CACHE[(ticker, period, interval)] = (
                 time.monotonic() + max(0, int(cache_minutes)) * 60,
-                frame.copy(),
+                frame.copy(deep=False),
             )
     except Exception as exc:
         # Caching is an optimisation only and must never stop a scan.
@@ -185,6 +206,7 @@ def download_history(
     cache_minutes: int = DEFAULT_CACHE_MINUTES,
     use_cache: bool = True,
     retry_workers: int = DEFAULT_RETRY_WORKERS,
+    batch_workers: int = DEFAULT_BATCH_WORKERS,
 ) -> MarketDataResult:
     """Download history efficiently using batches, cache and single-symbol retries."""
     requested = _normalise_tickers(tickers)
@@ -203,14 +225,33 @@ def download_history(
             pending.append(ticker)
 
     batch_size = max(1, int(batch_size))
-    for start in range(0, len(pending), batch_size):
-        batch_tickers = pending[start : start + batch_size]
-        try:
-            frames = _download_batch(batch_tickers, period, interval)
-        except Exception:
-            frames = {}
+    batches = [pending[start:start + batch_size] for start in range(0, len(pending), batch_size)]
+    downloaded_batches: list[tuple[list[str], dict[str, pd.DataFrame]]] = []
+    outer_workers = max(1, min(int(batch_workers), len(batches))) if batches else 1
 
-        retry: list[str] = []
+    if outer_workers == 1:
+        for batch_tickers in batches:
+            try:
+                downloaded_batches.append((batch_tickers, _download_batch(batch_tickers, period, interval)))
+            except Exception as exc:
+                LOGGER.warning("Market batch download failed: %s", exc)
+                downloaded_batches.append((batch_tickers, {}))
+    else:
+        with ThreadPoolExecutor(max_workers=outer_workers, thread_name_prefix="market-batch") as pool:
+            futures = {
+                pool.submit(_download_batch, batch, period, interval): batch
+                for batch in batches
+            }
+            for future in as_completed(futures):
+                batch_tickers = futures[future]
+                try:
+                    downloaded_batches.append((batch_tickers, future.result()))
+                except Exception as exc:
+                    LOGGER.warning("Market batch download failed: %s", exc)
+                    downloaded_batches.append((batch_tickers, {}))
+
+    retry: list[str] = []
+    for batch_tickers, frames in downloaded_batches:
         for ticker in batch_tickers:
             frame = _clean_frame(frames.get(ticker, pd.DataFrame()))
             if len(frame) < MIN_HISTORY_ROWS:
@@ -219,21 +260,21 @@ def download_history(
             prices[ticker] = frame
             _write_cache(ticker, period, interval, frame, fetched_at, cache_minutes)
 
-        if retry:
-            workers = max(1, min(int(retry_workers), len(retry)))
-            with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="market-retry") as pool:
-                futures = {pool.submit(_download_single, ticker, period, interval): ticker for ticker in retry}
-                for future in as_completed(futures):
-                    ticker = futures[future]
-                    try:
-                        frame = _clean_frame(future.result())
-                        if len(frame) < MIN_HISTORY_ROWS:
-                            errors[ticker] = "Insufficient price history"
-                            continue
-                        prices[ticker] = frame
-                        _write_cache(ticker, period, interval, frame, fetched_at, cache_minutes)
-                    except Exception as exc:
-                        errors[ticker] = str(exc)
+    if retry:
+        workers = max(1, min(int(retry_workers), len(retry)))
+        with ThreadPoolExecutor(max_workers=workers, thread_name_prefix="market-retry") as pool:
+            futures = {pool.submit(_download_single, ticker, period, interval): ticker for ticker in retry}
+            for future in as_completed(futures):
+                ticker = futures[future]
+                try:
+                    frame = _clean_frame(future.result())
+                    if len(frame) < MIN_HISTORY_ROWS:
+                        errors[ticker] = "Insufficient price history"
+                        continue
+                    prices[ticker] = frame
+                    _write_cache(ticker, period, interval, frame, fetched_at, cache_minutes)
+                except Exception as exc:
+                    errors[ticker] = str(exc)
 
     return MarketDataResult(
         prices=prices,
