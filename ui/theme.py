@@ -117,6 +117,31 @@ def apply_theme() -> None:
     .routine-title{font-size:1.75rem;font-weight:900;letter-spacing:-.04em;color:#0f172a;line-height:1.05}
     .routine-subtitle{margin-top:7px;color:#64748b;font-weight:600;max-width:850px}
     .stButton>button[kind="primary"]{min-height:3.35rem;font-size:1.05rem;font-weight:900;border-radius:14px}
+
+    /* Catalyst AI v11 — workflow-first executive workspace */
+    .block-container{max-width:1500px!important;padding-top:.35rem!important}
+    .nav-label{font-size:.66rem;font-weight:950;letter-spacing:.16em;color:#64748b;margin:.15rem 0 .35rem .15rem}
+    div[data-testid="stExpander"]{border:1px solid #dbeafe!important;border-radius:14px!important;background:rgba(255,255,255,.72)!important;margin:.45rem 0 .8rem!important;box-shadow:none!important}
+    div[data-testid="stExpander"] summary{font-size:.84rem!important;font-weight:850!important;color:#334155!important;padding:.55rem .8rem!important}
+    div[data-testid="column"] .stButton > button{min-height:38px!important;padding:.35rem .28rem!important;border-radius:10px!important;font-size:.8rem!important;box-shadow:0 5px 12px rgba(37,99,235,.11)!important}
+    .workspace-header{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid #dbeafe;border-radius:18px;padding:13px 17px;margin:8px 0 16px;box-shadow:0 8px 22px rgba(15,23,42,.05)}
+    .workspace-brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .workspace-mark{font-size:1.45rem}
+    .workspace-product{font-size:.7rem;font-weight:950;letter-spacing:.11em;text-transform:uppercase;color:#2563eb}
+    .workspace-product span{color:#64748b;margin-left:5px}
+    .workspace-header h1{font-size:clamp(1.35rem,2.5vw,2rem);letter-spacing:-.04em;margin:1px 0 0;color:#0f172a}
+    .workspace-engine{font-size:.78rem;color:#64748b;font-weight:750;white-space:nowrap}
+    .routine-command.v101-command{padding:18px 22px!important;border-radius:20px!important;margin-top:8px!important}
+    .routine-title{font-size:clamp(1.8rem,4vw,3rem)!important}
+    .routine-subtitle{font-size:.92rem!important}
+    .desk-status-strip{margin-top:4px!important}
+    @media(max-width:760px){
+      .workspace-engine{display:none}
+      .workspace-header{padding:11px 13px}
+      .workspace-header h1{font-size:1.35rem}
+      .nav-label{margin-top:.1rem}
+      div[data-testid="column"] .stButton > button{font-size:.72rem!important;min-height:42px!important}
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -151,6 +176,31 @@ def apply_theme() -> None:
     .action-levels{margin-top:8px;color:#64748b;font-size:.83rem;line-height:1.55}
     @media(max-width:900px){.desk-status-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.desk-status-strip>div{padding:8px 10px}.routine-mark{display:none}}
     @media(max-width:520px){.desk-status-strip{grid-template-columns:1fr}.desk-status-strip>div{padding:8px 10px}.v101-command .routine-title{font-size:1.45rem}}
+
+    /* Catalyst AI v11 — workflow-first executive workspace */
+    .block-container{max-width:1500px!important;padding-top:.35rem!important}
+    .nav-label{font-size:.66rem;font-weight:950;letter-spacing:.16em;color:#64748b;margin:.15rem 0 .35rem .15rem}
+    div[data-testid="stExpander"]{border:1px solid #dbeafe!important;border-radius:14px!important;background:rgba(255,255,255,.72)!important;margin:.45rem 0 .8rem!important;box-shadow:none!important}
+    div[data-testid="stExpander"] summary{font-size:.84rem!important;font-weight:850!important;color:#334155!important;padding:.55rem .8rem!important}
+    div[data-testid="column"] .stButton > button{min-height:38px!important;padding:.35rem .28rem!important;border-radius:10px!important;font-size:.8rem!important;box-shadow:0 5px 12px rgba(37,99,235,.11)!important}
+    .workspace-header{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid #dbeafe;border-radius:18px;padding:13px 17px;margin:8px 0 16px;box-shadow:0 8px 22px rgba(15,23,42,.05)}
+    .workspace-brand{display:flex;align-items:center;gap:10px;min-width:0}
+    .workspace-mark{font-size:1.45rem}
+    .workspace-product{font-size:.7rem;font-weight:950;letter-spacing:.11em;text-transform:uppercase;color:#2563eb}
+    .workspace-product span{color:#64748b;margin-left:5px}
+    .workspace-header h1{font-size:clamp(1.35rem,2.5vw,2rem);letter-spacing:-.04em;margin:1px 0 0;color:#0f172a}
+    .workspace-engine{font-size:.78rem;color:#64748b;font-weight:750;white-space:nowrap}
+    .routine-command.v101-command{padding:18px 22px!important;border-radius:20px!important;margin-top:8px!important}
+    .routine-title{font-size:clamp(1.8rem,4vw,3rem)!important}
+    .routine-subtitle{font-size:.92rem!important}
+    .desk-status-strip{margin-top:4px!important}
+    @media(max-width:760px){
+      .workspace-engine{display:none}
+      .workspace-header{padding:11px 13px}
+      .workspace-header h1{font-size:1.35rem}
+      .nav-label{margin-top:.1rem}
+      div[data-testid="column"] .stButton > button{font-size:.72rem!important;min-height:42px!important}
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -159,3 +209,5 @@ def apply_theme() -> None:
 # v10.1 compact executive trading desk overrides.
 def _v101_theme_marker() -> None:
     pass
+
+# v11 workspace overrides are appended below by apply_theme source patch.

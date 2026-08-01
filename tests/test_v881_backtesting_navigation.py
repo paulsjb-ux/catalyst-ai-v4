@@ -22,7 +22,7 @@ def _assigned_literal(path: Path, variable: str):
 def test_backtesting_is_visible_in_primary_navigation():
     navigation = _assigned_literal(
         PROJECT / "ui" / "components.py",
-        "PRIMARY_NAVIGATION",
+        "TOOL_NAVIGATION",
     )
     assert "Backtesting" in navigation
 

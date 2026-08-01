@@ -65,7 +65,7 @@ def main() -> None:
     apply_theme()
     page = top_navigation()
     if page != "Daily Routine":
-        render_header(CONFIG.app_name, CONFIG.tagline, CONFIG.engine_name, APP_VERSION)
+        render_header(CONFIG.app_name, CONFIG.tagline, CONFIG.engine_name, APP_VERSION, page_title=page)
     route_page(page)
 
 

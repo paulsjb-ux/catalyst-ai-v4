@@ -1,138 +1,96 @@
 import html
-import streamlit as st
 import re
+import streamlit as st
 
 
-def render_header(app_name: str, tagline: str, engine_name: str, version: str) -> None:
+def render_header(app_name: str, tagline: str, engine_name: str, version: str, page_title: str = "") -> None:
+    """Compact workspace header. Branding stays visible without consuming the page."""
+    title = page_title or app_name
     st.markdown(
-        f'''<div class="hero compact-hero">
-        <div class="brand-row"><div class="brand-mark">🚀</div><div>
-        <h1>{html.escape(app_name)}</h1><p>{html.escape(tagline)} <span>· {html.escape(engine_name)}</span></p>
-        </div><span class="badge">v{html.escape(version)}</span></div>
+        f'''<div class="workspace-header">
+        <div class="workspace-brand"><span class="workspace-mark">🚀</span><div>
+        <div class="workspace-product">{html.escape(app_name)} <span>v{html.escape(version)}</span></div>
+        <h1>{html.escape(title)}</h1></div></div>
+        <div class="workspace-engine">{html.escape(engine_name)}</div>
         </div>''', unsafe_allow_html=True
     )
 
 
 PRIMARY_NAVIGATION = [
-    "Today’s Decision",
     "Daily Routine",
+    "Today’s Decision",
     "Dashboard",
+    "Watchlist",
+    "Reports",
+]
+
+TOOL_NAVIGATION = [
     "Daily Brief",
-    "Alerts",
     "Market Scan",
+    "Alerts",
     "Paper Trading",
     "Backtesting",
-    "Trade Universe",
-    "Watchlist",
     "Validation",
     "Repeat Winners",
-    "Reports",
+    "Trade Universe",
     "Settings",
 ]
+
+ALL_NAVIGATION = PRIMARY_NAVIGATION + TOOL_NAVIGATION
 
 
 def navigation_overflow_fix() -> None:
     st.markdown(
         """
 <style>
-/* Fixed-grid navigation: no horizontal strip or sideways dragging. */
-html,
-body,
-[data-testid="stAppViewContainer"],
-[data-testid="stMain"],
-section.main,
-.main .block-container {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: clip !important;
-}
-
-div[data-testid="stHorizontalBlock"] {
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
-}
-
-div[data-testid="column"] {
-    min-width: 0 !important;
-    max-width: 100% !important;
-    overflow: hidden !important;
-}
-
-div[data-testid="column"] .stButton,
-div[data-testid="column"] .stButton > button {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-}
-
-div[data-testid="column"] .stButton > button {
-    white-space: normal !important;
-    overflow-wrap: anywhere !important;
-    line-height: 1.15 !important;
-    min-height: 3.25rem !important;
-    padding: 0.55rem 0.45rem !important;
-    border-radius: 1rem !important;
-}
-
-div[data-testid="stRadio"][aria-label="Navigation"] {
-    display: none !important;
-}
+html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], section.main,
+.main .block-container { width:100%!important; max-width:100%!important; overflow-x:clip!important; }
+div[data-testid="stHorizontalBlock"] { width:100%!important; max-width:100%!important; overflow:hidden!important; }
+div[data-testid="column"] { min-width:0!important; max-width:100%!important; overflow:hidden!important; }
+div[data-testid="column"] .stButton, div[data-testid="column"] .stButton > button { width:100%!important; max-width:100%!important; min-width:0!important; }
+div[data-testid="column"] .stButton > button { white-space:normal!important; overflow-wrap:anywhere!important; line-height:1.1!important; }
+div[data-testid="stRadio"][aria-label="Navigation"] { display:none!important; }
 </style>
-""",
-        unsafe_allow_html=True,
-    )
+""", unsafe_allow_html=True)
 
 
 def _navigation_key(page: str) -> str:
     safe = re.sub(r"[^a-z0-9]+", "_", page.lower()).strip("_")
-    return f"primary_nav_{safe}"
+    return f"workspace_nav_{safe}"
+
+
+def _render_nav_row(pages: list[str], selected: str, prefix: str) -> None:
+    columns = st.columns(len(pages), gap="small")
+    for column, page in zip(columns, pages):
+        with column:
+            clicked = st.button(
+                page,
+                key=f"{prefix}_{_navigation_key(page)}",
+                type="primary" if page == selected else "secondary",
+                use_container_width=True,
+            )
+            if clicked and page != selected:
+                st.session_state["primary_navigation"] = page
+                st.rerun()
 
 
 def top_navigation() -> str:
-    """Render navigation in fixed rows that cannot scroll sideways."""
+    """Workflow-first navigation: daily pages first, specialist tools on demand."""
     navigation_overflow_fix()
-
-    selected = st.session_state.get(
-        "primary_navigation",
-        "Daily Routine",
-    )
-    if selected not in PRIMARY_NAVIGATION:
+    selected = st.session_state.get("primary_navigation", "Daily Routine")
+    if selected not in ALL_NAVIGATION:
         selected = "Daily Routine"
         st.session_state["primary_navigation"] = selected
 
-    buttons_per_row = 7
+    st.markdown('<div class="nav-label">DAILY WORKSPACE</div>', unsafe_allow_html=True)
+    _render_nav_row(PRIMARY_NAVIGATION, selected, "primary")
 
-    for row_start in range(
-        0,
-        len(PRIMARY_NAVIGATION),
-        buttons_per_row,
-    ):
-        row_pages = PRIMARY_NAVIGATION[
-            row_start : row_start + buttons_per_row
-        ]
-        columns = st.columns(len(row_pages), gap="small")
+    tools_open = selected in TOOL_NAVIGATION
+    with st.expander("More tools" + (f" · {selected}" if tools_open else ""), expanded=tools_open):
+        for start in range(0, len(TOOL_NAVIGATION), 5):
+            _render_nav_row(TOOL_NAVIGATION[start:start + 5], selected, f"tools_{start}")
 
-        for column, page in zip(columns, row_pages):
-            with column:
-                clicked = st.button(
-                    page,
-                    key=_navigation_key(page),
-                    type=(
-                        "primary"
-                        if page == selected
-                        else "secondary"
-                    ),
-                    use_container_width=True,
-                )
-                if clicked and page != selected:
-                    st.session_state["primary_navigation"] = page
-                    st.rerun()
-
-    return st.session_state.get(
-        "primary_navigation",
-        "Daily Routine",
-    )
+    return st.session_state.get("primary_navigation", "Daily Routine")
 
 
 def metric_card(label: str, value: str, note: str = "") -> str:

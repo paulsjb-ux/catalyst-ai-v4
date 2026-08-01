@@ -8,8 +8,8 @@ def test_navigation_blocks_horizontal_canvas_overflow():
     source = (PROJECT / "ui" / "components.py").read_text(
         encoding="utf-8"
     )
-    assert "overflow-x: clip" in source
-    assert "overflow: hidden" in source
+    assert "overflow-x:clip" in source
+    assert "overflow:hidden" in source
 
 
 def test_top_navigation_applies_overflow_fix():

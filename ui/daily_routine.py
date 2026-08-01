@@ -97,7 +97,7 @@ def render_daily_routine() -> None:
         <div class="routine-command v101-command">
           <div class="routine-brand-row">
             <div>
-              <div class="routine-eyebrow">CATALYST AI v10.1</div>
+              <div class="routine-eyebrow">CATALYST AI v11.0</div>
               <div class="routine-title">Daily Trading Desk</div>
               <div class="routine-subtitle">Update the market, validate the evidence and produce today’s swing plan in one run.</div>
             </div>

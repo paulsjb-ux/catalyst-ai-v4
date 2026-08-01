@@ -1,34 +1,23 @@
 from pathlib import Path
 
-
 PROJECT = Path(__file__).resolve().parents[1]
 
 
 def test_navigation_no_longer_uses_horizontal_radio():
-    source = (PROJECT / "ui" / "components.py").read_text(
-        encoding="utf-8"
-    )
-    block = source[
-        source.index("def top_navigation()")
-        : source.index("def metric_card(")
-    ]
-    assert "st.radio(" not in block
-    assert "st.button(" in block
-    assert "st.columns(" in block
+    source = (PROJECT / "ui" / "components.py").read_text(encoding="utf-8")
+    assert "st.radio(" not in source
+    assert "st.button(" in source
 
 
-def test_navigation_is_split_into_fixed_rows():
-    source = (PROJECT / "ui" / "components.py").read_text(
-        encoding="utf-8"
-    )
-    assert "buttons_per_row = 7" in source
-    assert "use_container_width=True" in source
+def test_navigation_is_workflow_first():
+    source = (PROJECT / "ui" / "components.py").read_text(encoding="utf-8")
+    assert "PRIMARY_NAVIGATION" in source
+    assert "TOOL_NAVIGATION" in source
+    assert "More tools" in source
 
 
 def test_columns_constrain_button_width():
-    source = (PROJECT / "ui" / "components.py").read_text(
-        encoding="utf-8"
-    )
+    source = (PROJECT / "ui" / "components.py").read_text(encoding="utf-8")
     assert 'div[data-testid="column"]' in source
-    assert "min-width: 0" in source
-    assert "overflow-wrap: anywhere" in source
+    assert "min-width:0" in source
+    assert "max-width:100%" in source
