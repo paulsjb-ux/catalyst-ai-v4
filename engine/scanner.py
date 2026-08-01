@@ -104,6 +104,42 @@ def _put_cached_row(key: tuple[Any, ...], row: dict) -> None:
         _INDICATOR_CACHE[key] = dict(row)
 
 
+def score_enriched_row(
+    ticker: str,
+    latest: pd.Series,
+    *,
+    round_values: bool = True,
+) -> dict:
+    """Score one already-enriched price row using the live scanner rules.
+
+    The historical backtester calls this same function, keeping live and
+    historical BUY/WATCH/IGNORE decisions on one source of truth.
+    """
+    def value(name: str, default: float = 0.0, digits: int = 2) -> float:
+        number = _scalar(latest.get(name, default), default)
+        return round(number, digits) if round_values else number
+
+    row = {
+        "ticker": str(ticker).upper(),
+        "close": value("Close"),
+        "change_1d_pct": value("change_1d_pct"),
+        "change_20d_pct": value("change_20d_pct"),
+        "change_60d_pct": value("change_60d_pct"),
+        "rsi_14": value("rsi_14", 50, 1),
+        "volume_ratio": value("volume_ratio", 1),
+        "volatility_20d_pct": value("volatility_20d_pct"),
+        "sma_20": value("sma_20"),
+        "sma_50": value("sma_50"),
+        "sma_200": value("sma_200"),
+        "high_52w": value("high_52w"),
+    }
+    row["trend"] = classify_trend(pd.Series(row))
+    row.update(score_quality(pd.Series(row)))
+    row["signal"] = assign_signal(pd.Series(row))
+    row["reason"] = explain_score(pd.Series(row))
+    return row
+
+
 def _latest_indicator_row(ticker: str, prices: pd.DataFrame) -> dict | None:
     cache_key = _frame_fingerprint(ticker, prices)
     cached = _get_cached_row(cache_key)
@@ -115,24 +151,7 @@ def _latest_indicator_row(ticker: str, prices: pd.DataFrame) -> dict | None:
         return None
     latest = enriched.iloc[-1]
 
-    row = {
-        "ticker": ticker,
-        "close": round(_scalar(latest.get("Close", 0)), 2),
-        "change_1d_pct": round(_scalar(latest.get("change_1d_pct", 0)), 2),
-        "change_20d_pct": round(_scalar(latest.get("change_20d_pct", 0)), 2),
-        "change_60d_pct": round(_scalar(latest.get("change_60d_pct", 0)), 2),
-        "rsi_14": round(_scalar(latest.get("rsi_14", 50), 50), 1),
-        "volume_ratio": round(_scalar(latest.get("volume_ratio", 1), 1), 2),
-        "volatility_20d_pct": round(_scalar(latest.get("volatility_20d_pct", 0)), 2),
-        "sma_20": round(_scalar(latest.get("sma_20", 0)), 2),
-        "sma_50": round(_scalar(latest.get("sma_50", 0)), 2),
-        "sma_200": round(_scalar(latest.get("sma_200", 0)), 2),
-        "high_52w": round(_scalar(latest.get("high_52w", 0)), 2),
-    }
-    row["trend"] = classify_trend(pd.Series(row))
-    row.update(score_quality(pd.Series(row)))
-    row["signal"] = assign_signal(pd.Series(row))
-    row["reason"] = explain_score(pd.Series(row))
+    row = score_enriched_row(ticker, latest)
     _put_cached_row(cache_key, row)
     return row
 

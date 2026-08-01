@@ -252,11 +252,51 @@ def render_backtesting() -> None:
         st.line_chart(curve[chart_columns], height=320)
 
     if result.trades.empty:
+        diagnostic = result.diagnostics or {}
+        bars = diagnostic.get("bars_evaluated", 0)
+        buys = diagnostic.get("buy_signals", 0)
+        watches = diagnostic.get("watch_signals", 0)
+        qualifying_scores = diagnostic.get(
+            "scores_at_or_above_minimum",
+            0,
+        )
+        maximum_score = diagnostic.get("maximum_score", 0)
+
         status_card(
-            "No qualifying historical trades were found. Try more tickers, "
-            "a lower minimum score, or include WATCH signals.",
+            "No historical entries qualified. "
+            f"{bars:,} bars were evaluated, producing {buys:,} BUY and "
+            f"{watches:,} WATCH signals. "
+            f"{qualifying_scores:,} bars reached the selected score; "
+            f"the highest score was {maximum_score}.",
             "warning",
         )
+
+        by_ticker = pd.DataFrame(diagnostic.get("by_ticker", []))
+        if not by_ticker.empty:
+            st.markdown("### Signal Diagnostics")
+            diagnostic_columns = [
+                "ticker",
+                "price_rows",
+                "bars_evaluated",
+                "buy_signals",
+                "watch_signals",
+                "scores_at_or_above_minimum",
+                "maximum_score",
+                "accepted_entries",
+                "error",
+            ]
+            st.dataframe(
+                by_ticker[
+                    [
+                        column
+                        for column in diagnostic_columns
+                        if column in by_ticker.columns
+                    ]
+                ],
+                use_container_width=True,
+                hide_index=True,
+                height=320,
+            )
     else:
         evidence = calibration_summary(result.trades)
         if not evidence.empty:

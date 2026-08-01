@@ -10,7 +10,7 @@ from engine.indicators import enrich_price_frame
 from engine.risk import atr
 from engine.adaptive_risk import adaptive_risk_plan
 from engine.confidence_calibration import apply_walk_forward_calibration
-from engine.scoring import assign_signal, score_quality
+from engine.scanner import score_enriched_row
 
 
 TRADE_COLUMNS = [
@@ -57,6 +57,7 @@ class BacktestResult:
     metrics: dict = field(default_factory=dict)
     assumptions: dict = field(default_factory=dict)
     errors: dict[str, str] = field(default_factory=dict)
+    diagnostics: dict = field(default_factory=dict)
 
 
 def _safe_float(value, default: float = 0.0) -> float:
@@ -69,24 +70,15 @@ def _safe_float(value, default: float = 0.0) -> float:
         return default
 
 
-def _indicator_row(row: pd.Series) -> pd.Series:
-    values = {
-        "close": _safe_float(row.get("Close")),
-        "change_1d_pct": _safe_float(row.get("change_1d_pct")),
-        "change_20d_pct": _safe_float(row.get("change_20d_pct")),
-        "change_60d_pct": _safe_float(row.get("change_60d_pct")),
-        "rsi_14": _safe_float(row.get("rsi_14"), 50),
-        "volume_ratio": _safe_float(row.get("volume_ratio"), 1),
-        "volatility_20d_pct": _safe_float(row.get("volatility_20d_pct")),
-        "sma_20": _safe_float(row.get("sma_20")),
-        "sma_50": _safe_float(row.get("sma_50")),
-        "sma_200": _safe_float(row.get("sma_200")),
-        "high_52w": _safe_float(row.get("high_52w")),
-    }
-    components = score_quality(pd.Series(values))
-    values.update(components)
-    values["signal"] = assign_signal(pd.Series(values))
-    return pd.Series(values)
+def _indicator_row(ticker: str, row: pd.Series) -> pd.Series:
+    """Use exactly the same row-scoring function as the live scanner."""
+    return pd.Series(
+        score_enriched_row(
+            ticker,
+            row,
+            round_values=False,
+        )
+    )
 
 
 def _normalise_frame(frame: pd.DataFrame) -> pd.DataFrame:
@@ -142,6 +134,7 @@ def backtest_ticker(
     warmup_rows: int = 200,
     adaptive_risk: bool = True,
     base_position_pct: float = 20.0,
+    diagnostics: dict | None = None,
 ) -> pd.DataFrame:
     """Backtest one ticker with next-bar entry and no overlapping positions."""
     prices = _normalise_frame(frame)
@@ -155,16 +148,45 @@ def backtest_ticker(
     rows: list[dict] = []
     index = enriched.index
     position_until = -1
+    diagnostic = {
+        "ticker": str(ticker).upper(),
+        "price_rows": int(len(prices)),
+        "bars_evaluated": 0,
+        "buy_signals": 0,
+        "watch_signals": 0,
+        "ignore_signals": 0,
+        "scores_at_or_above_minimum": 0,
+        "accepted_entries": 0,
+        "maximum_score": 0,
+        "rejected_signal": 0,
+        "rejected_score": 0,
+    }
 
     for signal_position in range(warmup_rows, len(enriched) - 1):
         if signal_position <= position_until:
             continue
 
-        signal_row = _indicator_row(enriched.iloc[signal_position])
-        signal = str(signal_row.get("signal", "IGNORE"))
+        signal_row = _indicator_row(ticker, enriched.iloc[signal_position])
+        signal = str(signal_row.get("signal", "IGNORE")).upper()
         score = int(_safe_float(signal_row.get("score")))
+        diagnostic["bars_evaluated"] += 1
+        diagnostic["maximum_score"] = max(
+            diagnostic["maximum_score"],
+            score,
+        )
+        signal_key = {
+            "BUY": "buy_signals",
+            "WATCH": "watch_signals",
+        }.get(signal, "ignore_signals")
+        diagnostic[signal_key] += 1
+        if score >= int(minimum_score):
+            diagnostic["scores_at_or_above_minimum"] += 1
 
-        if signal not in allowed_signals or score < int(minimum_score):
+        if signal not in allowed_signals:
+            diagnostic["rejected_signal"] += 1
+            continue
+        if score < int(minimum_score):
+            diagnostic["rejected_score"] += 1
             continue
 
         entry_position = signal_position + 1
@@ -227,6 +249,8 @@ def backtest_ticker(
         net_return = gross_return - max(0.0, float(transaction_cost_pct))
         portfolio_return = net_return * position_size_pct / 100
 
+        diagnostic["accepted_entries"] += 1
+
         rows.append(
             {
                 "ticker": str(ticker).upper(),
@@ -256,6 +280,8 @@ def backtest_ticker(
         )
         position_until = exit_position
 
+    if diagnostics is not None:
+        diagnostics.update(diagnostic)
     return pd.DataFrame(rows, columns=TRADE_COLUMNS)
 
 
@@ -371,18 +397,56 @@ def run_backtest(
     price_map: dict[str, pd.DataFrame],
     **kwargs,
 ) -> BacktestResult:
+    """Run ticker tests and calibration without leaking option groups.
+
+    v9.0 passed walk-forward calibration options into backtest_ticker(), which
+    caused every ticker to fail with unexpected keyword argument errors.
+    """
     all_trades: list[pd.DataFrame] = []
     errors: dict[str, str] = {}
+    ticker_diagnostics: list[dict] = []
+
+    ticker_option_names = {
+        "holding_days",
+        "minimum_score",
+        "signals",
+        "use_target_stop",
+        "target_atr_multiple",
+        "stop_atr_multiple",
+        "transaction_cost_pct",
+        "warmup_rows",
+        "adaptive_risk",
+        "base_position_pct",
+    }
+    ticker_kwargs = {
+        name: value
+        for name, value in kwargs.items()
+        if name in ticker_option_names
+    }
 
     for ticker, frame in price_map.items():
         if str(ticker).upper() in {"SPY", "QQQ"}:
             continue
+        diagnostic: dict = {}
         try:
-            trades = backtest_ticker(ticker, frame, **kwargs)
+            trades = backtest_ticker(
+                ticker,
+                frame,
+                diagnostics=diagnostic,
+                **ticker_kwargs,
+            )
+            ticker_diagnostics.append(diagnostic)
             if not trades.empty:
                 all_trades.append(trades)
         except Exception as exc:
             errors[str(ticker).upper()] = str(exc)
+            diagnostic.update(
+                {
+                    "ticker": str(ticker).upper(),
+                    "error": str(exc),
+                }
+            )
+            ticker_diagnostics.append(diagnostic)
 
     combined = (
         pd.concat(all_trades, ignore_index=True)
@@ -432,10 +496,74 @@ def run_backtest(
             ),
         },
     }
+    diagnostics_frame = pd.DataFrame(ticker_diagnostics)
+    diagnostics_summary = {
+        "tickers_processed": int(len(ticker_diagnostics)),
+        "tickers_with_errors": int(len(errors)),
+        "bars_evaluated": int(
+            pd.to_numeric(
+                diagnostics_frame.get(
+                    "bars_evaluated",
+                    pd.Series(dtype=float),
+                ),
+                errors="coerce",
+            ).fillna(0).sum()
+        ),
+        "buy_signals": int(
+            pd.to_numeric(
+                diagnostics_frame.get(
+                    "buy_signals",
+                    pd.Series(dtype=float),
+                ),
+                errors="coerce",
+            ).fillna(0).sum()
+        ),
+        "watch_signals": int(
+            pd.to_numeric(
+                diagnostics_frame.get(
+                    "watch_signals",
+                    pd.Series(dtype=float),
+                ),
+                errors="coerce",
+            ).fillna(0).sum()
+        ),
+        "scores_at_or_above_minimum": int(
+            pd.to_numeric(
+                diagnostics_frame.get(
+                    "scores_at_or_above_minimum",
+                    pd.Series(dtype=float),
+                ),
+                errors="coerce",
+            ).fillna(0).sum()
+        ),
+        "accepted_entries": int(
+            pd.to_numeric(
+                diagnostics_frame.get(
+                    "accepted_entries",
+                    pd.Series(dtype=float),
+                ),
+                errors="coerce",
+            ).fillna(0).sum()
+        ),
+        "maximum_score": int(
+            pd.to_numeric(
+                diagnostics_frame.get(
+                    "maximum_score",
+                    pd.Series(dtype=float),
+                ),
+                errors="coerce",
+            ).fillna(0).max()
+            if not diagnostics_frame.empty
+            else 0
+        ),
+        "by_ticker": ticker_diagnostics,
+    }
+
     return BacktestResult(
         trades=combined,
         equity_curve=curve,
         metrics=metrics,
         assumptions=assumptions,
         errors=errors,
+        diagnostics=diagnostics_summary,
     )
