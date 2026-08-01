@@ -6,6 +6,10 @@ from data.history_store import list_saved_scans, load_scan
 from data.market_data import download_history
 from engine.validation import calculate_forward_returns, summarise_validation, add_quality_labels
 from engine.proof_validation import build_proof_report
+from engine.research_lab import (
+    evaluate_experiment, experiment_comparison_frame, list_experiments,
+    load_locked_benchmark, lock_benchmark, save_experiment,
+)
 from engine.validation_report import (
     build_validation_pdf,
     list_validation_reports,
@@ -73,7 +77,7 @@ def _baseline_report() -> dict | None:
 
 
 def _render_proof_validation() -> None:
-    st.markdown("### v14 Adaptive Research Centre")
+    st.markdown("### v14.2 Quant Research Centre")
     st.caption("Generate a reproducible proof report, compare it with the locked v9.2.1 baseline and archive every run.")
 
     trades, configuration, source = _validation_trades()
@@ -91,7 +95,7 @@ def _render_proof_validation() -> None:
     c3.metric("Build", APP_VERSION)
     c4.metric("Baseline", f"v{baseline.get('metadata', {}).get('build', '-')}" if baseline else "Not found")
 
-    if st.button("Generate v14 Validation Report", type="primary", use_container_width=True):
+    if st.button("Generate v14.2 Validation Report", type="primary", use_container_width=True):
         with st.spinner("Running profitability, consistency, drawdown, stress and calibration checks..."):
             report = build_proof_report(
                 trades,
@@ -196,6 +200,82 @@ def _render_proof_validation() -> None:
         mime="text/csv",
         use_container_width=True,
     )
+
+    st.markdown("#### v14.2 Quant Research Lab")
+    st.caption("Run controlled A/B experiments on the exact same completed trades. Production trading logic is not changed.")
+
+    locked = load_locked_benchmark()
+    lock_col, status_col = st.columns([1, 2])
+    if lock_col.button("Lock Current Report as Research Benchmark", use_container_width=True):
+        benchmark_path = lock_benchmark(report)
+        st.success(f"Benchmark locked at {benchmark_path}.")
+        locked = load_locked_benchmark()
+    status_col.metric(
+        "Locked Research Benchmark",
+        f"v{(locked or {}).get('metadata', {}).get('build', '-')}" if locked else "Not locked",
+    )
+
+    presets = {
+        "80-85 score band": ("score_range", {"minimum": 80, "maximum": 85}),
+        "JPM + MSFT + GOOGL only": ("ticker_subset", {"tickers": ["JPM", "MSFT", "GOOGL"]}),
+        "Exclude NVDA + AVGO": ("exclude_tickers", {"tickers": ["NVDA", "AVGO"]}),
+        "Confidence 58+": ("confidence_floor", {"minimum": 58}),
+        "6-20 day swing trades": ("holding_period", {"minimum_days": 6, "maximum_days": 20}),
+        "Core swing combination": ("combined", {"steps": [
+            {"type": "score_range", "params": {"minimum": 80, "maximum": 85}},
+            {"type": "ticker_subset", "params": {"tickers": ["JPM", "MSFT", "GOOGL"]}},
+            {"type": "holding_period", "params": {"minimum_days": 6, "maximum_days": 20}},
+        ]}),
+    }
+    preset_name = st.selectbox("Research experiment", list(presets), key="research_lab_preset")
+    experiment_type, experiment_params = presets[preset_name]
+    st.code(json.dumps({"type": experiment_type, "params": experiment_params}, indent=2), language="json")
+
+    if st.button("Run Controlled A/B Experiment", type="secondary", use_container_width=True):
+        result = evaluate_experiment(
+            trades,
+            name=preset_name,
+            experiment_type=experiment_type,
+            params=experiment_params,
+        )
+        result_path = save_experiment(result)
+        st.session_state["research_experiment_result"] = result
+        st.session_state["research_experiment_path"] = str(result_path)
+
+    experiment_result = st.session_state.get("research_experiment_result")
+    if experiment_result:
+        experiment_verdict = experiment_result.get("verdict", "REJECT")
+        status_card(
+            f"Experiment {experiment_result.get('name')}: {experiment_verdict}. "
+            f"Archived as {st.session_state.get('research_experiment_path', '-')}.",
+            "positive" if experiment_verdict == "PROMOTE" else "warning",
+        )
+        st.dataframe(experiment_comparison_frame(experiment_result), use_container_width=True, hide_index=True)
+        checks_frame = pd.DataFrame([
+            {"promotion gate": key.replace("_", " ").title(), "result": "PASS" if value else "FAIL"}
+            for key, value in (experiment_result.get("promotion_checks") or {}).items()
+        ])
+        st.dataframe(checks_frame, use_container_width=True, hide_index=True)
+        ex1, ex2 = st.columns(2)
+        ex1.download_button(
+            "Download Experiment JSON",
+            json.dumps(experiment_result, indent=2, default=str).encode("utf-8"),
+            file_name=f"catalyst_experiment_{experiment_result.get('experiment_id', 'result')}.json",
+            mime="application/json",
+            use_container_width=True,
+        )
+        ex2.download_button(
+            "Download A/B Comparison CSV",
+            experiment_comparison_frame(experiment_result).to_csv(index=False).encode("utf-8"),
+            file_name=f"catalyst_experiment_{experiment_result.get('experiment_id', 'result')}.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+
+    experiment_history = list_experiments()
+    if not experiment_history.empty:
+        st.markdown("##### Experiment History")
+        st.dataframe(experiment_history.drop(columns=["path"], errors="ignore"), use_container_width=True, hide_index=True, height=220)
 
     st.markdown("#### Validation History")
     history = list_validation_reports()

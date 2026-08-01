@@ -56,7 +56,7 @@ def test_confidence_calibration_has_observed_win_rate():
 
 
 def test_v141_report_contains_research_sections():
-    report = build_proof_report(_trades(), build_version="14.1")
+    report = build_proof_report(_trades(), build_version="14.2")
     for key in ("decision_filter_diagnostics", "stress_decomposition", "feature_attribution", "confidence_calibration"):
         assert key in report
         assert report[key]

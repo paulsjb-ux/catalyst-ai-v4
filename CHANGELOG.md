@@ -100,3 +100,9 @@
 - Added confidence-band calibration against observed win rates.
 - Added all diagnostics to Validation Centre and PDF/JSON exports.
 - Trading rules and v14 returns remain unchanged.
+
+## v14.2 — Quant Research Lab
+- Added named, reproducible A/B experiments on identical completed-trade evidence.
+- Added locked research benchmark and explicit promotion gates.
+- Added research presets, experiment archive, and JSON/CSV comparison exports.
+- Production trading logic remains unchanged from v14.1.
