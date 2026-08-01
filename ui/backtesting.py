@@ -7,6 +7,7 @@ from data.market_data import download_history
 from engine.backtest import run_backtest
 from engine.backtest_analysis import ticker_performance
 from engine.confidence_calibration import calibration_summary
+from engine.regime_recency_confidence import score_band_diagnostics
 from ui.components import empty_state, section_header, status_card
 
 
@@ -298,6 +299,12 @@ def render_backtesting() -> None:
                 height=320,
             )
     else:
+        diagnostics = score_band_diagnostics(result.trades)
+        if not diagnostics.empty:
+            st.markdown("### v9.2 Regime & Recency Calibration")
+            st.caption("Confidence is separated by score band and market regime, weighted toward recent evidence, and capped at REDUCED size.")
+            st.dataframe(diagnostics, use_container_width=True, hide_index=True, height=260)
+
         evidence = calibration_summary(result.trades)
         if not evidence.empty:
             st.markdown("### Confidence Evidence")

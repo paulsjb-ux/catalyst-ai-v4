@@ -4,7 +4,13 @@ import re
 
 
 def render_header(app_name: str, tagline: str, engine_name: str, version: str) -> None:
-    st.markdown(f'''<div class="hero"><h1>🚀 {html.escape(app_name)}</h1><p><strong>{html.escape(tagline)}</strong><br>Powered by the {html.escape(engine_name)}</p><span class="badge">Version {html.escape(version)} · Market Intelligence Only</span></div>''', unsafe_allow_html=True)
+    st.markdown(
+        f'''<div class="hero compact-hero">
+        <div class="brand-row"><div class="brand-mark">🚀</div><div>
+        <h1>{html.escape(app_name)}</h1><p>{html.escape(tagline)} <span>· {html.escape(engine_name)}</span></p>
+        </div><span class="badge">v{html.escape(version)}</span></div>
+        </div>''', unsafe_allow_html=True
+    )
 
 
 PRIMARY_NAVIGATION = [
@@ -95,7 +101,7 @@ def top_navigation() -> str:
         selected = PRIMARY_NAVIGATION[0]
         st.session_state["primary_navigation"] = selected
 
-    buttons_per_row = 5
+    buttons_per_row = 7
 
     for row_start in range(
         0,

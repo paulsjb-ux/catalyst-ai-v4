@@ -3,11 +3,20 @@ import streamlit as st
 def apply_theme() -> None:
     st.markdown("""
     <style>
+
+    .compact-hero{padding:16px 20px;border-radius:20px;margin-bottom:12px}
+    .brand-row{display:flex;align-items:center;gap:14px}
+    .brand-mark{font-size:2.2rem;line-height:1}
+    .compact-hero h1{font-size:clamp(1.8rem,3vw,2.7rem);letter-spacing:-.055em;margin:0}
+    .compact-hero p{font-size:.9rem;margin:.25rem 0 0;color:#475569}
+    .compact-hero p span{color:#64748b}
+    .compact-hero .badge{margin-left:auto;white-space:nowrap;padding:6px 10px;font-size:.78rem}
+    div[data-testid="column"] .stButton > button{min-height:42px!important;padding:.45rem .35rem!important;border-radius:12px!important;font-size:.88rem!important;box-shadow:0 7px 16px rgba(37,99,235,.14)!important}
     .stApp{
         background:linear-gradient(180deg,#f8fbff 0%,#eef7ff 70%,#fff 100%);
         color:#0f172a;
     }
-    .block-container{max-width:1320px;padding-top:.75rem;padding-bottom:3rem}
+    .block-container{max-width:1380px;padding-top:.45rem;padding-bottom:2.5rem}
     [data-testid="stHeader"]{background:rgba(248,251,255,.88);backdrop-filter:blur(14px)}
     #MainMenu,footer{visibility:hidden}
     .hero{background:linear-gradient(135deg,#fff,#eff6ff);border:1px solid #bfdbfe;border-radius:28px;padding:24px;box-shadow:0 18px 42px rgba(15,23,42,.08);margin-bottom:18px}

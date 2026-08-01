@@ -10,6 +10,7 @@ from engine.indicators import enrich_price_frame
 from engine.risk import atr
 from engine.adaptive_risk import adaptive_risk_plan
 from engine.confidence_calibration import apply_walk_forward_calibration
+from engine.regime_recency_confidence import apply_regime_recency_confidence
 from engine.scanner import score_enriched_row
 
 
@@ -43,6 +44,18 @@ TRADE_COLUMNS = [
     "calibrated_position_size_pct",
     "calibrated_portfolio_return_pct",
     "evidence_rationale",
+    "confidence_regime",
+    "recency_effective_trades",
+    "recency_win_rate_pct",
+    "recency_profit_factor",
+    "recency_average_return_pct",
+    "confidence_status",
+    "confidence_change",
+    "confidence_direction",
+    "v92_position_cap_pct",
+    "v92_position_size_pct",
+    "v92_portfolio_return_pct",
+    "confidence_reason",
 ]
 
 
@@ -329,15 +342,19 @@ def calculate_metrics(trades: pd.DataFrame) -> tuple[dict, pd.DataFrame]:
         errors="coerce",
     ).fillna(100.0)
     calibrated_returns = pd.to_numeric(
-        ordered["calibrated_portfolio_return_pct"]
-        if "calibrated_portfolio_return_pct" in ordered.columns
-        else portfolio_returns,
+        ordered["v92_portfolio_return_pct"]
+        if "v92_portfolio_return_pct" in ordered.columns
+        else (ordered["calibrated_portfolio_return_pct"]
+              if "calibrated_portfolio_return_pct" in ordered.columns
+              else portfolio_returns),
         errors="coerce",
     ).fillna(0)
     calibrated_sizes = pd.to_numeric(
-        ordered["calibrated_position_size_pct"]
-        if "calibrated_position_size_pct" in ordered.columns
-        else position_sizes,
+        ordered["v92_position_size_pct"]
+        if "v92_position_size_pct" in ordered.columns
+        else (ordered["calibrated_position_size_pct"]
+              if "calibrated_position_size_pct" in ordered.columns
+              else position_sizes),
         errors="coerce",
     ).fillna(position_sizes)
     equity = (1 + returns / 100).cumprod()
@@ -469,6 +486,12 @@ def run_backtest(
             kwargs.get("full_size_average_return_pct", 0.15)
         ),
     )
+    combined = apply_regime_recency_confidence(
+        combined,
+        enabled=bool(kwargs.get("regime_recency_confidence", True)),
+        half_life_days=float(kwargs.get("confidence_half_life_days", 45.0)),
+        reduced_cap_pct=float(kwargs.get("reduced_position_cap_pct", 15.0)),
+    )
     metrics, curve = calculate_metrics(combined)
 
     assumptions = {
@@ -488,6 +511,9 @@ def run_backtest(
         "minimum_evidence_trades": kwargs.get(
             "minimum_evidence_trades", 20
         ),
+        "regime_recency_confidence": bool(kwargs.get("regime_recency_confidence", True)),
+        "confidence_half_life_days": kwargs.get("confidence_half_life_days", 45.0),
+        "reduced_position_cap_pct": kwargs.get("reduced_position_cap_pct", 15.0),
         "full_size_evidence_thresholds": {
             "profit_factor": kwargs.get("full_size_profit_factor", 1.20),
             "win_rate_pct": kwargs.get("full_size_win_rate_pct", 48.0),

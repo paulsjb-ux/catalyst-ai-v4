@@ -72,3 +72,10 @@
 - Added Supabase retry/backoff and explicit degraded fallback status.
 - Added export retention and cleaner release packaging.
 - Aligned version metadata and fixed RSI pandas warning.
+
+## 9.2
+- Added regime-specific, exponentially weighted confidence overlay.
+- Added automatic PROVEN expiry and confidence direction tracking.
+- Added REDUCED position cap and v9.2 portfolio return columns.
+- Added score-band calibration diagnostics.
+- Rebuilt home header/navigation into a compact professional layout.

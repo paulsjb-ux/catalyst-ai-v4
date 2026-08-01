@@ -21,7 +21,7 @@ def test_navigation_is_split_into_fixed_rows():
     source = (PROJECT / "ui" / "components.py").read_text(
         encoding="utf-8"
     )
-    assert "buttons_per_row = 5" in source
+    assert "buttons_per_row = 7" in source
     assert "use_container_width=True" in source
 
 
