@@ -22,7 +22,18 @@ def enrich_price_frame(frame: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
 
     output = frame.copy()
+
+    if isinstance(output.columns, pd.MultiIndex):
+        output.columns = output.columns.get_level_values(0)
+    output = output.loc[:, ~output.columns.duplicated(keep="first")]
+
+    if "Close" not in output.columns:
+        return pd.DataFrame()
+
     close = output["Close"]
+    if isinstance(close, pd.DataFrame):
+        close = close.iloc[:, 0]
+    close = pd.to_numeric(close, errors="coerce")
 
     output["sma_20"] = close.rolling(20, min_periods=5).mean()
     output["sma_50"] = close.rolling(50, min_periods=10).mean()

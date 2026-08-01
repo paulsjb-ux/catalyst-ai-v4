@@ -36,15 +36,60 @@ class MarketDataResult:
 
 
 def _clean_frame(frame: pd.DataFrame) -> pd.DataFrame:
+    """Return one flat OHLCV frame with unique columns.
+
+    yfinance can occasionally return residual MultiIndex levels or duplicate
+    price columns for individual symbols. The scanner requires each field,
+    especially Close and Volume, to resolve to one Series.
+    """
     if frame is None or frame.empty:
         return pd.DataFrame()
+
     cleaned = frame.copy()
-    cleaned.columns = [str(col).title() for col in cleaned.columns]
+
+    if isinstance(cleaned.columns, pd.MultiIndex):
+        # Prefer the price-field level. If both levels contain price fields,
+        # flattening below still removes duplicate names deterministically.
+        expected_lower = {"open", "high", "low", "close", "adj close", "volume"}
+        chosen_level = 0
+        for level in range(cleaned.columns.nlevels):
+            values = {
+                str(value).strip().lower()
+                for value in cleaned.columns.get_level_values(level)
+            }
+            if len(values & expected_lower) > len(
+                {
+                    str(value).strip().lower()
+                    for value in cleaned.columns.get_level_values(chosen_level)
+                }
+                & expected_lower
+            ):
+                chosen_level = level
+        cleaned.columns = cleaned.columns.get_level_values(chosen_level)
+
+    cleaned.columns = [str(column).strip().title() for column in cleaned.columns]
+
+    # Keep the first occurrence of each OHLCV field. Duplicate "Close" columns
+    # otherwise cause output["Close"] to return a DataFrame instead of Series.
+    cleaned = cleaned.loc[:, ~cleaned.columns.duplicated(keep="first")]
+
     expected = ["Open", "High", "Low", "Close", "Adj Close", "Volume"]
-    available = [col for col in expected if col in cleaned.columns]
-    cleaned = cleaned[available]
-    if "Close" in cleaned.columns:
-        cleaned = cleaned.dropna(subset=["Close"])
+    available = [column for column in expected if column in cleaned.columns]
+    cleaned = cleaned.loc[:, available]
+
+    if "Close" not in cleaned.columns:
+        return pd.DataFrame()
+
+    close = cleaned["Close"]
+    if isinstance(close, pd.DataFrame):
+        close = close.iloc[:, 0]
+        cleaned = cleaned.drop(columns=["Close"], errors="ignore")
+        cleaned.insert(0, "Close", close)
+
+    cleaned["Close"] = pd.to_numeric(cleaned["Close"], errors="coerce")
+    if "Volume" in cleaned.columns:
+        cleaned["Volume"] = pd.to_numeric(cleaned["Volume"], errors="coerce")
+    cleaned = cleaned.dropna(subset=["Close"])
     return cleaned
 
 

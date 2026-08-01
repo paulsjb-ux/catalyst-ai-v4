@@ -103,7 +103,7 @@ def _write_exports(result: RoutineResult, export_dir: Path) -> list[str]:
 def run_daily_routine(
     *,
     period: str = "1y",
-    max_tickers: int = 523,
+    max_tickers: int = 323,
     include_regime: bool = True,
     export_dir: str | Path = "storage/exports",
     progress: ProgressCallback | None = None,
@@ -141,7 +141,7 @@ def run_daily_routine(
         for ticker in REGIME_TICKERS:
             if ticker not in download_tickers:
                 download_tickers.append(ticker)
-        _notify(progress, "market_data", 20, f"Downloading market data for {len(download_tickers)} symbols ({len(tickers)} scan symbols plus {len(download_tickers) - len(tickers)} regime symbols)")
+        _notify(progress, "market_data", 20, f"Downloading market data for {len(download_tickers)} symbols")
         market = download_history(download_tickers, period=period)
         result.market_errors = market.errors
         if not market.prices:
