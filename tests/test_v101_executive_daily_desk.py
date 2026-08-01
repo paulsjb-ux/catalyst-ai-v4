@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 def test_v101_version_and_daily_desk_markers():
-    assert '11.1' in Path('version.py').read_text()
+    assert '12.0' in Path('version.py').read_text()
     daily = Path('ui/daily_routine.py').read_text()
     assert 'desk-status-strip' in daily
     assert 'RUN DAILY ROUTINE' in daily

@@ -4,7 +4,7 @@ import streamlit as st
 
 
 def render_header(app_name: str, tagline: str, engine_name: str, version: str, page_title: str = "") -> None:
-    """Ultra-compact page title bar."""
+    """Compact workspace title bar used inside the main content area."""
     title = page_title or app_name
     st.markdown(
         f'''<div class="workspace-header">
@@ -23,6 +23,24 @@ PRIMARY_NAVIGATION = [
     "Reports",
 ]
 
+TRADING_TOOLS = [
+    "Daily Brief",
+    "Market Scan",
+    "Alerts",
+    "Paper Trading",
+]
+
+ANALYTICS_TOOLS = [
+    "Backtesting",
+    "Validation",
+    "Repeat Winners",
+]
+
+SYSTEM_TOOLS = [
+    "Trade Universe",
+    "Settings",
+]
+
 TOOL_NAVIGATION = [
     "Daily Brief",
     "Market Scan",
@@ -34,21 +52,25 @@ TOOL_NAVIGATION = [
     "Trade Universe",
     "Settings",
 ]
-
 ALL_NAVIGATION = PRIMARY_NAVIGATION + TOOL_NAVIGATION
 
 
 def navigation_overflow_fix() -> None:
+    """Keep the workspace inside the viewport and clear of Streamlit's header."""
     st.markdown(
         """
 <style>
-html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], section.main,
-.main .block-container { width:100%!important; max-width:100%!important; overflow-x:clip!important; }
+html, body, [data-testid="stAppViewContainer"], [data-testid="stMain"], section.main {
+    width:100%!important; max-width:100%!important; overflow-x:clip!important;
+}
+.main .block-container {
+    width:100%!important; max-width:1500px!important; overflow-x:hidden!important;
+    padding-top:3.75rem!important;
+}
 div[data-testid="stHorizontalBlock"] { width:100%!important; max-width:100%!important; overflow:hidden!important; }
-div[data-testid="column"] { min-width:0!important; max-width:100%!important; overflow:hidden!important; }
-div[data-testid="column"] .stButton, div[data-testid="column"] .stButton > button { width:100%!important; max-width:100%!important; min-width:0!important; }
-div[data-testid="column"] .stButton > button { white-space:normal!important; overflow-wrap:anywhere!important; line-height:1.1!important; }
-div[data-testid="stRadio"][aria-label="Navigation"] { display:none!important; }
+div[data-testid="column"] { min-width:0!important; max-width:100%!important; }
+[data-testid="stSidebar"] { border-right:1px solid #dbeafe; }
+[data-testid="stSidebarContent"] { padding-top:1rem; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -58,35 +80,49 @@ def _navigation_key(page: str) -> str:
     return f"workspace_nav_{safe}"
 
 
-def _render_nav_row(pages: list[str], selected: str, prefix: str) -> None:
-    columns = st.columns(len(pages), gap="small")
-    for column, page in zip(columns, pages):
-        with column:
-            clicked = st.button(
-                page,
-                key=f"{prefix}_{_navigation_key(page)}",
-                type="primary" if page == selected else "secondary",
-                use_container_width=True,
-            )
-            if clicked and page != selected:
-                st.session_state["primary_navigation"] = page
-                st.rerun()
+def _sidebar_button(page: str, selected: str, prefix: str) -> None:
+    clicked = st.button(
+        page,
+        key=f"{prefix}_{_navigation_key(page)}",
+        type="primary" if page == selected else "secondary",
+        use_container_width=True,
+    )
+    if clicked and page != selected:
+        st.session_state["primary_navigation"] = page
+        st.rerun()
+
+
+def _sidebar_group(label: str, pages: list[str], selected: str, prefix: str, expanded: bool = True) -> None:
+    with st.expander(label, expanded=expanded):
+        for page in pages:
+            _sidebar_button(page, selected, prefix)
 
 
 def top_navigation() -> str:
-    """Workflow-first navigation: daily pages first, specialist tools on demand."""
+    """v12 workstation navigation: fixed left rail; legacy More tools content is grouped by workflow."""
     navigation_overflow_fix()
     selected = st.session_state.get("primary_navigation", "Daily Routine")
     if selected not in ALL_NAVIGATION:
         selected = "Daily Routine"
         st.session_state["primary_navigation"] = selected
 
-    _render_nav_row(PRIMARY_NAVIGATION, selected, "primary")
+    with st.sidebar:
+        st.markdown(
+            '<div class="sidebar-brand"><span>🚀</span><div><strong>Catalyst AI</strong><small>v12.0</small></div></div>',
+            unsafe_allow_html=True,
+        )
+        st.caption("EXECUTIVE WORKSPACE")
+        # "More tools" from v11 are now organised into the groups below.
 
-    tools_open = selected in TOOL_NAVIGATION
-    with st.expander("More tools" + (f" · {selected}" if tools_open else ""), expanded=tools_open):
-        for start in range(0, len(TOOL_NAVIGATION), 5):
-            _render_nav_row(TOOL_NAVIGATION[start:start + 5], selected, f"tools_{start}")
+        for page in PRIMARY_NAVIGATION:
+            _sidebar_button(page, selected, "primary")
+
+        st.markdown('<div class="sidebar-divider"></div>', unsafe_allow_html=True)
+        _sidebar_group("Trading tools", TRADING_TOOLS, selected, "trading", selected in TRADING_TOOLS)
+        _sidebar_group("Analytics", ANALYTICS_TOOLS, selected, "analytics", selected in ANALYTICS_TOOLS)
+        _sidebar_group("System", SYSTEM_TOOLS, selected, "system", selected in SYSTEM_TOOLS)
+
+        st.markdown('<div class="sidebar-footer">One-button swing intelligence</div>', unsafe_allow_html=True)
 
     return st.session_state.get("primary_navigation", "Daily Routine")
 

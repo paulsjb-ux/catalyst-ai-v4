@@ -82,3 +82,9 @@
 
 ## v9.2.1 — Proof & Performance
 - Added reproducible proof validation, stress testing, diagnostic breakdowns and downloadable reports.
+
+## 12.0
+- Replaced top navigation grid with a compact left-rail workstation.
+- Fixed navigation overlap with Streamlit's fixed top header.
+- Grouped specialist pages into Trading tools, Analytics and System.
+- Preserved the one-button swing desk and all trading logic.

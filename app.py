@@ -61,7 +61,7 @@ def route_page(page: str) -> None:
 
 
 def main() -> None:
-    st.set_page_config(page_title=CONFIG.app_name, page_icon=CONFIG.page_icon, layout=CONFIG.layout, initial_sidebar_state="collapsed")
+    st.set_page_config(page_title=CONFIG.app_name, page_icon=CONFIG.page_icon, layout=CONFIG.layout, initial_sidebar_state="expanded")
     apply_theme()
     page = top_navigation()
     if page != "Daily Routine":

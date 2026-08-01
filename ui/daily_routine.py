@@ -96,7 +96,7 @@ def render_daily_routine() -> None:
         </div>
         <div class="routine-command v101-command">
           <div class="routine-brand-row">
-            <div class="routine-title">Daily Trading Desk <span>· Catalyst AI v11.1</span></div>
+            <div class="routine-title">Daily Trading Desk <span>· Catalyst AI v12.0</span></div>
             <div class="routine-subtitle">One run updates, validates and ranks today’s swing opportunities.</div>
           </div>
         </div>

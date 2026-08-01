@@ -234,6 +234,24 @@ def apply_theme() -> None:
     .daily-verdict strong{font-size:1rem!important}.daily-verdict p{font-size:.75rem!important;margin-top:1px!important}
     h1{font-size:1.45rem!important} h2{font-size:1.2rem!important} h3{font-size:1rem!important;margin-top:.5rem!important}
     @media(max-width:760px){div[data-testid="column"] .stButton > button{min-height:34px!important;height:auto!important;font-size:.68rem!important}.workspace-product{display:none!important}.desk-status-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+
+    /* Catalyst AI v12.0 — left-rail trading workstation */
+    [data-testid="stSidebar"]{background:linear-gradient(180deg,#f8fbff 0%,#eef7ff 100%)!important;min-width:230px!important;max-width:230px!important}
+    [data-testid="stSidebarContent"]{padding:.75rem .65rem 1rem!important}
+    [data-testid="stSidebar"] .stButton>button{min-height:34px!important;height:34px!important;border-radius:8px!important;font-size:.78rem!important;text-align:left!important;justify-content:flex-start!important;padding:.25rem .65rem!important;box-shadow:none!important}
+    [data-testid="stSidebar"] div[data-testid="stExpander"]{background:transparent!important;border:0!important;margin:.2rem 0!important}
+    [data-testid="stSidebar"] div[data-testid="stExpander"] summary{padding:.35rem .35rem!important;font-size:.7rem!important;text-transform:uppercase!important;letter-spacing:.08em!important;color:#64748b!important}
+    [data-testid="stSidebar"] div[data-testid="stExpanderDetails"]{padding:.15rem 0!important}
+    .sidebar-brand{display:flex;align-items:center;gap:.55rem;padding:.2rem .25rem .3rem}
+    .sidebar-brand>span{font-size:1.35rem}.sidebar-brand strong{display:block;font-size:1rem;line-height:1.05;color:#0f172a}.sidebar-brand small{font-size:.66rem;color:#2563eb;font-weight:850}
+    .sidebar-divider{height:1px;background:#dbeafe;margin:.55rem .2rem}
+    .sidebar-footer{font-size:.63rem;color:#94a3b8;text-align:center;margin-top:1rem}
+    .main .block-container{padding-top:3.75rem!important;padding-left:1.4rem!important;padding-right:1.4rem!important;max-width:1500px!important}
+    .workspace-header{margin:0 0 .6rem!important}
+    @media(max-width:900px){
+      [data-testid="stSidebar"]{min-width:220px!important;max-width:220px!important}
+      .main .block-container{padding-top:3.5rem!important;padding-left:.8rem!important;padding-right:.8rem!important}
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -244,3 +262,5 @@ def _v101_theme_marker() -> None:
     pass
 
 # v11 workspace overrides are appended below by apply_theme source patch.
+
+# v12 left-rail workstation overrides are injected by apply_theme below.
