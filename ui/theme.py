@@ -204,6 +204,39 @@ def apply_theme() -> None:
     </style>
     """, unsafe_allow_html=True)
 
+    st.markdown("""
+    <style>
+    /* Catalyst AI v11.1 — ultra-compact workspace */
+    .block-container{max-width:1450px!important;padding-top:.15rem!important;padding-bottom:1.25rem!important}
+    [data-testid="stVerticalBlock"]{gap:.45rem!important}
+    .nav-label{display:none!important}
+    div[data-testid="column"] .stButton > button{min-height:30px!important;height:30px!important;padding:.12rem .3rem!important;border-radius:8px!important;font-size:.72rem!important;font-weight:800!important;box-shadow:0 2px 7px rgba(37,99,235,.09)!important}
+    div[data-testid="stExpander"]{margin:.2rem 0 .4rem!important;border-radius:10px!important}
+    div[data-testid="stExpander"] summary{padding:.3rem .65rem!important;font-size:.74rem!important}
+    .workspace-header{min-height:38px!important;padding:5px 10px!important;margin:4px 0 8px!important;border-radius:10px!important;box-shadow:none!important}
+    .workspace-brand{gap:6px!important}.workspace-mark{font-size:1rem!important}
+    .workspace-header h1{font-size:1.05rem!important;letter-spacing:-.02em!important;margin:0!important}
+    .workspace-product{font-size:.62rem!important;letter-spacing:.05em!important;text-transform:none!important}
+    .workspace-engine{display:none!important}
+    .desk-status-strip{margin:2px 0 5px!important;border-radius:9px!important;box-shadow:none!important}
+    .desk-status-strip>div{padding:5px 8px!important;min-height:29px!important}
+    .desk-status-strip span{font-size:.55rem!important;letter-spacing:.08em!important}.desk-status-strip strong{font-size:.68rem!important}
+    .routine-command.v101-command{padding:8px 12px!important;border-radius:11px!important;margin:3px 0 5px!important;box-shadow:none!important}
+    .routine-brand-row{display:block!important}
+    .v101-command .routine-title{font-size:1.2rem!important;line-height:1.1!important}
+    .v101-command .routine-title span{font-size:.62rem!important;color:#2563eb!important;letter-spacing:.04em!important;white-space:nowrap!important}
+    .v101-command .routine-subtitle{font-size:.75rem!important;margin-top:2px!important}
+    .routine-mark,.routine-eyebrow{display:none!important}
+    .stButton>button[kind="primary"]{min-height:42px!important;height:42px!important;font-size:.9rem!important;border-radius:10px!important}
+    .metric-card{min-height:72px!important;padding:8px 10px!important;border-radius:11px!important;box-shadow:none!important}
+    .metric-label{font-size:.58rem!important}.metric-value{font-size:1.08rem!important;margin-top:2px!important}.metric-note{font-size:.65rem!important;margin-top:1px!important}
+    .daily-verdict{padding:8px 12px!important;margin:6px 0 8px!important;border-radius:11px!important;box-shadow:none!important}
+    .daily-verdict strong{font-size:1rem!important}.daily-verdict p{font-size:.75rem!important;margin-top:1px!important}
+    h1{font-size:1.45rem!important} h2{font-size:1.2rem!important} h3{font-size:1rem!important;margin-top:.5rem!important}
+    @media(max-width:760px){div[data-testid="column"] .stButton > button{min-height:34px!important;height:auto!important;font-size:.68rem!important}.workspace-product{display:none!important}.desk-status-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+    </style>
+    """, unsafe_allow_html=True)
+
 # v10.1 command-centre refinements are injected after the shared theme.
 
 # v10.1 compact executive trading desk overrides.

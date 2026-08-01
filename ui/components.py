@@ -4,14 +4,13 @@ import streamlit as st
 
 
 def render_header(app_name: str, tagline: str, engine_name: str, version: str, page_title: str = "") -> None:
-    """Compact workspace header. Branding stays visible without consuming the page."""
+    """Ultra-compact page title bar."""
     title = page_title or app_name
     st.markdown(
         f'''<div class="workspace-header">
-        <div class="workspace-brand"><span class="workspace-mark">🚀</span><div>
-        <div class="workspace-product">{html.escape(app_name)} <span>v{html.escape(version)}</span></div>
-        <h1>{html.escape(title)}</h1></div></div>
-        <div class="workspace-engine">{html.escape(engine_name)}</div>
+        <div class="workspace-brand"><span class="workspace-mark">🚀</span>
+        <h1>{html.escape(title)}</h1></div>
+        <div class="workspace-product">{html.escape(app_name)} · v{html.escape(version)}</div>
         </div>''', unsafe_allow_html=True
     )
 
@@ -82,7 +81,6 @@ def top_navigation() -> str:
         selected = "Daily Routine"
         st.session_state["primary_navigation"] = selected
 
-    st.markdown('<div class="nav-label">DAILY WORKSPACE</div>', unsafe_allow_html=True)
     _render_nav_row(PRIMARY_NAVIGATION, selected, "primary")
 
     tools_open = selected in TOOL_NAVIGATION
