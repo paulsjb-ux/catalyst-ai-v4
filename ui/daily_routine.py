@@ -35,8 +35,7 @@ def _latest_payload():
     summary = st.session_state.get("daily_routine_summary", persisted.get("summary", {})) or _load_last_run()
     desk = st.session_state.get("swing_desk")
     if not isinstance(desk, pd.DataFrame) and isinstance(scan, pd.DataFrame) and not scan.empty:
-        report = load_proof_report()
-        desk = build_swing_desk(scan, plans, regime, proof_report=report)
+        desk = build_swing_desk(scan, plans, regime, proof_report=load_proof_report())
     return scan, plans, regime, summary, desk if isinstance(desk, pd.DataFrame) else pd.DataFrame()
 
 
@@ -77,21 +76,39 @@ def _run_routine(period: str, max_tickers: int, send_alerts: bool) -> None:
 
 
 def render_daily_routine() -> None:
+    scan, plans, regime, summary, desk = _latest_payload()
+    last_run = summary or _load_last_run()
+
+    finished = str(last_run.get("finished_at", "")) if last_run else ""
+    runtime = float(last_run.get("duration_seconds", 0) or 0) if last_run else 0
+    run_label = finished.replace("T", " ")[:16] if finished else "Not run yet"
+    regime_name = str((regime or {}).get("regime", "AWAITING SCAN")).replace("_", " ")
+    proof_verdict = str(last_run.get("proof_verdict", "AWAITING RUN")) if last_run else "AWAITING RUN"
+    health = "HEALTHY" if (not last_run or last_run.get("success", True)) else "ATTENTION"
+
     st.markdown(
-        """
-        <div class="routine-command">
-          <div class="routine-eyebrow">CATALYST AI v10.0</div>
-          <div class="routine-title">Today’s Trading Desk</div>
-          <div class="routine-subtitle">One button updates the market, validates the evidence and selects only the strongest swing opportunities.</div>
+        f"""
+        <div class="desk-status-strip">
+          <div><span>MARKET</span><strong>{regime_name}</strong></div>
+          <div><span>LAST RUN</span><strong>{run_label}</strong></div>
+          <div><span>VALIDATION</span><strong>{proof_verdict}</strong></div>
+          <div><span>ENGINE</span><strong>{health}</strong></div>
+        </div>
+        <div class="routine-command v101-command">
+          <div class="routine-brand-row">
+            <div>
+              <div class="routine-eyebrow">CATALYST AI v10.1</div>
+              <div class="routine-title">Daily Trading Desk</div>
+              <div class="routine-subtitle">Update the market, validate the evidence and produce today’s swing plan in one run.</div>
+            </div>
+            <div class="routine-mark">🚀</div>
+          </div>
         </div>
         """,
         unsafe_allow_html=True,
     )
 
-    scan, plans, regime, summary, desk = _latest_payload()
-    last_run = summary or _load_last_run()
-
-    with st.expander("Routine settings", expanded=False):
+    with st.expander("Advanced routine settings", expanded=False):
         c1, c2, c3 = st.columns(3)
         period = c1.selectbox("Price history", ["6mo", "1y", "2y"], index=1)
         max_tickers = c2.number_input("Maximum symbols", min_value=25, max_value=1200, value=750, step=25)
@@ -101,68 +118,84 @@ def render_daily_routine() -> None:
 
     today = datetime.now(timezone.utc).date().isoformat()
     already_ran_today = bool(last_run and str(last_run.get("finished_at", "")).startswith(today))
-    button_label = "↻ Run Again" if already_ran_today else "▶ Run Daily Routine"
+    button_label = "↻ RUN DAILY ROUTINE AGAIN" if already_ran_today else "▶ RUN DAILY ROUTINE"
 
-    if st.button(button_label, type="primary", use_container_width=True, key="v100_run_daily_routine"):
+    if st.button(button_label, type="primary", use_container_width=True, key="v101_run_daily_routine"):
         _run_routine(period, int(max_tickers), send_alerts)
 
     if not summary or not isinstance(scan, pd.DataFrame) or scan.empty:
-        empty_state("Trading desk not run yet", "Press the button once. Catalyst will do the rest.", "▶")
+        st.markdown(
+            '<div class="desk-awaiting"><strong>Ready.</strong> Press the button once and Catalyst will build today’s complete trading desk.</div>',
+            unsafe_allow_html=True,
+        )
         return
 
     if not summary.get("success", True):
-        status_card("The last routine needs attention. Open the run details below.", "warning")
+        status_card("The last routine needs attention. Open the diagnostics panel for details.", "warning")
         return
-
-    finished = str(summary.get("finished_at", ""))
-    st.caption(f"Last completed: {finished} · Runtime {summary.get('duration_seconds', 0)} seconds")
 
     policy = policy_from_proof(load_proof_report())
     swing_summary = swing_desk_summary(desk, policy)
-    regime_name = str((regime or {}).get("regime", "UNKNOWN")).replace("_", " ")
-    proof_verdict = summary.get("proof_verdict", "CONDITIONAL PASS")
 
     c1, c2, c3, c4 = st.columns(4)
-    c1.markdown(metric_card("Market regime", regime_name, "Current environment"), unsafe_allow_html=True)
-    c2.markdown(metric_card("Qualified swings", str(swing_summary["qualified_swing_trades"]), f"Maximum {policy.maximum_new_positions} new"), unsafe_allow_html=True)
-    c3.markdown(metric_card("Position cap", f"{policy.position_cap_pct:g}%", "Reduced size by default"), unsafe_allow_html=True)
-    c4.markdown(metric_card("Proof status", str(proof_verdict), "Validation evidence"), unsafe_allow_html=True)
+    c1.markdown(metric_card("Market", regime_name, "Current regime"), unsafe_allow_html=True)
+    c2.markdown(metric_card("Qualified", str(swing_summary["qualified_swing_trades"]), f"Max {policy.maximum_new_positions} new positions"), unsafe_allow_html=True)
+    c3.markdown(metric_card("Position cap", f"{policy.position_cap_pct:g}%", "Reduced size"), unsafe_allow_html=True)
+    c4.markdown(metric_card("Validation", proof_verdict, "Latest proof status"), unsafe_allow_html=True)
 
-    qualified = desk[desk.get("swing_status", pd.Series(index=desk.index, dtype=str)).isin(["PRIORITY", "QUALIFIED"])] if not desk.empty else pd.DataFrame()
+    status_series = desk.get("swing_status", pd.Series(index=desk.index, dtype=str)) if not desk.empty else pd.Series(dtype=str)
+    qualified = desk[status_series.isin(["PRIORITY", "QUALIFIED"])] if not desk.empty else pd.DataFrame()
     if qualified.empty:
-        status_card("NO TRADE TODAY — no swing setup passed the full quality and regime filters.", "info")
+        st.markdown(
+            '<div class="daily-verdict verdict-cash"><span>TODAY’S VERDICT</span><strong>NO TRADE — REMAIN IN CASH</strong><p>No swing setup passed all quality, evidence and regime filters.</p></div>',
+            unsafe_allow_html=True,
+        )
     else:
-        status_card(f"{len(qualified)} swing setup{'s' if len(qualified) != 1 else ''} passed. Review no more than {policy.maximum_new_positions} positions.", "positive")
+        plural = "S" if len(qualified) != 1 else ""
+        st.markdown(
+            f'<div class="daily-verdict verdict-trade"><span>TODAY’S VERDICT</span><strong>{len(qualified)} QUALIFIED SWING SETUP{plural}</strong><p>Review no more than {policy.maximum_new_positions} new positions at reduced size.</p></div>',
+            unsafe_allow_html=True,
+        )
 
-    st.markdown("### Best Swing Opportunities")
+    st.markdown("### Today’s ranked opportunities")
     if desk.empty:
         empty_state("No candidates", "The scan produced no BUY or WATCH candidates.", "—")
     else:
         display = desk.copy()
         rename = {
             "daily_rank": "Rank", "ticker": "Ticker", "action": "Action", "score": "Score",
-            "position_size_pct": "Size %", "entry_price": "Entry", "target_price": "Target",
-            "stop_loss": "Stop", "risk_reward": "R/R", "trend": "Trend",
+            "swing_status": "Status", "position_size_pct": "Size %", "entry_price": "Entry",
+            "target_price": "Target", "stop_loss": "Stop", "risk_reward": "R/R", "trend": "Trend",
         }
         columns = [c for c in rename if c in display.columns]
         st.dataframe(display[columns].rename(columns=rename), use_container_width=True, hide_index=True)
 
     top = qualified.head(policy.maximum_new_positions) if not qualified.empty else pd.DataFrame()
     if not top.empty:
-        st.markdown("### Today’s Action")
-        for _, row in top.iterrows():
-            st.markdown(
-                f"**{row.get('ticker')} — {row.get('action')}**  \n"
-                f"Score {float(row.get('score', 0)):.0f} · Reduced size {float(row.get('position_size_pct', 0)):.0f}% · "
-                f"Entry {row.get('entry_price', '—')} · Target {row.get('target_price', '—')} · Stop {row.get('stop_loss', '—')}"
-            )
+        st.markdown("### Action plan")
+        action_columns = st.columns(len(top))
+        for column, (_, row) in zip(action_columns, top.iterrows()):
+            with column:
+                rank = int(row.get("daily_rank", 0) or 0)
+                score = float(row.get("score", 0) or 0)
+                size = float(row.get("position_size_pct", 0) or 0)
+                card = (
+                    f'<div class="action-card"><div class="action-rank">RANK {rank}</div>'
+                    f'<div class="action-ticker">{row.get("ticker")}</div>'
+                    f'<div class="action-label">{row.get("action")}</div>'
+                    f'<div class="action-detail">Score <b>{score:.0f}</b> · Size <b>{size:.0f}%</b></div>'
+                    f'<div class="action-levels">Entry {row.get("entry_price", "—")}<br>'
+                    f'Target {row.get("target_price", "—")}<br>Stop {row.get("stop_loss", "—")}</div></div>'
+                )
+                st.markdown(card, unsafe_allow_html=True)
 
     st.caption(
-        f"Swing focus uses the currently validated score band {policy.score_min:g}–{policy.score_max:g} and gives priority to "
-        f"{', '.join(policy.preferred_tickers)}. A priority label is evidence-based, not a guarantee."
+        f"Completed {finished or '—'} in {runtime:g}s. Swing focus currently uses score band "
+        f"{policy.score_min:g}–{policy.score_max:g} and prioritises {', '.join(policy.preferred_tickers)}. "
+        "Priority is evidence-based, not a guarantee."
     )
 
-    with st.expander("Run details and diagnostics"):
+    with st.expander("Diagnostics and run details", expanded=False):
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Symbols scanned", summary.get("symbols_scanned", 0))
         c2.metric("BUY signals", summary.get("buy_count", 0))

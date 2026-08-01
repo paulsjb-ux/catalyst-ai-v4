@@ -120,4 +120,42 @@ def apply_theme() -> None:
     </style>
     """, unsafe_allow_html=True)
 
-# v10 command-centre refinements are injected after the shared theme.
+    st.markdown("""
+    <style>
+    .block-container{max-width:1500px!important;padding-top:.3rem!important}
+    .desk-status-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:#dbeafe;border:1px solid #dbeafe;border-radius:14px;overflow:hidden;margin:4px 0 10px;box-shadow:0 8px 20px rgba(15,23,42,.05)}
+    .desk-status-strip>div{background:rgba(255,255,255,.96);padding:9px 13px;display:flex;justify-content:space-between;gap:10px;align-items:center}
+    .desk-status-strip span{font-size:.65rem;font-weight:900;letter-spacing:.11em;color:#64748b}
+    .desk-status-strip strong{font-size:.78rem;color:#0f172a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .v101-command{padding:14px 18px!important;margin-bottom:8px!important}
+    .routine-brand-row{display:flex;align-items:center;justify-content:space-between;gap:20px}
+    .routine-mark{font-size:2.25rem}
+    .v101-command .routine-title{font-size:1.65rem}
+    .v101-command .routine-subtitle{font-size:.9rem;margin-top:4px}
+    .stButton>button[kind="primary"]{min-height:4rem!important;font-size:1.18rem!important;letter-spacing:.02em!important;border-radius:14px!important}
+    .desk-awaiting{background:#fff;border:1px dashed #93c5fd;border-radius:16px;padding:16px;text-align:center;color:#475569;margin-top:12px}
+    .daily-verdict{border-radius:16px;padding:14px 18px;margin:12px 0 14px;box-shadow:0 8px 20px rgba(15,23,42,.05)}
+    .daily-verdict span{display:block;font-size:.68rem;font-weight:900;letter-spacing:.13em;margin-bottom:3px}
+    .daily-verdict strong{display:block;font-size:1.2rem;letter-spacing:-.02em}
+    .daily-verdict p{margin:3px 0 0;font-size:.88rem}
+    .verdict-trade{background:#ecfdf5;border:1px solid #86efac;color:#14532d}
+    .verdict-cash{background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a}
+    .metric-card{min-height:98px!important;padding:13px 15px!important;border-radius:16px!important}
+    .metric-value{font-size:1.45rem!important;margin-top:5px!important}
+    .metric-note{font-size:.76rem!important}
+    .action-card{background:#fff;border:1px solid #dbeafe;border-radius:16px;padding:15px;box-shadow:0 8px 20px rgba(15,23,42,.06);min-height:190px}
+    .action-rank{font-size:.66rem;letter-spacing:.12em;font-weight:900;color:#64748b}
+    .action-ticker{font-size:1.8rem;font-weight:950;letter-spacing:-.05em;margin-top:5px;color:#0f172a}
+    .action-label{display:inline-block;margin-top:2px;padding:3px 8px;border-radius:999px;background:#dcfce7;color:#166534;font-size:.72rem;font-weight:900}
+    .action-detail{margin-top:12px;color:#334155;font-size:.9rem}
+    .action-levels{margin-top:8px;color:#64748b;font-size:.83rem;line-height:1.55}
+    @media(max-width:900px){.desk-status-strip{grid-template-columns:repeat(2,minmax(0,1fr))}.desk-status-strip>div{padding:8px 10px}.routine-mark{display:none}}
+    @media(max-width:520px){.desk-status-strip{grid-template-columns:1fr}.desk-status-strip>div{padding:8px 10px}.v101-command .routine-title{font-size:1.45rem}}
+    </style>
+    """, unsafe_allow_html=True)
+
+# v10.1 command-centre refinements are injected after the shared theme.
+
+# v10.1 compact executive trading desk overrides.
+def _v101_theme_marker() -> None:
+    pass
