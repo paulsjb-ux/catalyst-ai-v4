@@ -8,3 +8,9 @@ __pycache__/
 storage/kv/
 storage/backups/
 storage/*.json
+storage/logs/
+storage/market_cache/
+storage/exports/
+storage/daily_routine/
+storage/scans/
+.pytest_cache/

@@ -12,6 +12,8 @@ from data.storage_admin import (
     restore_backup,
     restore_latest_cloud_backup,
 )
+from data.diagnostics import diagnostic_bundle, recent_log_lines
+from ui.action_helpers import run_ui_action
 from ui.components import section_header, status_card
 from ui.professional_tools import render_professional_tools
 
@@ -54,46 +56,46 @@ def render_settings(version: str) -> None:
     c1, c2 = st.columns(2)
 
     if c1.button("Back up all data", width="stretch"):
-        try:
-            result = backup_all()
-            st.success(
-                f"Backup complete: {result['watchlist_count']} watchlist rows and "
-                f"{result['scan_count']} scans."
-            )
+        result = run_ui_action("Backup", backup_all, "Backup complete.")
+        if result is not None:
             st.json(result)
-        except Exception as exc:
-            st.error(str(exc))
 
     if c2.button("Migrate local data to cloud", width="stretch", disabled=not storage["table_ready"]):
-        try:
-            result = migrate_local_to_cloud()
-            st.success("Local data migrated to Supabase.")
+        result = run_ui_action("Cloud migration", migrate_local_to_cloud, "Local data migrated to Supabase.")
+        if result is not None:
             st.json(result)
-        except Exception as exc:
-            st.error(str(exc))
 
     c3, c4 = st.columns(2)
 
     if c3.button("Restore latest cloud backup", width="stretch", disabled=not storage["table_ready"]):
-        try:
-            result = restore_latest_cloud_backup()
-            st.success("Latest cloud backup restored.")
+        result = run_ui_action("Cloud restore", restore_latest_cloud_backup, "Latest cloud backup restored.")
+        if result is not None:
             st.json(result)
-        except Exception as exc:
-            st.error(str(exc))
 
     uploaded = c4.file_uploader("Restore JSON backup", type=["json"])
     if uploaded is not None and st.button("Restore uploaded backup", width="stretch"):
-        try:
-            payload = load_backup_file(uploaded)
-            result = restore_backup(payload)
-            st.success("Uploaded backup restored.")
+        result = run_ui_action(
+            "Uploaded backup restore",
+            lambda: restore_backup(load_backup_file(uploaded)),
+            "Uploaded backup restored.",
+        )
+        if result is not None:
             st.json(result)
-        except Exception as exc:
-            st.error(str(exc))
 
     with st.expander("Application health details"):
         st.json(status)
+
+    st.markdown("### Diagnostics")
+    with st.expander("Recent application log"):
+        lines = recent_log_lines(150)
+        st.code("\n".join(lines) if lines else "No log entries available.", language="text")
+    st.download_button(
+        "Download diagnostic log",
+        data=diagnostic_bundle(),
+        file_name="catalyst-diagnostics.log",
+        mime="text/plain",
+        width="stretch",
+    )
 
     st.markdown("### Professional Finish")
     render_professional_tools(version)
