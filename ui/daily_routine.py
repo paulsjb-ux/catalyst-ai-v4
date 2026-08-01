@@ -9,6 +9,7 @@ import streamlit as st
 
 from data.daily_routine_store import load_latest_routine, save_latest_routine
 from engine.daily_routine import run_daily_routine
+from engine.auto_validation import load_tracker, record_daily_run, tracker_summary
 from engine.swing_focus import build_swing_desk, load_proof_report, policy_from_proof, swing_desk_summary
 from ui.components import empty_state, metric_card, status_card
 from version import APP_VERSION
@@ -72,6 +73,7 @@ def _run_routine(period: str, max_tickers: int, send_alerts: bool) -> None:
     _save_last_run(summary)
     if result.success:
         save_latest_routine(scan=result.scan_results, plans=result.trade_plans, regime=result.regime, summary=summary)
+        record_daily_run(result.swing_desk, result.scan_results, result.regime, maximum_new_positions=2)
     progress_bar.progress(100, text="Trading desk ready" if result.success else "Routine stopped")
     st.rerun()
 
@@ -185,6 +187,15 @@ def render_daily_routine() -> None:
                     f'Target {row.get("target_price", "—")}<br>Stop {row.get("stop_loss", "—")}</div></div>'
                 )
                 st.markdown(card, unsafe_allow_html=True)
+
+    validation = tracker_summary(load_tracker())
+    st.markdown("### 30-Day automatic validation")
+    v1, v2, v3, v4 = st.columns(4)
+    v1.metric("Progress", f"{validation['days_completed']}/{validation['target_days']} days")
+    v2.metric("Paper trades", validation["trades_total"], f"{validation['open_trades']} open")
+    v3.metric("Profit factor", validation["profit_factor"] if validation["closed_trades"] else "Collecting")
+    v4.metric("Status", validation["status"])
+    st.progress(validation["progress_pct"] / 100.0, text=f"Automatic paper validation: {validation['progress_pct']}% complete")
 
     st.caption(
         f"Completed {finished or '—'} in {runtime:g}s. Swing focus currently uses score band "

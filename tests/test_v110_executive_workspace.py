@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 def test_v11_version():
-    assert '14.2' in Path('version.py').read_text()
+    assert '14.3' in Path('version.py').read_text()
 
 
 def test_workflow_first_navigation():

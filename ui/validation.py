@@ -5,6 +5,7 @@ import streamlit as st
 from data.history_store import list_saved_scans, load_scan
 from data.market_data import download_history
 from engine.validation import calculate_forward_returns, summarise_validation, add_quality_labels
+from engine.auto_validation import load_tracker, reset_tracker, tracker_summary
 from engine.proof_validation import build_proof_report
 from engine.research_lab import (
     evaluate_experiment, experiment_comparison_frame, list_experiments,
@@ -76,8 +77,35 @@ def _baseline_report() -> dict | None:
     return load_json_report("storage/validation/latest_proof_report.json")
 
 
+def _render_auto_validation() -> None:
+    tracker = load_tracker()
+    summary = tracker_summary(tracker)
+    st.markdown("### 30-Day Automatic Paper Validation")
+    st.caption("Each successful Daily Routine run is saved once per day. Qualified recommendations are paper-tracked automatically; no broker orders are placed.")
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Progress", f"{summary['days_completed']}/{summary['target_days']} days")
+    c2.metric("Paper Trades", summary["trades_total"], f"{summary['open_trades']} open")
+    c3.metric("Closed PF", summary["profit_factor"] if summary["closed_trades"] else "Collecting")
+    c4.metric("Status", summary["status"])
+    st.progress(summary["progress_pct"] / 100.0, text=f"{summary['progress_pct']}% of the 30-day programme complete")
+    days = pd.DataFrame(tracker.get("days", []))
+    trades = pd.DataFrame(tracker.get("trades", []))
+    t1, t2 = st.tabs(["Daily Log", "Paper Trades"])
+    with t1:
+        st.dataframe(days.sort_values("date", ascending=False) if not days.empty else days, use_container_width=True, hide_index=True)
+    with t2:
+        st.dataframe(trades, use_container_width=True, hide_index=True)
+    e1, e2 = st.columns([3, 1])
+    e1.download_button("Download 30-Day Evidence", json.dumps(tracker, indent=2).encode("utf-8"), file_name="catalyst_30_day_auto_validation.json", mime="application/json", use_container_width=True)
+    if e2.button("Reset Programme", use_container_width=True):
+        reset_tracker()
+        st.rerun()
+
+
 def _render_proof_validation() -> None:
-    st.markdown("### v14.2 Quant Research Centre")
+    _render_auto_validation()
+    st.divider()
+    st.markdown("### v14.3 Quant Research Centre")
     st.caption("Generate a reproducible proof report, compare it with the locked v9.2.1 baseline and archive every run.")
 
     trades, configuration, source = _validation_trades()
@@ -95,7 +123,7 @@ def _render_proof_validation() -> None:
     c3.metric("Build", APP_VERSION)
     c4.metric("Baseline", f"v{baseline.get('metadata', {}).get('build', '-')}" if baseline else "Not found")
 
-    if st.button("Generate v14.2 Validation Report", type="primary", use_container_width=True):
+    if st.button("Generate v14.3 Validation Report", type="primary", use_container_width=True):
         with st.spinner("Running profitability, consistency, drawdown, stress and calibration checks..."):
             report = build_proof_report(
                 trades,
@@ -201,7 +229,7 @@ def _render_proof_validation() -> None:
         use_container_width=True,
     )
 
-    st.markdown("#### v14.2 Quant Research Lab")
+    st.markdown("#### v14.3 Quant Research Lab")
     st.caption("Run controlled A/B experiments on the exact same completed trades. Production trading logic is not changed.")
 
     locked = load_locked_benchmark()
