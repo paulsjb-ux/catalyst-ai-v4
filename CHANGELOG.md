@@ -79,3 +79,6 @@
 - Added REDUCED position cap and v9.2 portfolio return columns.
 - Added score-band calibration diagnostics.
 - Rebuilt home header/navigation into a compact professional layout.
+
+## v9.2.1 — Proof & Performance
+- Added reproducible proof validation, stress testing, diagnostic breakdowns and downloadable reports.

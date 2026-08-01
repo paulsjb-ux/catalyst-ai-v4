@@ -1,9 +1,12 @@
+import json
 import pandas as pd
 import streamlit as st
 
 from data.history_store import list_saved_scans, load_scan
 from data.market_data import download_history
 from engine.validation import calculate_forward_returns, summarise_validation, add_quality_labels
+from engine.proof_validation import build_proof_report
+from version import APP_VERSION
 from ui.components import empty_state, section_header, status_card
 
 
@@ -28,11 +31,87 @@ VALIDATION_COLUMNS = [
 ]
 
 
+
+def _render_proof_validation() -> None:
+    st.markdown("### Proof & Performance")
+    st.caption("Runs the locked v9.2.1 evidence checks against the most recent backtest. No strategy parameters are changed.")
+    result = st.session_state.get("backtest_result")
+    if result is None or getattr(result, "trades", pd.DataFrame()).empty:
+        status_card("Run a Backtesting test first. Catalyst will then use those completed trades as the locked evidence set.", "info")
+        return
+
+    trades = result.trades
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Evidence Trades", len(trades))
+    c2.metric("Backtest Errors", len(getattr(result, "errors", {}) or {}))
+    c3.metric("Build", APP_VERSION)
+
+    if st.button("Run Proof Validation", type="primary", use_container_width=True):
+        with st.spinner("Testing profitability, consistency, drawdown and stress survival..."):
+            report = build_proof_report(
+                trades,
+                build_version=APP_VERSION,
+                configuration=getattr(result, "assumptions", {}) or {},
+            )
+            st.session_state["proof_validation_report"] = report
+
+    report = st.session_state.get("proof_validation_report")
+    if not report:
+        return
+
+    verdict = report["verdict"]
+    tone = "positive" if verdict == "PASS" else ("info" if verdict == "CONDITIONAL PASS" else "warning")
+    status_card(f"Verdict: {verdict} — {report['checks_passed']}/{report['checks_total']} proof checks passed.", tone)
+
+    overall = report["overall"]
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Net Return", f"{overall['total_return_pct']}%")
+    c2.metric("Profit Factor", overall["profit_factor"])
+    c3.metric("Max Drawdown", f"{overall['max_drawdown_pct']}%")
+    c4.metric("Avg Trade", f"{overall['average_return_pct']}%")
+
+    checks = pd.DataFrame([
+        {"check": key.replace("_", " ").title(), "result": "PASS" if value else "FAIL"}
+        for key, value in report["checks"].items()
+    ])
+    st.dataframe(checks, use_container_width=True, hide_index=True)
+
+    tab1, tab2, tab3, tab4 = st.tabs(["By Year", "Score Bands", "Tickers", "Regimes"])
+    with tab1:
+        st.dataframe(pd.DataFrame(report["by_year"]), use_container_width=True, hide_index=True)
+    with tab2:
+        st.dataframe(pd.DataFrame(report["by_score_band"]), use_container_width=True, hide_index=True)
+    with tab3:
+        st.dataframe(pd.DataFrame(report["by_ticker"]), use_container_width=True, hide_index=True, height=360)
+    with tab4:
+        st.dataframe(pd.DataFrame(report["by_regime"]), use_container_width=True, hide_index=True)
+
+    stress = report["stress"]
+    st.markdown("#### Execution Stress Test")
+    st.caption("Adds 0.20% extra cost and a 0.15% delayed-entry penalty to every trade.")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Stress Return", f"{stress['total_return_pct']}%")
+    c2.metric("Stress Profit Factor", stress["profit_factor"])
+    c3.metric("Stress Drawdown", f"{stress['max_drawdown_pct']}%")
+
+    st.download_button(
+        "Download Proof Report (JSON)",
+        json.dumps(report, indent=2, default=str).encode("utf-8"),
+        file_name=f"catalyst_proof_report_v{APP_VERSION}.json",
+        mime="application/json",
+        use_container_width=True,
+    )
+
+
 def render_validation() -> None:
     section_header(
         "Validation Centre",
-        "Forward-return validation anchored to the saved scan date.",
+        "Proof testing, performance diagnostics and forward-return validation.",
     )
+
+    _render_proof_validation()
+    st.divider()
+    st.markdown("### Saved Scan Forward Validation")
 
     scans = list_saved_scans()
 
