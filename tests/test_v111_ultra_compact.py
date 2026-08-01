@@ -1,7 +1,7 @@
 from pathlib import Path
 
 def test_v111_version():
-    assert '12.0' in Path('version.py').read_text()
+    assert '13.0' in Path('version.py').read_text()
 
 def test_ultra_compact_overrides():
     text = Path('ui/theme.py').read_text()
@@ -10,4 +10,4 @@ def test_ultra_compact_overrides():
     assert 'min-height:38px' in text
 
 def test_daily_desk_version_label():
-    assert 'Catalyst AI v12.0' in Path('ui/daily_routine.py').read_text()
+    assert 'Daily Routine <span>· v13.0</span>' in Path('ui/daily_routine.py').read_text()

@@ -96,8 +96,8 @@ def render_daily_routine() -> None:
         </div>
         <div class="routine-command v101-command">
           <div class="routine-brand-row">
-            <div class="routine-title">Daily Trading Desk <span>· Catalyst AI v12.0</span></div>
-            <div class="routine-subtitle">One run updates, validates and ranks today’s swing opportunities.</div>
+            <div class="routine-title">Daily Routine <span>· v13.0</span></div>
+            <div class="routine-subtitle">Press Run to generate today’s complete swing-trading desk.</div>
           </div>
         </div>
         """,
@@ -133,12 +133,6 @@ def render_daily_routine() -> None:
     policy = policy_from_proof(load_proof_report())
     swing_summary = swing_desk_summary(desk, policy)
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.markdown(metric_card("Market", regime_name, "Current regime"), unsafe_allow_html=True)
-    c2.markdown(metric_card("Qualified", str(swing_summary["qualified_swing_trades"]), f"Max {policy.maximum_new_positions} new positions"), unsafe_allow_html=True)
-    c3.markdown(metric_card("Position cap", f"{policy.position_cap_pct:g}%", "Reduced size"), unsafe_allow_html=True)
-    c4.markdown(metric_card("Validation", proof_verdict, "Latest proof status"), unsafe_allow_html=True)
-
     status_series = desk.get("swing_status", pd.Series(index=desk.index, dtype=str)) if not desk.empty else pd.Series(dtype=str)
     qualified = desk[status_series.isin(["PRIORITY", "QUALIFIED"])] if not desk.empty else pd.DataFrame()
     if qualified.empty:
@@ -152,6 +146,12 @@ def render_daily_routine() -> None:
             f'<div class="daily-verdict verdict-trade"><span>TODAY’S VERDICT</span><strong>{len(qualified)} QUALIFIED SWING SETUP{plural}</strong><p>Review no more than {policy.maximum_new_positions} new positions at reduced size.</p></div>',
             unsafe_allow_html=True,
         )
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.markdown(metric_card("Market", regime_name, "Current regime"), unsafe_allow_html=True)
+    c2.markdown(metric_card("Qualified", str(swing_summary["qualified_swing_trades"]), f"Max {policy.maximum_new_positions} positions"), unsafe_allow_html=True)
+    c3.markdown(metric_card("Position cap", f"{policy.position_cap_pct:g}%", "Reduced size"), unsafe_allow_html=True)
+    c4.markdown(metric_card("Validation", proof_verdict, "Proof status"), unsafe_allow_html=True)
 
     st.markdown("### Today’s ranked opportunities")
     if desk.empty:

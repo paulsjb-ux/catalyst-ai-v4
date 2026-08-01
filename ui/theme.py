@@ -264,3 +264,92 @@ def _v101_theme_marker() -> None:
 # v11 workspace overrides are appended below by apply_theme source patch.
 
 # v12 left-rail workstation overrides are injected by apply_theme below.
+
+# v13 single-screen workstation overrides.
+def _v13_workspace_css() -> str:
+    return r"""
+<style>
+/* Remove Streamlit development chrome and reclaim the top of the viewport. */
+header[data-testid="stHeader"]{display:none!important;height:0!important;}
+[data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stStatusWidget"]{display:none!important;}
+#MainMenu, footer{display:none!important;}
+[data-testid="stAppViewContainer"]{padding-top:0!important;}
+.main .block-container{padding-top:.55rem!important;padding-bottom:1.25rem!important;max-width:1600px!important;}
+
+/* Narrower workstation rail. */
+[data-testid="stSidebar"]{min-width:218px!important;max-width:218px!important;width:218px!important;background:linear-gradient(180deg,#f8fbff,#eff7ff)!important;}
+[data-testid="stSidebarContent"]{padding:.55rem .55rem .8rem!important;}
+.sidebar-brand{padding:8px 7px 11px!important;margin-bottom:4px!important;gap:8px!important;}
+.sidebar-brand>span{font-size:1.45rem!important;}
+.sidebar-brand strong{font-size:1rem!important;line-height:1.05!important;}
+.sidebar-brand small{font-size:.72rem!important;}
+.sidebar-divider{margin:8px 3px!important;}
+.sidebar-footer{font-size:.68rem!important;padding:8px 4px!important;}
+[data-testid="stSidebar"] .stButton>button{min-height:34px!important;height:34px!important;padding:.18rem .55rem!important;border-radius:9px!important;font-size:.78rem!important;box-shadow:none!important;}
+[data-testid="stSidebar"] [data-testid="stExpander"]{border:0!important;background:transparent!important;box-shadow:none!important;}
+[data-testid="stSidebar"] [data-testid="stExpander"] summary{min-height:31px!important;padding:.2rem .25rem!important;font-size:.72rem!important;text-transform:uppercase!important;letter-spacing:.09em!important;color:#64748b!important;}
+[data-testid="stSidebar"] [data-testid="stExpanderDetails"]{padding:.15rem 0 .25rem!important;}
+
+/* Single-line live status toolbar. */
+.desk-status-strip{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:0!important;min-height:40px!important;margin:0 0 8px!important;border-radius:12px!important;overflow:hidden!important;box-shadow:none!important;}
+.desk-status-strip>div{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:7px!important;padding:7px 11px!important;min-height:40px!important;border-right:1px solid #dbeafe!important;}
+.desk-status-strip>div:last-child{border-right:0!important;}
+.desk-status-strip span{font-size:.62rem!important;letter-spacing:.11em!important;}
+.desk-status-strip strong{font-size:.78rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
+
+/* Compact title and command zone. */
+.routine-command{padding:9px 13px!important;margin:0 0 7px!important;border-radius:13px!important;box-shadow:none!important;min-height:auto!important;}
+.routine-brand-row{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;}
+.routine-title{font-size:1.12rem!important;line-height:1.15!important;margin:0!important;white-space:nowrap!important;}
+.routine-title span{font-size:.76rem!important;}
+.routine-subtitle{font-size:.76rem!important;line-height:1.2!important;margin:0!important;text-align:right!important;}
+
+/* Keep advanced settings unobtrusive. */
+[data-testid="stExpander"]{border-radius:10px!important;box-shadow:none!important;}
+[data-testid="stExpander"] summary{min-height:34px!important;padding:.25rem .7rem!important;}
+
+/* Make the command button the focal point without consuming the page. */
+.main .stButton>button[kind="primary"], .main .stButton>button[data-testid="stBaseButton-primary"]{min-height:48px!important;height:48px!important;border-radius:12px!important;font-size:.9rem!important;letter-spacing:.02em!important;box-shadow:0 8px 18px rgba(37,99,235,.16)!important;}
+
+/* Verdict first; concise and immediately readable. */
+.daily-verdict{padding:10px 14px!important;margin:8px 0!important;border-radius:12px!important;box-shadow:none!important;}
+.daily-verdict span{font-size:.62rem!important;letter-spacing:.12em!important;}
+.daily-verdict strong{display:inline-block!important;font-size:1.08rem!important;margin:0 0 0 10px!important;}
+.daily-verdict p{display:inline!important;font-size:.76rem!important;margin-left:10px!important;}
+
+/* Dense executive metrics. */
+.metric-card{min-height:78px!important;padding:10px 12px!important;border-radius:12px!important;box-shadow:none!important;}
+.metric-label{font-size:.61rem!important;letter-spacing:.1em!important;}
+.metric-value{font-size:1.18rem!important;line-height:1.08!important;margin-top:4px!important;}
+.metric-note{font-size:.68rem!important;margin-top:3px!important;}
+
+/* Dense results area. */
+h3{font-size:1rem!important;margin:.7rem 0 .35rem!important;}
+[data-testid="stDataFrame"]{border-radius:11px!important;padding:2px!important;box-shadow:none!important;}
+[data-testid="stDataFrame"] *{font-size:.76rem!important;}
+.action-card{padding:10px!important;border-radius:12px!important;min-height:auto!important;box-shadow:none!important;}
+.action-ticker{font-size:1.35rem!important;}
+.action-levels,.action-detail{font-size:.72rem!important;}
+.stCaptionContainer p{font-size:.68rem!important;line-height:1.25!important;}
+
+/* Hide generic page branding; workspace headers become slim. */
+.workspace-header{min-height:38px!important;padding:6px 10px!important;margin-bottom:7px!important;border-radius:10px!important;box-shadow:none!important;}
+.workspace-header h1{font-size:1.05rem!important;}
+.workspace-mark{font-size:1rem!important;}
+.workspace-product{font-size:.7rem!important;}
+
+@media(max-width:900px){
+  [data-testid="stSidebar"]{min-width:205px!important;max-width:205px!important;width:205px!important;}
+  .desk-status-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .routine-brand-row{display:block!important;}
+  .routine-subtitle{text-align:left!important;margin-top:3px!important;white-space:normal!important;}
+  .daily-verdict strong,.daily-verdict p{display:block!important;margin-left:0!important;margin-top:3px!important;}
+}
+</style>
+"""
+
+# Wrap the original theme application so v13 overrides are always last.
+_apply_theme_v12 = apply_theme
+def apply_theme() -> None:
+    _apply_theme_v12()
+    st.markdown(_v13_workspace_css(), unsafe_allow_html=True)
