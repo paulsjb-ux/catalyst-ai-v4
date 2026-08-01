@@ -37,6 +37,8 @@ class StorageConfig:
     enabled: bool
     key_source: str = ""
     key_type: str = "unknown"
+    configured_key_sources: tuple[str, ...] = ()
+    warning: str = ""
 
 
 def _secret(name: str, default: str = "") -> str:
@@ -69,21 +71,33 @@ def _key_type(key: str) -> str:
 def get_storage_config() -> StorageConfig:
     url = _normalise_credential(_secret("SUPABASE_URL")).rstrip("/")
 
-    # Streamlit is server-side, so an explicitly configured secret key is
-    # supported. Otherwise use the standard SUPABASE_KEY/publishable key.
+    # Prefer publishable credentials for normal operation and Row Level
+    # Security. A server-side secret remains supported only as a last resort.
     candidates = (
-        ("SUPABASE_SECRET_KEY", _secret("SUPABASE_SECRET_KEY")),
         ("SUPABASE_KEY", _secret("SUPABASE_KEY")),
         ("SUPABASE_PUBLISHABLE_KEY", _secret("SUPABASE_PUBLISHABLE_KEY")),
+        ("SUPABASE_SECRET_KEY", _secret("SUPABASE_SECRET_KEY")),
     )
+    configured = tuple(name for name, value in candidates if value)
     source, raw_key = next(((name, value) for name, value in candidates if value), ("", ""))
     key = _normalise_credential(raw_key)
+    warning = ""
+    if len(configured) > 1:
+        warning = (
+            "Multiple Supabase keys are configured. Catalyst selected "
+            f"{source}; remove unused key entries to avoid ambiguity."
+        )
+    if _key_type(key) == "secret":
+        extra = " A secret key bypasses Row Level Security; prefer a publishable key."
+        warning = (warning + extra).strip()
     return StorageConfig(
         url=url,
         key=key,
         enabled=bool(url and key),
         key_source=source,
         key_type=_key_type(key),
+        configured_key_sources=configured,
+        warning=warning,
     )
 
 
@@ -324,6 +338,8 @@ def health_check(*, force: bool = False) -> dict:
         "key_source": config.key_source or None,
         "key_type": config.key_type,
         "project_ref": config.url.removeprefix("https://").split(".", 1)[0] if config.url else None,
+        "configured_key_sources": list(config.configured_key_sources),
+        "warning": config.warning or None,
         "error": None,
     }
     if not config.enabled:

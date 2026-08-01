@@ -12,6 +12,10 @@ import json
 
 import pandas as pd
 
+from logging_config import configure_logging
+
+LOGGER = configure_logging()
+
 CACHE_DIR = Path("storage/market_cache")
 DEFAULT_CACHE_MINUTES = 20
 MIN_HISTORY_ROWS = 60
@@ -84,11 +88,19 @@ def _read_cache(ticker: str, period: str, interval: str, max_age_minutes: int) -
         with _MEMORY_CACHE_LOCK:
             _MEMORY_CACHE[memory_key] = (now + max_age_minutes * 60, frame.copy())
         return frame
-    except Exception:
+    except Exception as exc:
+        LOGGER.warning("Market cache read failed for %s: %s", ticker, exc)
         return None
 
 
-def _write_cache(ticker: str, period: str, interval: str, frame: pd.DataFrame, fetched_at: datetime) -> None:
+def _write_cache(
+    ticker: str,
+    period: str,
+    interval: str,
+    frame: pd.DataFrame,
+    fetched_at: datetime,
+    cache_minutes: int = DEFAULT_CACHE_MINUTES,
+) -> None:
     try:
         CACHE_DIR.mkdir(parents=True, exist_ok=True)
         frame_path, meta_path = _cache_paths(ticker, period, interval)
@@ -96,12 +108,12 @@ def _write_cache(ticker: str, period: str, interval: str, frame: pd.DataFrame, f
         meta_path.write_text(json.dumps({"fetched_at": fetched_at.isoformat()}), encoding="utf-8")
         with _MEMORY_CACHE_LOCK:
             _MEMORY_CACHE[(ticker, period, interval)] = (
-                time.monotonic() + DEFAULT_CACHE_MINUTES * 60,
+                time.monotonic() + max(0, int(cache_minutes)) * 60,
                 frame.copy(),
             )
-    except Exception:
+    except Exception as exc:
         # Caching is an optimisation only and must never stop a scan.
-        pass
+        LOGGER.warning("Market cache write failed for %s: %s", ticker, exc)
 
 
 def _split_batch_frame(batch: pd.DataFrame, tickers: list[str]) -> dict[str, pd.DataFrame]:
@@ -205,7 +217,7 @@ def download_history(
                 retry.append(ticker)
                 continue
             prices[ticker] = frame
-            _write_cache(ticker, period, interval, frame, fetched_at)
+            _write_cache(ticker, period, interval, frame, fetched_at, cache_minutes)
 
         if retry:
             workers = max(1, min(int(retry_workers), len(retry)))
@@ -219,7 +231,7 @@ def download_history(
                             errors[ticker] = "Insufficient price history"
                             continue
                         prices[ticker] = frame
-                        _write_cache(ticker, period, interval, frame, fetched_at)
+                        _write_cache(ticker, period, interval, frame, fetched_at, cache_minutes)
                     except Exception as exc:
                         errors[ticker] = str(exc)
 

@@ -4,12 +4,16 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 import json
+import os
+import tempfile
+import uuid
 
 import pandas as pd
 
 from data.storage_service import dataframe_to_records, get, put, records_to_dataframe
+from logging_config import configure_logging
 
-
+LOGGER = configure_logging()
 STORAGE_DIR = Path("storage")
 SCAN_HISTORY_DIR = STORAGE_DIR / "scans"
 INDEX_FILE = STORAGE_DIR / "scan_index.json"
@@ -26,17 +30,43 @@ class SavedScan:
     watch_count: int
 
 
+def _atomic_text(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w", encoding="utf-8", dir=path.parent, delete=False
+    ) as handle:
+        handle.write(text)
+        handle.flush()
+        os.fsync(handle.fileno())
+        temp_name = handle.name
+    os.replace(temp_name, path)
+
+
+def _atomic_csv(path: Path, frame: pd.DataFrame) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.NamedTemporaryFile(
+        "w", encoding="utf-8", newline="", dir=path.parent, delete=False
+    ) as handle:
+        frame.to_csv(handle, index=False)
+        handle.flush()
+        os.fsync(handle.fileno())
+        temp_name = handle.name
+    os.replace(temp_name, path)
+
+
 def ensure_storage() -> None:
     SCAN_HISTORY_DIR.mkdir(parents=True, exist_ok=True)
     if not INDEX_FILE.exists():
-        INDEX_FILE.write_text("[]", encoding="utf-8")
+        _atomic_text(INDEX_FILE, "[]")
 
 
 def _load_local_index() -> list[dict]:
     ensure_storage()
     try:
-        return json.loads(INDEX_FILE.read_text(encoding="utf-8"))
-    except Exception:
+        value = json.loads(INDEX_FILE.read_text(encoding="utf-8"))
+        return value if isinstance(value, list) else []
+    except (OSError, json.JSONDecodeError) as exc:
+        LOGGER.warning("Scan index could not be read; using an empty index: %s", exc)
         return []
 
 
@@ -49,8 +79,15 @@ def _load_index() -> list[dict]:
 
 def _save_index(index: list[dict]) -> None:
     ensure_storage()
-    INDEX_FILE.write_text(json.dumps(index, indent=2), encoding="utf-8")
-    put(SCAN_INDEX_KEY, index)
+    _atomic_text(INDEX_FILE, json.dumps(index, indent=2))
+    backend = put(SCAN_INDEX_KEY, index)
+    if backend == "local-fallback":
+        LOGGER.warning("Scan index cloud write failed; local index retained.")
+
+
+def _new_scan_id(saved_at_dt: datetime) -> str:
+    stamp = saved_at_dt.strftime("%Y%m%d_%H%M%S_%f")
+    return f"{stamp}_{uuid.uuid4().hex[:6]}"
 
 
 def save_scan(frame: pd.DataFrame) -> SavedScan | None:
@@ -60,7 +97,7 @@ def save_scan(frame: pd.DataFrame) -> SavedScan | None:
 
     saved_at_dt = datetime.now(timezone.utc)
     saved_at = saved_at_dt.isoformat()
-    scan_id = saved_at_dt.strftime("%Y%m%d_%H%M%S")
+    scan_id = _new_scan_id(saved_at_dt)
     path = SCAN_HISTORY_DIR / f"scan_{scan_id}.csv"
 
     output = frame.copy()
@@ -68,7 +105,7 @@ def save_scan(frame: pd.DataFrame) -> SavedScan | None:
         output.insert(0, "saved_at", saved_at)
     if "scan_id" not in output.columns:
         output.insert(0, "scan_id", scan_id)
-    output.to_csv(path, index=False)
+    _atomic_csv(path, output)
 
     buy_count = int((frame["signal"] == "BUY").sum()) if "signal" in frame.columns else 0
     watch_count = int((frame["signal"] == "WATCH").sum()) if "signal" in frame.columns else 0
@@ -82,7 +119,9 @@ def save_scan(frame: pd.DataFrame) -> SavedScan | None:
         watch_count=watch_count,
     )
 
-    put(f"scan:{scan_id}", dataframe_to_records(output))
+    backend = put(f"scan:{scan_id}", dataframe_to_records(output))
+    if backend == "local-fallback":
+        LOGGER.warning("Scan %s retained locally after cloud write failure.", scan_id)
 
     index = _load_index()
     index = [item for item in index if item.get("scan_id") != scan_id]
@@ -112,9 +151,15 @@ def load_scan(scan_id: str) -> pd.DataFrame:
 
     path = Path(match.get("file_path", ""))
     if not path.exists():
+        LOGGER.warning("Local scan file is missing for scan %s: %s", scan_id, path)
         return pd.DataFrame()
 
-    frame = pd.read_csv(path)
+    try:
+        frame = pd.read_csv(path)
+    except (OSError, pd.errors.EmptyDataError, pd.errors.ParserError) as exc:
+        LOGGER.warning("Scan %s could not be read: %s", scan_id, exc)
+        return pd.DataFrame()
+
     put(f"scan:{scan_id}", dataframe_to_records(frame))
     return frame
 

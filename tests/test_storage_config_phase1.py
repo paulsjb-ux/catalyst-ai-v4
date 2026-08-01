@@ -14,7 +14,7 @@ def test_credentials_remove_accidental_whitespace(monkeypatch):
     assert config.key_type == "publishable"
 
 
-def test_explicit_secret_key_takes_priority(monkeypatch):
+def test_publishable_key_takes_priority_over_secret(monkeypatch):
     values = {
         "SUPABASE_URL": "https://abc.supabase.co",
         "SUPABASE_SECRET_KEY": "sb_secret_server",
@@ -22,9 +22,10 @@ def test_explicit_secret_key_takes_priority(monkeypatch):
     }
     monkeypatch.setattr(cloud_store, "_secret", lambda name, default="": values.get(name, default))
     config = cloud_store.get_storage_config()
-    assert config.key == "sb_secret_server"
-    assert config.key_source == "SUPABASE_SECRET_KEY"
-    assert config.key_type == "secret"
+    assert config.key == "sb_publishable_client"
+    assert config.key_source == "SUPABASE_KEY"
+    assert config.key_type == "publishable"
+    assert "Multiple Supabase keys" in config.warning
 
 
 def test_publishable_alias_supported(monkeypatch):
