@@ -23,6 +23,7 @@ ROUTES: dict[str, tuple[str, str]] = {
     "Alerts": ("ui.alerts", "render_alerts"),
     "Market Scan": ("ui.market_scan", "render_market_scan"),
     "Paper Trading": ("ui.paper_trading", "render_paper_trading"),
+    "Backtesting": ("ui.backtesting", "render_backtesting"),
     "Trade Universe": ("ui.trade_universe", "render_trade_universe"),
     "Watchlist": ("ui.watchlist", "render_watchlist"),
     "Validation": ("ui.validation", "render_validation"),

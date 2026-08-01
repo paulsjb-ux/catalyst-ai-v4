@@ -1,0 +1,165 @@
+from __future__ import annotations
+
+import pandas as pd
+import streamlit as st
+
+from data.market_data import download_history
+from engine.backtest import run_backtest
+from ui.components import empty_state, section_header, status_card
+
+
+DEFAULT_TICKERS = "AAPL,MSFT,NVDA,AMZN,META,GOOGL,AVGO,LLY,JPM,COST"
+
+
+def render_backtesting() -> None:
+    section_header(
+        "Historical Backtesting",
+        "Test the existing Catalyst scoring rules using next-day entries and "
+        "strict no-look-ahead assumptions.",
+    )
+
+    status_card(
+        "Backtests are research tools, not forecasts. Results exclude taxes, "
+        "slippage beyond the selected transaction cost, and portfolio-capital constraints.",
+        "info",
+    )
+
+    tickers_raw = st.text_area(
+        "Tickers",
+        value=DEFAULT_TICKERS,
+        height=100,
+        help="Use a focused set first. Large historical downloads can take time.",
+    )
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        period = st.selectbox("History", ["2y", "5y", "10y"], index=1)
+    with c2:
+        holding_days = st.number_input(
+            "Maximum holding days",
+            min_value=2,
+            max_value=120,
+            value=20,
+            step=1,
+        )
+    with c3:
+        minimum_score = st.number_input(
+            "Minimum strategy score",
+            min_value=55,
+            max_value=100,
+            value=78,
+            step=1,
+        )
+
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        use_target_stop = st.toggle("Use ATR target and stop", value=True)
+    with c2:
+        transaction_cost = st.number_input(
+            "Round-trip cost (%)",
+            min_value=0.0,
+            max_value=5.0,
+            value=0.10,
+            step=0.05,
+            format="%.2f",
+        )
+    with c3:
+        include_watch = st.toggle("Include WATCH signals", value=False)
+
+    if st.button("Run Historical Backtest", type="primary", use_container_width=True):
+        tickers = list(
+            dict.fromkeys(
+                token.strip().upper()
+                for token in tickers_raw.replace("\n", ",").split(",")
+                if token.strip()
+            )
+        )
+        if not tickers:
+            st.error("Enter at least one ticker.")
+        else:
+            with st.spinner(
+                f"Downloading {period} of history and testing {len(tickers)} symbols..."
+            ):
+                market = download_history(
+                    tickers,
+                    period=period,
+                    cache_minutes=60,
+                )
+                signals = ("BUY", "WATCH") if include_watch else ("BUY",)
+                result = run_backtest(
+                    market.prices,
+                    holding_days=int(holding_days),
+                    minimum_score=int(minimum_score),
+                    signals=signals,
+                    use_target_stop=use_target_stop,
+                    transaction_cost_pct=float(transaction_cost),
+                )
+                result.errors.update(market.errors)
+                st.session_state["backtest_result"] = result
+
+    result = st.session_state.get("backtest_result")
+    if result is None:
+        empty_state(
+            "No backtest yet",
+            "Choose a focused ticker set and run the historical test.",
+            "🧪",
+        )
+        return
+
+    metrics = result.metrics
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Trades", metrics.get("trades", 0))
+    c2.metric("Win Rate", f"{metrics.get('win_rate_pct', 0)}%")
+    c3.metric("Average Trade", f"{metrics.get('average_return_pct', 0)}%")
+    c4.metric(
+        "Compounded Return",
+        f"{metrics.get('compounded_return_pct', 0)}%",
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Max Drawdown", f"{metrics.get('max_drawdown_pct', 0)}%")
+    c2.metric("Profit Factor", metrics.get("profit_factor", 0))
+    c3.metric("Median Trade", f"{metrics.get('median_return_pct', 0)}%")
+    c4.metric(
+        "Average Hold",
+        f"{metrics.get('average_holding_days', 0)} days",
+    )
+
+    if not result.equity_curve.empty:
+        st.markdown("### Compounded Trade Equity")
+        st.line_chart(
+            result.equity_curve.set_index("trade_number")["equity"],
+            height=320,
+        )
+
+    if result.trades.empty:
+        status_card(
+            "No qualifying historical trades were found. Try more tickers, "
+            "a lower minimum score, or include WATCH signals.",
+            "warning",
+        )
+    else:
+        st.markdown("### Historical Trades")
+        st.dataframe(
+            result.trades.sort_values(
+                ["entry_date", "ticker"],
+                ascending=[False, True],
+            ),
+            use_container_width=True,
+            hide_index=True,
+            height=430,
+        )
+        st.download_button(
+            "Download backtest trades CSV",
+            result.trades.to_csv(index=False).encode("utf-8"),
+            file_name="catalyst_backtest_trades.csv",
+            mime="text/csv",
+            use_container_width=True,
+        )
+
+    with st.expander("Backtest assumptions"):
+        st.json(result.assumptions)
+
+    if result.errors:
+        with st.expander(f"Data errors ({len(result.errors)})"):
+            st.json(result.errors)
