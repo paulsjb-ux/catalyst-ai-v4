@@ -95,10 +95,10 @@ def top_navigation() -> str:
 
     selected = st.session_state.get(
         "primary_navigation",
-        PRIMARY_NAVIGATION[0],
+        "Daily Routine",
     )
     if selected not in PRIMARY_NAVIGATION:
-        selected = PRIMARY_NAVIGATION[0]
+        selected = "Daily Routine"
         st.session_state["primary_navigation"] = selected
 
     buttons_per_row = 7
@@ -131,7 +131,7 @@ def top_navigation() -> str:
 
     return st.session_state.get(
         "primary_navigation",
-        PRIMARY_NAVIGATION[0],
+        "Daily Routine",
     )
 
 

@@ -35,6 +35,9 @@ class RoutineResult:
     exports: list[str] = field(default_factory=list)
     scan_id: str = ""
     universe_health: dict = field(default_factory=dict)
+    swing_desk: pd.DataFrame = field(default_factory=pd.DataFrame)
+    swing_summary: dict = field(default_factory=dict)
+    proof_health: dict = field(default_factory=dict)
 
     def summary(self) -> dict:
         scan = self.scan_results if self.scan_results is not None else pd.DataFrame()
@@ -56,6 +59,13 @@ class RoutineResult:
             "alerts_generated": int(self.alert_result.get("generated", self.alert_result.get("alert_count", 0)) or 0),
             "exports_created": int(len(self.exports)),
             "scan_id": self.scan_id,
+            "qualified_swing_trades": int(self.swing_summary.get("qualified_swing_trades", 0)),
+            "priority_swing_trades": int(self.swing_summary.get("priority_swing_trades", 0)),
+            "maximum_new_positions": int(self.swing_summary.get("maximum_new_positions", 2)),
+            "position_cap_pct": float(self.swing_summary.get("position_cap_pct", 15.0)),
+            "preferred_score_band": self.swing_summary.get("preferred_score_band", "80-85"),
+            "preferred_tickers": self.swing_summary.get("preferred_tickers", []),
+            "proof_verdict": self.proof_health.get("verdict", "NOT RUN"),
             "stages": self.stages,
         }
 
@@ -91,7 +101,7 @@ def _write_exports(result: RoutineResult, export_dir: Path) -> list[str]:
     _cleanup_exports(export_dir)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
     paths: list[Path] = []
-    for name, frame in (("scan", result.scan_results), ("trade_plans", result.trade_plans), ("comparison", result.comparison)):
+    for name, frame in (("scan", result.scan_results), ("trade_plans", result.trade_plans), ("swing_desk", result.swing_desk), ("comparison", result.comparison)):
         if frame is not None and not frame.empty:
             path = export_dir / f"catalyst_{name}_{stamp}.csv"
             frame.to_csv(path, index=False)
@@ -130,6 +140,7 @@ def run_daily_routine(
         from engine.market_regime import REGIME_TICKERS, build_market_regime
         from engine.scanner import run_scan
         from engine.trade_plans import build_trade_plans, filter_trade_plan_candidates
+        from engine.swing_focus import build_swing_desk, load_proof_report, policy_from_proof, swing_desk_summary
         from engine.universe_builder import build_scan_universe
 
         _notify(progress, "universe", 5, "Building the quality-controlled market universe")
@@ -182,6 +193,22 @@ def run_daily_routine(
         _notify(progress, "plans", 68, "Generating target, stop and risk/reward plans")
         result.trade_plans = build_trade_plans(filter_trade_plan_candidates(result.scan_results), market.prices)
         _record(result, "Trade plans", "complete", f"{len(result.trade_plans)} plans generated")
+
+        _notify(progress, "swing_desk", 74, "Selecting fewer, higher-quality swing opportunities")
+        proof_report = load_proof_report()
+        policy = policy_from_proof(proof_report)
+        result.proof_health = {
+            "verdict": proof_report.get("verdict", "NOT RUN"),
+            "profit_factor": (proof_report.get("overall") or {}).get("profit_factor"),
+            "checks_passed": proof_report.get("checks_passed"),
+            "checks_total": proof_report.get("checks_total"),
+        }
+        result.swing_desk = build_swing_desk(
+            result.scan_results, result.trade_plans, result.regime,
+            proof_report=proof_report, policy=policy,
+        )
+        result.swing_summary = swing_desk_summary(result.swing_desk, policy)
+        _record(result, "Swing desk", "complete", f"{result.swing_summary.get('qualified_swing_trades', 0)} qualified; maximum {policy.maximum_new_positions} new positions")
 
         _notify(progress, "brief", 79, "Generating the Daily Intelligence Brief")
         result.brief = build_daily_brief(

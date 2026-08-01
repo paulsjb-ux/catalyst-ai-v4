@@ -111,5 +111,13 @@ def apply_theme() -> None:
             grid-template-columns:1fr;
         }
     }
+
+    .routine-command{background:#ffffff;border:1px solid #dbeafe;border-radius:18px;padding:18px 20px;margin:2px 0 12px;box-shadow:0 10px 24px rgba(15,23,42,.05)}
+    .routine-eyebrow{font-size:.72rem;font-weight:900;letter-spacing:.16em;color:#2563eb;margin-bottom:5px}
+    .routine-title{font-size:1.75rem;font-weight:900;letter-spacing:-.04em;color:#0f172a;line-height:1.05}
+    .routine-subtitle{margin-top:7px;color:#64748b;font-weight:600;max-width:850px}
+    .stButton>button[kind="primary"]{min-height:3.35rem;font-size:1.05rem;font-weight:900;border-radius:14px}
     </style>
     """, unsafe_allow_html=True)
+
+# v10 command-centre refinements are injected after the shared theme.
