@@ -102,19 +102,25 @@ def _sidebar_group(label: str, pages: list[str], selected: str, prefix: str, exp
 
 
 def _mobile_navigation(selected: str) -> None:
-    """Always-available mobile route selector when Streamlit collapses the sidebar."""
-    def _apply_mobile_route() -> None:
-        requested = st.session_state.get("mobile_page_navigation", selected)
-        if requested in ALL_NAVIGATION and requested != st.session_state.get("primary_navigation"):
-            st.session_state["primary_navigation"] = requested
+    """Mobile route selector that commits navigation immediately.
 
-    # Keep the hidden desktop widget aligned with sidebar navigation so it is
-    # correct immediately if the viewport changes to mobile.
-    if st.session_state.get("mobile_page_navigation") != selected:
-        st.session_state["mobile_page_navigation"] = selected
+    Streamlit callback timing can differ between desktop and iOS Safari.  The
+    selector therefore uses its returned value as the source of truth and
+    explicitly reruns after changing the canonical navigation state.
+    """
+    widget_key = "mobile_page_navigation"
 
-    # The keyed container receives a stable CSS class in current Streamlit builds.
-    # It is hidden on desktop and shown as a sticky app bar on narrow screens.
+    # Sync the selector only before it is instantiated. This keeps a desktop
+    # sidebar click and the mobile selector aligned without mutating a live
+    # widget's state.
+    if st.session_state.get(widget_key) not in ALL_NAVIGATION:
+        st.session_state[widget_key] = selected
+    elif st.session_state.get("primary_navigation") != selected:
+        st.session_state[widget_key] = selected
+
+    # The keyed container receives a stable CSS class in current Streamlit
+    # builds. It is hidden on desktop and shown as a sticky app bar on narrow
+    # screens.
     with st.container(key="mobile_navigation_container"):
         left, right = st.columns([1.05, 2.15], vertical_alignment="center")
         with left:
@@ -123,14 +129,17 @@ def _mobile_navigation(selected: str) -> None:
                 unsafe_allow_html=True,
             )
         with right:
-            st.selectbox(
+            requested = st.selectbox(
                 "Navigate",
                 ALL_NAVIGATION,
-                index=ALL_NAVIGATION.index(selected),
-                key="mobile_page_navigation",
+                index=ALL_NAVIGATION.index(st.session_state.get(widget_key, selected)),
+                key=widget_key,
                 label_visibility="collapsed",
-                on_change=_apply_mobile_route,
             )
+
+    if requested in ALL_NAVIGATION and requested != selected:
+        st.session_state["primary_navigation"] = requested
+        st.rerun()
 
 def top_navigation() -> str:
     """v12 workstation navigation: fixed left rail; legacy More tools content is grouped by workflow."""
