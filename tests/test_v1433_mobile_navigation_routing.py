@@ -12,4 +12,4 @@ def test_mobile_navigation_uses_returned_selection_and_explicit_rerun():
 def test_v1433_version():
     ns = {}
     exec(Path("version.py").read_text(encoding="utf-8"), ns)
-    assert ns["APP_VERSION"] == "14.4.0"
+    assert ns["APP_VERSION"] == "14.5.0"

@@ -8,6 +8,7 @@ import pandas as pd
 import streamlit as st
 
 from data.daily_routine_store import load_latest_routine, save_latest_routine
+from data.release_candidate_store import record_recommendations, record_routine_history
 from engine.daily_routine import run_daily_routine
 from engine.auto_validation import load_tracker, record_daily_run, tracker_summary, persistence_status
 from engine.swing_focus import build_swing_desk, load_proof_report, policy_from_proof, swing_desk_summary
@@ -74,6 +75,8 @@ def _run_routine(period: str, max_tickers: int, send_alerts: bool) -> None:
     if result.success:
         save_latest_routine(scan=result.scan_results, plans=result.trade_plans, regime=result.regime, summary=summary)
         record_daily_run(result.swing_desk, result.scan_results, result.regime, maximum_new_positions=2)
+        record_routine_history(summary, result.regime, result.swing_desk)
+        record_recommendations(result.swing_desk, run_at=str(summary.get("finished_at") or ""))
     progress_bar.progress(100, text="Trading desk ready" if result.success else "Routine stopped")
     st.rerun()
 

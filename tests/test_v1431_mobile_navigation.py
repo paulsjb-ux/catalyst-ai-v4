@@ -20,4 +20,4 @@ def test_mobile_css_provides_sticky_fallback_and_keeps_desktop_hidden():
 def test_patch_version():
     namespace = {}
     exec(Path("version.py").read_text(encoding="utf-8"), namespace)
-    assert namespace["APP_VERSION"] == "14.4.0"
+    assert namespace["APP_VERSION"] == "14.5.0"

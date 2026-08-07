@@ -19,6 +19,7 @@ ROUTES: dict[str, tuple[str, str]] = {
     "Today’s Decision": ("ui.todays_decision", "render_todays_decision"),
     "Daily Routine": ("ui.daily_routine", "render_daily_routine"),
     "Dashboard": ("ui.dashboard", "render_dashboard"),
+    "Portfolio": ("ui.portfolio", "render_portfolio"),
     "Daily Brief": ("ui.daily_brief", "render_daily_brief"),
     "Alerts": ("ui.alerts", "render_alerts"),
     "Market Scan": ("ui.market_scan", "render_market_scan"),

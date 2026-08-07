@@ -405,3 +405,21 @@ def apply_theme() -> None:
     _apply_base_theme()
     st.markdown(_v13_workspace_css(), unsafe_allow_html=True)
     st.markdown(_v1431_mobile_css(), unsafe_allow_html=True)
+    st.markdown(r"""
+<style>
+@media(max-width:900px){
+  .main .block-container{padding-bottom:4rem!important;}
+  div[data-testid="stMetric"]{min-width:0!important;overflow:hidden!important;}
+  div[data-testid="stMetric"] [data-testid="stMetricValue"]{font-size:1.18rem!important;white-space:normal!important;}
+  div[data-testid="stMetric"] [data-testid="stMetricLabel"]{font-size:.72rem!important;}
+  .stDownloadButton>button{min-height:44px!important;width:100%!important;}
+}
+@media(max-width:430px){
+  [data-testid="stHorizontalBlock"]{gap:.38rem!important;}
+  div[data-testid="stMetric"]{padding:.35rem!important;}
+  .routine-title{font-size:1.18rem!important;}
+  .routine-subtitle{font-size:.68rem!important;}
+  [data-testid="stDataFrame"]{font-size:.7rem!important;}
+}
+</style>
+""", unsafe_allow_html=True)

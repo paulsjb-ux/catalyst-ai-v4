@@ -1,5 +1,1 @@
-Catalyst AI production build: 14.4.0
-Entry point: app.py
-Canonical version source: version.py
-Expected UI label: v14.4.0
-Packaging note: app.py is at the ZIP root; no __MACOSX, .DS_Store, bytecode, or local caches are included.
+14.5.0

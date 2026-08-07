@@ -20,6 +20,7 @@ PRIMARY_NAVIGATION = [
     "Daily Routine",
     "Today’s Decision",
     "Dashboard",
+    "Portfolio",
     "Watchlist",
     "Reports",
 ]

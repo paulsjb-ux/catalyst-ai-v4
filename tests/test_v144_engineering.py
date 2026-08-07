@@ -7,10 +7,10 @@ from engine.daily_routine import RoutineResult, _record
 
 
 def test_version_is_single_source_of_truth():
-    assert APP_VERSION == "14.4.0"
+    assert APP_VERSION == "14.5.0"
     assert engine_version.__version__ == APP_VERSION
     assert reports_version.APP_VERSION == APP_VERSION
-    assert 'version = "14.4.0"' in Path("pyproject.toml").read_text(encoding="utf-8")
+    assert 'version = "14.5.0"' in Path("pyproject.toml").read_text(encoding="utf-8")
 
 
 def test_stage_timings_are_exported_in_summary():
