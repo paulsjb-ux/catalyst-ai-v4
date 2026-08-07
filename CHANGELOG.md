@@ -1,3 +1,10 @@
+# v14.3.1
+
+- Added reliable sticky mobile navigation for iPhone and narrow screens.
+- Preserved desktop sidebar navigation.
+- Improved mobile button, spacing and table behaviour.
+- No trading or validation logic changes.
+
 # v14.0
 - Added walk-forward adaptive confidence, dynamic evidence sizing, and holding-period diagnostics.
 - UI frozen from v13.1.

@@ -99,6 +99,39 @@ def _sidebar_group(label: str, pages: list[str], selected: str, prefix: str, exp
             _sidebar_button(page, selected, prefix)
 
 
+
+
+def _mobile_navigation(selected: str) -> None:
+    """Always-available mobile route selector when Streamlit collapses the sidebar."""
+    def _apply_mobile_route() -> None:
+        requested = st.session_state.get("mobile_page_navigation", selected)
+        if requested in ALL_NAVIGATION and requested != st.session_state.get("primary_navigation"):
+            st.session_state["primary_navigation"] = requested
+
+    # Keep the hidden desktop widget aligned with sidebar navigation so it is
+    # correct immediately if the viewport changes to mobile.
+    if st.session_state.get("mobile_page_navigation") != selected:
+        st.session_state["mobile_page_navigation"] = selected
+
+    # The keyed container receives a stable CSS class in current Streamlit builds.
+    # It is hidden on desktop and shown as a sticky app bar on narrow screens.
+    with st.container(key="mobile_navigation_container"):
+        left, right = st.columns([1.05, 2.15], vertical_alignment="center")
+        with left:
+            st.markdown(
+                f'<div class="mobile-brand"><strong>🚀 Catalyst AI</strong><span>v{APP_VERSION}</span></div>',
+                unsafe_allow_html=True,
+            )
+        with right:
+            st.selectbox(
+                "Navigate",
+                ALL_NAVIGATION,
+                index=ALL_NAVIGATION.index(selected),
+                key="mobile_page_navigation",
+                label_visibility="collapsed",
+                on_change=_apply_mobile_route,
+            )
+
 def top_navigation() -> str:
     """v12 workstation navigation: fixed left rail; legacy More tools content is grouped by workflow."""
     navigation_overflow_fix()
@@ -106,6 +139,8 @@ def top_navigation() -> str:
     if selected not in ALL_NAVIGATION:
         selected = "Daily Routine"
         st.session_state["primary_navigation"] = selected
+
+    _mobile_navigation(selected)
 
     with st.sidebar:
         st.markdown(

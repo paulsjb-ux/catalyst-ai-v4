@@ -353,3 +353,61 @@ _apply_theme_v12 = apply_theme
 def apply_theme() -> None:
     _apply_theme_v12()
     st.markdown(_v13_workspace_css(), unsafe_allow_html=True)
+
+
+# v14.3.1 mobile navigation and iPhone usability overrides.
+def _v1431_mobile_css() -> str:
+    return r"""
+<style>
+/* Desktop keeps the established left workstation rail. */
+.st-key-mobile_navigation_container{display:none!important;}
+
+@media(max-width:900px){
+  /* The Streamlit sidebar is unreliable on iPhone once the native header is hidden.
+     Replace it with a sticky, always-visible route selector. */
+  [data-testid="stSidebar"], [data-testid="collapsedControl"]{display:none!important;}
+  .st-key-mobile_navigation_container{
+    display:block!important;position:sticky!important;top:0!important;z-index:1005!important;
+    margin:-.35rem -.35rem .55rem!important;padding:.42rem .55rem!important;
+    background:rgba(248,251,255,.98)!important;border-bottom:1px solid #dbeafe!important;
+    box-shadow:0 5px 14px rgba(15,23,42,.08)!important;backdrop-filter:blur(10px)!important;
+  }
+  .st-key-mobile_navigation_container [data-testid="stHorizontalBlock"]{
+    display:grid!important;grid-template-columns:minmax(118px,.95fr) minmax(165px,1.5fr)!important;
+    gap:.45rem!important;align-items:center!important;overflow:visible!important;
+  }
+  .st-key-mobile_navigation_container [data-testid="column"]{width:auto!important;flex:initial!important;}
+  .st-key-mobile_navigation_container [data-testid="stSelectbox"]{margin:0!important;}
+  .st-key-mobile_navigation_container [data-baseweb="select"]>div{
+    min-height:38px!important;height:38px!important;border-radius:10px!important;background:#fff!important;
+    border-color:#bfdbfe!important;font-size:.78rem!important;
+  }
+  .mobile-brand{display:flex!important;align-items:center!important;gap:.35rem!important;white-space:nowrap!important;}
+  .mobile-brand strong{font-size:.83rem!important;color:#0f172a!important;}
+  .mobile-brand span{font-size:.64rem!important;font-weight:800!important;color:#2563eb!important;}
+
+  .main .block-container{padding:.35rem .55rem 1.2rem!important;max-width:100%!important;}
+  .workspace-header{margin-top:0!important;}
+  .main .stButton>button[kind="primary"],
+  .main .stButton>button[data-testid="stBaseButton-primary"]{width:100%!important;min-height:48px!important;}
+  .desk-status-strip{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .desk-status-strip>div{padding:6px 8px!important;}
+  .metric-card{min-height:70px!important;padding:8px 9px!important;}
+  [data-testid="stDataFrame"], [data-testid="stTable"]{overflow-x:auto!important;max-width:100%!important;}
+}
+
+@media(max-width:430px){
+  .st-key-mobile_navigation_container [data-testid="stHorizontalBlock"]{
+    grid-template-columns:1fr!important;gap:.3rem!important;
+  }
+  .mobile-brand{justify-content:space-between!important;padding:0 .1rem!important;}
+  .st-key-mobile_navigation_container [data-baseweb="select"]>div{min-height:40px!important;height:40px!important;}
+  .desk-status-strip{grid-template-columns:1fr 1fr!important;}
+}
+</style>
+"""
+
+_apply_theme_v143 = apply_theme
+def apply_theme() -> None:
+    _apply_theme_v143()
+    st.markdown(_v1431_mobile_css(), unsafe_allow_html=True)
