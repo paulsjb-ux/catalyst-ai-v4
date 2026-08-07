@@ -1,10 +1,10 @@
-# Catalyst AI v4
+# Catalyst AI v14.4.0
 
 Catalyst AI v4 is a Streamlit-based market intelligence app.
 
 ## Version
 
-`4.0.0-sprint1-part5`
+`14.4.0`
 
 ## Sprint 1 includes
 
