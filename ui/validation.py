@@ -5,7 +5,10 @@ import streamlit as st
 from data.history_store import list_saved_scans, load_scan
 from data.market_data import download_history
 from engine.validation import calculate_forward_returns, summarise_validation, add_quality_labels
-from engine.auto_validation import load_tracker, reset_tracker, tracker_summary
+from engine.auto_validation import (
+    load_tracker, reset_tracker, tracker_summary, persistence_status,
+    merge_tracker_evidence, recover_validation_days,
+)
 from engine.proof_validation import build_proof_report
 from engine.research_lab import (
     evaluate_experiment, experiment_comparison_frame, list_experiments,
@@ -80,14 +83,24 @@ def _baseline_report() -> dict | None:
 def _render_auto_validation() -> None:
     tracker = load_tracker()
     summary = tracker_summary(tracker)
+    storage = tracker.get("storage") or persistence_status()
     st.markdown("### 30-Day Automatic Paper Validation")
-    st.caption("Each successful Daily Routine run is saved once per day. Qualified recommendations are paper-tracked automatically; no broker orders are placed.")
+    st.caption("Each successful Daily Routine run is saved once per market date. Qualified recommendations are paper-tracked automatically; no broker orders are placed.")
+
+    if storage.get("durable"):
+        st.success(f"Persistent storage: {storage.get('mode', 'SUPABASE')} · Programme {storage.get('programme_id', 'default')}")
+    else:
+        detail = storage.get("error") or storage.get("message") or "Durable storage is not configured."
+        st.error(f"Persistence warning: {storage.get('mode', 'LOCAL')} — {detail}")
+        st.caption("On Streamlit Cloud, local-only records may disappear after a restart or redeploy. Configure Supabase before relying on the 30-day count.")
+
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Progress", f"{summary['days_completed']}/{summary['target_days']} days")
     c2.metric("Paper Trades", summary["trades_total"], f"{summary['open_trades']} open")
     c3.metric("Closed PF", summary["profit_factor"] if summary["closed_trades"] else "Collecting")
     c4.metric("Status", summary["status"])
     st.progress(summary["progress_pct"] / 100.0, text=f"{summary['progress_pct']}% of the 30-day programme complete")
+
     days = pd.DataFrame(tracker.get("days", []))
     trades = pd.DataFrame(tracker.get("trades", []))
     t1, t2 = st.tabs(["Daily Log", "Paper Trades"])
@@ -95,11 +108,40 @@ def _render_auto_validation() -> None:
         st.dataframe(days.sort_values("date", ascending=False) if not days.empty else days, use_container_width=True, hide_index=True)
     with t2:
         st.dataframe(trades, use_container_width=True, hide_index=True)
+
     e1, e2 = st.columns([3, 1])
     e1.download_button("Download 30-Day Evidence", json.dumps(tracker, indent=2).encode("utf-8"), file_name="catalyst_30_day_auto_validation.json", mime="application/json", use_container_width=True)
     if e2.button("Reset Programme", use_container_width=True):
         reset_tracker()
         st.rerun()
+
+    with st.expander("Recovery & persistence", expanded=not bool(storage.get("durable"))):
+        st.markdown("**Recover previous evidence without inventing results**")
+        evidence = st.file_uploader("Import a previous 30-Day Evidence JSON", type=["json"], key="auto_validation_recovery_json")
+        if evidence is not None and st.button("Merge imported evidence", use_container_width=True, key="merge_auto_validation_evidence"):
+            try:
+                incoming = json.loads(evidence.getvalue().decode("utf-8"))
+                merged = merge_tracker_evidence(incoming)
+                st.success(f"Evidence merged. Tracker now contains {tracker_summary(merged)['days_completed']} unique days.")
+                st.rerun()
+            except Exception as exc:
+                st.error(f"Evidence could not be merged: {exc}")
+
+        st.markdown("**Manually restore known completed days**")
+        st.caption("Use this only for days you know the Daily Routine completed. Restored days are marked RECOVERED and no trade outcome is fabricated.")
+        raw_dates = st.text_area("Completed dates (YYYY-MM-DD, one per line)", key="recovery_dates", placeholder="2026-08-05\n2026-08-06\n2026-08-07")
+        recovery_note = st.text_input("Recovery note", value="Recovered after Streamlit storage reset.", key="recovery_note")
+        if st.button("Restore these days", use_container_width=True, key="restore_validation_days"):
+            dates = [line.strip() for line in raw_dates.splitlines() if line.strip()]
+            if not dates:
+                st.warning("Enter at least one date to restore.")
+            else:
+                recovered = recover_validation_days(dates, note=recovery_note)
+                st.success(f"Recovery complete. Tracker now contains {tracker_summary(recovered)['days_completed']} unique days.")
+                st.rerun()
+
+        st.markdown("**Supabase setup**")
+        st.caption("Run `supabase_schema.sql`, then add SUPABASE_URL, SUPABASE_KEY and optionally CATALYST_VALIDATION_PROGRAMME_ID to Streamlit Secrets. See README_V14_3_2.md.")
 
 
 def _render_proof_validation() -> None:

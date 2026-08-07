@@ -57,3 +57,6 @@ Current version: `5.2.0-sprint3-part3`
 Catalyst now includes retry-safe scheduled alert execution, persistent delivery health, last-run diagnostics and a weekday GitHub Actions workflow.
 
 Current version: `5.3.0-sprint3-part4`
+
+## v14.3.2 — Persistent Validation Storage
+The 30-day automatic validation tracker can now persist to Supabase/PostgreSQL across Streamlit Cloud restarts and redeploys. The Validation Centre shows storage health and includes evidence import plus manual day recovery for previously lost records. See `README_V14_3_2.md` and `supabase_schema.sql`.
