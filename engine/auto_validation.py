@@ -9,12 +9,15 @@ import tempfile
 from typing import Any, Iterable
 
 import pandas as pd
-import requests
+
+from data.cloud_store import get_storage_config
+from data.storage_service import get as storage_get, put as storage_put, storage_status as shared_storage_status
+from version import APP_VERSION
 
 DEFAULT_PATH = Path("storage/auto_validation/30_day_tracker.json")
 TARGET_DAYS = 30
 PROGRAMME_ID = "catalyst-30-day-v14"
-SUPABASE_TABLE = "catalyst_auto_validation"
+STORAGE_KEY_PREFIX = "auto_validation"
 
 
 class PersistenceError(RuntimeError):
@@ -33,55 +36,47 @@ def _num(value: Any, default: float = 0.0) -> float:
         return default
 
 
-def _streamlit_secret(name: str) -> str:
-    """Read a Streamlit secret without making Streamlit a hard dependency for tests/CLI."""
-    try:
-        import streamlit as st  # type: ignore
-
-        value = st.secrets.get(name, "")
-        return str(value).strip() if value is not None else ""
-    except Exception:
-        return ""
-
-
 def persistence_config() -> dict[str, str]:
-    """Return durable storage configuration from env or Streamlit secrets.
+    """Return the shared Catalyst storage configuration.
 
-    Supported secret names:
-      SUPABASE_URL
-      SUPABASE_KEY
-      CATALYST_VALIDATION_PROGRAMME_ID (optional)
+    Automatic validation now uses the same storage layer as the rest of Catalyst.
     """
-    url = os.getenv("SUPABASE_URL", "").strip() or _streamlit_secret("SUPABASE_URL")
-    key = os.getenv("SUPABASE_KEY", "").strip() or _streamlit_secret("SUPABASE_KEY")
+    config = get_storage_config()
     programme_id = (
         os.getenv("CATALYST_VALIDATION_PROGRAMME_ID", "").strip()
-        or _streamlit_secret("CATALYST_VALIDATION_PROGRAMME_ID")
         or PROGRAMME_ID
     )
-    return {"url": url.rstrip("/"), "key": key, "programme_id": programme_id}
+    return {"url": config.url, "key": config.key, "programme_id": programme_id}
+
+
+def _storage_key() -> str:
+    return f"{STORAGE_KEY_PREFIX}:{persistence_config()['programme_id']}"
 
 
 def persistence_status() -> dict[str, Any]:
-    cfg = persistence_config()
-    configured = bool(cfg["url"] and cfg["key"])
+    config = get_storage_config()
+    shared = shared_storage_status()
+    configured = bool(config.enabled)
+    mode = "SUPABASE" if configured and not shared.get("degraded") else ("LOCAL_FALLBACK" if configured else "LOCAL")
     return {
-        "mode": "SUPABASE" if configured else "LOCAL",
-        "durable": configured,
+        "mode": mode,
+        "durable": configured and not shared.get("degraded", False),
         "configured": configured,
-        "programme_id": cfg["programme_id"],
+        "programme_id": persistence_config()["programme_id"],
         "message": (
-            "Durable Supabase storage is active."
-            if configured
-            else "Local file fallback only. Streamlit Cloud can erase this data after restart/redeploy."
+            "Durable shared Catalyst storage is active."
+            if configured and not shared.get("degraded", False)
+            else "Local fallback is active; configure/check Supabase for durable validation storage."
         ),
+        "error": shared.get("last_error", ""),
     }
+
 
 
 def new_tracker(started_at: str | None = None) -> dict:
     stamp = started_at or _now_iso()
     return {
-        "version": "14.3.2",
+        "version": APP_VERSION,
         "programme": "30-Day Automatic Paper Validation",
         "programme_id": persistence_config().get("programme_id", PROGRAMME_ID),
         "started_at": stamp,
@@ -98,11 +93,10 @@ def new_tracker(started_at: str | None = None) -> dict:
     }
 
 
-
 def _stamp_value(value: Any) -> float:
     try:
         return datetime.fromisoformat(str(value).replace("Z", "+00:00")).timestamp()
-    except Exception:
+    except (TypeError, ValueError):
         return 0.0
 
 
@@ -126,126 +120,51 @@ def _local_save(tracker: dict, path: str | Path = DEFAULT_PATH) -> Path:
     os.replace(temp_name, target)
     return target
 
-
-def _supabase_headers(key: str) -> dict[str, str]:
-    return {
-        "apikey": key,
-        "Authorization": f"Bearer {key}",
-        "Content-Type": "application/json",
-        "Prefer": "resolution=merge-duplicates,return=representation",
-    }
-
-
-def _remote_load() -> dict | None:
-    cfg = persistence_config()
-    if not (cfg["url"] and cfg["key"]):
-        return None
-    endpoint = f"{cfg['url']}/rest/v1/{SUPABASE_TABLE}"
-    params = {
-        "programme_id": f"eq.{cfg['programme_id']}",
-        "select": "payload,updated_at",
-        "limit": "1",
-    }
-    try:
-        response = requests.get(endpoint, headers=_supabase_headers(cfg["key"]), params=params, timeout=8)
-        response.raise_for_status()
-        rows = response.json()
-        if not rows:
-            return None
-        payload = rows[0].get("payload")
-        return payload if isinstance(payload, dict) else None
-    except Exception as exc:
-        raise PersistenceError(f"Supabase read failed: {exc}") from exc
-
-
-def _remote_save(tracker: dict) -> None:
-    cfg = persistence_config()
-    if not (cfg["url"] and cfg["key"]):
-        raise PersistenceError("Supabase is not configured")
-    endpoint = f"{cfg['url']}/rest/v1/{SUPABASE_TABLE}"
-    row = {
-        "programme_id": cfg["programme_id"],
-        "payload": tracker,
-        "updated_at": tracker.get("updated_at") or _now_iso(),
-    }
-    try:
-        response = requests.post(endpoint, headers=_supabase_headers(cfg["key"]), json=row, timeout=8)
-        response.raise_for_status()
-    except Exception as exc:
-        raise PersistenceError(f"Supabase write failed: {exc}") from exc
-
-
 def load_tracker(path: str | Path = DEFAULT_PATH) -> dict:
-    """Load the tracker.
+    """Load validation evidence through Catalyst's shared persistence service.
 
-    Explicit non-default paths remain local for deterministic tests and CLI use.
-    The application default prefers Supabase when configured and automatically migrates
-    a surviving local tracker the first time remote storage is empty.
+    Explicit non-default paths stay local for deterministic tests and CLI use.
+    The default key is mirrored to the legacy JSON file so existing deployments
+    can be recovered and migrated without losing evidence.
     """
     explicit_local = Path(path) != DEFAULT_PATH
     if explicit_local:
         return _local_load(path) or new_tracker()
 
+    local = _local_load(path)
+    stored = storage_get(_storage_key(), None)
+    remote = stored if isinstance(stored, dict) else None
     status = persistence_status()
-    if status["durable"]:
-        try:
-            remote = _remote_load()
-            local = _local_load(path)
-            if remote and local:
-                # Reconcile after a transient write failure: never discard a newer local backup.
-                if _stamp_value(local.get("updated_at")) > _stamp_value(remote.get("updated_at")):
-                    local["storage"] = status
-                    _remote_save(local)
-                    return local
-                remote["storage"] = status
-                _local_save(remote, path)
-                return remote
-            if remote:
-                remote["storage"] = status
-                _local_save(remote, path)
-                return remote
-            if local and (local.get("days") or local.get("trades")):
-                local["updated_at"] = local.get("updated_at") or _now_iso()
-                local["storage"] = status
-                _remote_save(local)
-                return local
-            tracker = new_tracker()
-            tracker["storage"] = status
-            _remote_save(tracker)
-            _local_save(tracker, path)
-            return tracker
-        except PersistenceError as exc:
-            local = _local_load(path) or new_tracker()
-            local["storage"] = {**status, "durable": False, "mode": "LOCAL_FALLBACK", "error": str(exc)}
-            _local_save(local, path)
-            return local
 
-    tracker = _local_load(path) or new_tracker()
+    if remote and local:
+        tracker = local if _stamp_value(local.get("updated_at")) > _stamp_value(remote.get("updated_at")) else remote
+    else:
+        tracker = remote or local or new_tracker()
+
+    tracker["version"] = APP_VERSION
     tracker["storage"] = status
+    # If a legacy local tracker was newer/missing from shared storage, migrate it.
+    if not remote or _stamp_value(tracker.get("updated_at")) > _stamp_value(remote.get("updated_at")):
+        storage_put(_storage_key(), tracker)
+    _local_save(tracker, path)
     return tracker
 
 
 def save_tracker(tracker: dict, path: str | Path = DEFAULT_PATH) -> Path:
     tracker = dict(tracker)
-    tracker["updated_at"] = tracker.get("updated_at") or _now_iso()
+    tracker["version"] = APP_VERSION
+    tracker["updated_at"] = _now_iso()
     explicit_local = Path(path) != DEFAULT_PATH
     if explicit_local:
         return _local_save(tracker, path)
 
-    # Always keep a local backup. Supabase is the source of truth when configured.
     local_path = _local_save(tracker, path)
+    backend = storage_put(_storage_key(), tracker)
     status = persistence_status()
-    if status["durable"]:
-        try:
-            tracker["storage"] = status
-            _remote_save(tracker)
-            _local_save(tracker, path)
-        except PersistenceError as exc:
-            tracker["storage"] = {**status, "durable": False, "mode": "LOCAL_FALLBACK", "error": str(exc)}
-            _local_save(tracker, path)
-    else:
-        tracker["storage"] = status
-        _local_save(tracker, path)
+    if backend == "local-fallback":
+        status = {**status, "durable": False, "mode": "LOCAL_FALLBACK"}
+    tracker["storage"] = status
+    _local_save(tracker, path)
     return local_path
 
 

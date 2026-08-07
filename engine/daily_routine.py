@@ -67,6 +67,7 @@ class RoutineResult:
             "preferred_tickers": self.swing_summary.get("preferred_tickers", []),
             "proof_verdict": self.proof_health.get("verdict", "NOT RUN"),
             "stages": self.stages,
+            "stage_timings": {item.get("stage", ""): item.get("duration_seconds", 0.0) for item in self.stages if "duration_seconds" in item},
         }
 
 
@@ -75,8 +76,11 @@ def _notify(callback: ProgressCallback | None, stage: str, percent: int, message
         callback(stage, percent, message)
 
 
-def _record(result: RoutineResult, stage: str, status: str, detail: str) -> None:
-    result.stages.append({"stage": stage, "status": status, "detail": detail})
+def _record(result: RoutineResult, stage: str, status: str, detail: str, duration_seconds: float | None = None) -> None:
+    item = {"stage": stage, "status": status, "detail": detail}
+    if duration_seconds is not None:
+        item["duration_seconds"] = round(float(duration_seconds), 3)
+    result.stages.append(item)
 
 
 
@@ -143,6 +147,7 @@ def run_daily_routine(
         from engine.swing_focus import build_swing_desk, load_proof_report, policy_from_proof, swing_desk_summary
         from engine.universe_builder import build_scan_universe
 
+        stage_timer = perf_counter()
         _notify(progress, "universe", 5, "Building the quality-controlled market universe")
         quarantine = quarantined_tickers()
         tickers = build_scan_universe(
@@ -157,24 +162,27 @@ def run_daily_routine(
         )
         if not tickers:
             raise RuntimeError("The scan universe is empty.")
-        _record(result, "Universe", "complete", f"{len(tickers)} symbols selected; {len(quarantine)} quarantined")
+        _record(result, "Universe", "complete", f"{len(tickers)} symbols selected; {len(quarantine)} quarantined", perf_counter() - stage_timer)
 
         download_tickers = list(tickers)
         for ticker in REGIME_TICKERS:
             if ticker not in download_tickers:
                 download_tickers.append(ticker)
+        stage_timer = perf_counter()
         _notify(progress, "market_data", 20, f"Downloading market data for {len(download_tickers)} symbols ({len(tickers)} scan symbols plus {len(download_tickers) - len(tickers)} regime symbols)")
         market = download_history(download_tickers, period=period)
         result.market_errors = market.errors
         result.universe_health = update_universe_health(tickers, market.prices.keys(), market.errors)
         if not market.prices:
             raise RuntimeError("No market data was downloaded.")
-        _record(result, "Market data", "complete", f"{len(market.prices)} symbols loaded; {len(market.errors)} errors; "f"{result.universe_health.get('success_rate_pct', 0)}% success")
+        _record(result, "Market data", "complete", f"{len(market.prices)} symbols loaded; {len(market.errors)} errors; "f"{result.universe_health.get('success_rate_pct', 0)}% success; cache {market.cache_hits}; incremental {getattr(market, 'incremental_updates', 0)}", perf_counter() - stage_timer)
 
+        stage_timer = perf_counter()
         _notify(progress, "regime", 35, "Detecting SPY/QQQ market regime")
         result.regime = build_market_regime(market.prices) if include_regime else {}
-        _record(result, "Market regime", "complete", result.regime.get("regime", "Disabled"))
+        _record(result, "Market regime", "complete", result.regime.get("regime", "Disabled"), perf_counter() - stage_timer)
 
+        stage_timer = perf_counter()
         _notify(progress, "scan", 52, "Scoring the universe")
         scan_kwargs = {"workers": scan_workers} if scan_workers else {}
         result.scan_results = run_scan(
@@ -188,12 +196,14 @@ def run_daily_routine(
         result.scan_id = saved.scan_id if saved else ""
         previous = load_previous_scan(result.scan_id) if saved else pd.DataFrame()
         result.comparison = compare_scans(result.scan_results, previous)
-        _record(result, "Universe scan", "complete", f"{len(result.scan_results)} symbols scored")
+        _record(result, "Universe scan", "complete", f"{len(result.scan_results)} symbols scored", perf_counter() - stage_timer)
 
+        stage_timer = perf_counter()
         _notify(progress, "plans", 68, "Generating target, stop and risk/reward plans")
         result.trade_plans = build_trade_plans(filter_trade_plan_candidates(result.scan_results), market.prices)
-        _record(result, "Trade plans", "complete", f"{len(result.trade_plans)} plans generated")
+        _record(result, "Trade plans", "complete", f"{len(result.trade_plans)} plans generated", perf_counter() - stage_timer)
 
+        stage_timer = perf_counter()
         _notify(progress, "swing_desk", 74, "Selecting fewer, higher-quality swing opportunities")
         proof_report = load_proof_report()
         policy = policy_from_proof(proof_report)
@@ -208,8 +218,9 @@ def run_daily_routine(
             proof_report=proof_report, policy=policy,
         )
         result.swing_summary = swing_desk_summary(result.swing_desk, policy)
-        _record(result, "Swing desk", "complete", f"{result.swing_summary.get('qualified_swing_trades', 0)} qualified; maximum {policy.maximum_new_positions} new positions")
+        _record(result, "Swing desk", "complete", f"{result.swing_summary.get('qualified_swing_trades', 0)} qualified; maximum {policy.maximum_new_positions} new positions", perf_counter() - stage_timer)
 
+        stage_timer = perf_counter()
         _notify(progress, "brief", 79, "Generating the Daily Intelligence Brief")
         result.brief = build_daily_brief(
             result.regime,
@@ -219,8 +230,9 @@ def run_daily_routine(
             result.comparison,
             pd.DataFrame(),
         )
-        _record(result, "Daily Brief", "complete", "Brief generated")
+        _record(result, "Daily Brief", "complete", "Brief generated", perf_counter() - stage_timer)
 
+        stage_timer = perf_counter()
         _notify(progress, "alerts", 88, "Refreshing alerts")
         if send_alerts:
             try:
@@ -230,16 +242,17 @@ def run_daily_routine(
                     regime=result.regime,
                     trigger="daily_routine",
                 )
-                _record(result, "Alerts", "complete", "Alert cycle refreshed")
+                _record(result, "Alerts", "complete", "Alert cycle refreshed", perf_counter() - stage_timer)
             except Exception as exc:
                 result.alert_result = {"error": str(exc), "generated": 0}
-                _record(result, "Alerts", "warning", f"Alert refresh failed: {exc}")
+                _record(result, "Alerts", "warning", f"Alert refresh failed: {exc}", perf_counter() - stage_timer)
         else:
-            _record(result, "Alerts", "skipped", "Alert delivery disabled")
+            _record(result, "Alerts", "skipped", "Alert delivery disabled", perf_counter() - stage_timer)
 
+        stage_timer = perf_counter()
         _notify(progress, "exports", 95, "Writing CSV, Markdown and JSON exports")
         result.exports = _write_exports(result, Path(export_dir))
-        _record(result, "Exports", "complete", f"{len(result.exports)} files created")
+        _record(result, "Exports", "complete", f"{len(result.exports)} files created", perf_counter() - stage_timer)
         result.success = True
     except Exception as exc:
         LOGGER.exception("Daily Routine failed")

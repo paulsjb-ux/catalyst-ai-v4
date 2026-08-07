@@ -1,1 +1,3 @@
-__version__ = "14.1"
+from version import APP_VERSION
+
+__version__ = APP_VERSION

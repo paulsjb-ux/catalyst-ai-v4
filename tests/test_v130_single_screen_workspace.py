@@ -2,7 +2,7 @@ from pathlib import Path
 
 
 def test_v13_version_and_compact_workspace_css():
-    assert '14.3' in Path('version.py').read_text(encoding='utf-8')
+    assert '14.4' in Path('version.py').read_text(encoding='utf-8')
     theme = Path('ui/theme.py').read_text(encoding='utf-8')
     assert 'header[data-testid="stHeader"]{display:none' in theme
     assert 'width:218px' in theme

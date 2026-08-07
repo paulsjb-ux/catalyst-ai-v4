@@ -1,6 +1,6 @@
 import streamlit as st
 
-def apply_theme() -> None:
+def _apply_base_theme() -> None:
     st.markdown("""
     <style>
 
@@ -348,13 +348,6 @@ h3{font-size:1rem!important;margin:.7rem 0 .35rem!important;}
 </style>
 """
 
-# Wrap the original theme application so v13 overrides are always last.
-_apply_theme_v12 = apply_theme
-def apply_theme() -> None:
-    _apply_theme_v12()
-    st.markdown(_v13_workspace_css(), unsafe_allow_html=True)
-
-
 # v14.3.1 mobile navigation and iPhone usability overrides.
 def _v1431_mobile_css() -> str:
     return r"""
@@ -407,7 +400,8 @@ def _v1431_mobile_css() -> str:
 </style>
 """
 
-_apply_theme_v143 = apply_theme
 def apply_theme() -> None:
-    _apply_theme_v143()
+    """Apply Catalyst's theme once in deterministic base → desktop → mobile order."""
+    _apply_base_theme()
+    st.markdown(_v13_workspace_css(), unsafe_allow_html=True)
     st.markdown(_v1431_mobile_css(), unsafe_allow_html=True)

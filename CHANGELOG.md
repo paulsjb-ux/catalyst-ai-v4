@@ -1,3 +1,8 @@
+## 14.4.0
+- Engineering-only performance and code-quality release.
+- Unified versioning and persistence, flattened theme application, stage timing diagnostics, incremental daily market refresh, and repository cleanup.
+- No intentional strategy/scoring/risk changes.
+
 # v14.3.1
 
 - Added reliable sticky mobile navigation for iPhone and narrow screens.

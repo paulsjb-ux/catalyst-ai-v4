@@ -34,6 +34,7 @@ class MarketDataResult:
     fetched_at: datetime
     cache_hits: int = 0
     stale_cache_hits: int = 0
+    incremental_updates: int = 0
 
 
 def _clean_frame(frame: pd.DataFrame) -> pd.DataFrame:
@@ -272,7 +273,9 @@ def download_history(
     fetched_at = datetime.now(timezone.utc)
     cache_hits = 0
     stale_cache_hits = 0
+    incremental_updates = 0
     pending: list[str] = []
+    stale_for_incremental: dict[str, pd.DataFrame] = {}
 
     for ticker in requested:
         cached = _read_cache(ticker, period, interval, cache_minutes) if use_cache else None
@@ -281,24 +284,31 @@ def download_history(
             cache_hits += 1
         else:
             pending.append(ticker)
+            if use_cache and interval == "1d":
+                stale = _read_cache(ticker, period, interval, cache_minutes, allow_expired=True)
+                if stale is not None:
+                    stale_for_incremental[ticker] = stale
 
     batch_size = max(1, int(batch_size))
-    batches = [pending[start:start + batch_size] for start in range(0, len(pending), batch_size)]
+    incremental_tickers = [ticker for ticker in pending if ticker in stale_for_incremental]
+    full_tickers = [ticker for ticker in pending if ticker not in stale_for_incremental]
+    batches = [(batch, "7d") for start in range(0, len(incremental_tickers), batch_size) if (batch := incremental_tickers[start:start + batch_size])]
+    batches += [(batch, period) for start in range(0, len(full_tickers), batch_size) if (batch := full_tickers[start:start + batch_size])]
     downloaded_batches: list[tuple[list[str], dict[str, pd.DataFrame]]] = []
     outer_workers = max(1, min(int(batch_workers), len(batches))) if batches else 1
 
     if outer_workers == 1:
-        for batch_tickers in batches:
+        for batch_tickers, batch_period in batches:
             try:
-                downloaded_batches.append((batch_tickers, _download_batch(batch_tickers, period, interval)))
+                downloaded_batches.append((batch_tickers, _download_batch(batch_tickers, batch_period, interval)))
             except Exception as exc:
                 LOGGER.warning("Market batch download failed: %s", exc)
                 downloaded_batches.append((batch_tickers, {}))
     else:
         with ThreadPoolExecutor(max_workers=outer_workers, thread_name_prefix="market-batch") as pool:
             futures = {
-                pool.submit(_download_batch, batch, period, interval): batch
-                for batch in batches
+                pool.submit(_download_batch, batch, batch_period, interval): batch
+                for batch, batch_period in batches
             }
             for future in as_completed(futures):
                 batch_tickers = futures[future]
@@ -312,6 +322,9 @@ def download_history(
     for batch_tickers, frames in downloaded_batches:
         for ticker in batch_tickers:
             frame = _clean_frame(frames.get(ticker, pd.DataFrame()))
+            if ticker in stale_for_incremental and not frame.empty:
+                frame = _clean_frame(pd.concat([stale_for_incremental[ticker], frame]).loc[lambda x: ~x.index.duplicated(keep="last")].sort_index())
+                incremental_updates += 1
             if len(frame) < MIN_HISTORY_ROWS:
                 retry.append(ticker)
                 continue
@@ -359,4 +372,5 @@ def download_history(
         fetched_at=fetched_at,
         cache_hits=cache_hits,
         stale_cache_hits=stale_cache_hits,
+        incremental_updates=incremental_updates,
     )

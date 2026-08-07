@@ -58,5 +58,10 @@ Catalyst now includes retry-safe scheduled alert execution, persistent delivery 
 
 Current version: `5.3.0-sprint3-part4`
 
-## v14.3.2 — Persistent Validation Storage
-The 30-day automatic validation tracker can now persist to Supabase/PostgreSQL across Streamlit Cloud restarts and redeploys. The Validation Centre shows storage health and includes evidence import plus manual day recovery for previously lost records. See `README_V14_3_2.md` and `supabase_schema.sql`.
+## v14.4.0 — Performance & Code Quality
+The current production build consolidates versioning and persistence, adds stage-by-stage Daily Routine timing, and refreshes expired daily market caches incrementally. Trading/scoring/risk logic is intentionally unchanged.
+
+### Persistent storage
+Run `supabase_setup.sql` once in Supabase. All persistent Catalyst data, including the 30-day validation tracker, now uses the shared `catalyst_store` table. The legacy validation-only schema is archived under `docs/` for migration reference only.
+
+See `README_V14_4.md` for release details.

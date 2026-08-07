@@ -77,7 +77,7 @@ def _group_report(trades: pd.DataFrame, group_column: str) -> pd.DataFrame:
     if trades is None or trades.empty or group_column not in trades.columns:
         return pd.DataFrame()
     rows: list[dict[str, Any]] = []
-    for group, frame in trades.groupby(group_column, dropna=False, sort=True):
+    for group, frame in trades.groupby(group_column, dropna=False, sort=True, observed=False):
         row = {group_column: str(group)}
         row.update(performance_summary(frame))
         rows.append(row)
