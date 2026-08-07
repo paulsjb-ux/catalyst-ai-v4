@@ -119,6 +119,12 @@
 - Added research presets, experiment archive, and JSON/CSV comparison exports.
 - Production trading logic remains unchanged from v14.1.
 
+## 14.5.1
+
+- Fixed sidebar navigation being immediately overwritten by stale mobile selector state.
+- Synchronised desktop and mobile route state using Streamlit callbacks.
+- Clarified 30-day validation status so a completed trading day is shown as waiting, not frozen.
+
 ## 14.5.0
 - Added persistent routine audit history.
 - Added recommendation lifecycle and automatic 3-trading-day expiry.

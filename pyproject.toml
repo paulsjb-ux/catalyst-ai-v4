@@ -1,6 +1,6 @@
 [project]
 name = "catalyst-ai"
-version = "14.5.0"
+version = "14.5.1"
 description = "Professional Trading Intelligence powered by the PJB Trading Engine"
 requires-python = ">=3.10"
 

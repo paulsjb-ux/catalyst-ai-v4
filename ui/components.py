@@ -82,16 +82,27 @@ def _navigation_key(page: str) -> str:
     return f"workspace_nav_{safe}"
 
 
+def _apply_sidebar_route(page: str) -> None:
+    """Commit a sidebar route and keep the mobile selector in sync.
+
+    Streamlit callbacks run before the next script rerun, which makes this a
+    safe place to update both navigation state keys.  Keeping the two keys in
+    lock-step prevents the hidden mobile selector from immediately restoring
+    the previous page after a desktop/sidebar click.
+    """
+    st.session_state["primary_navigation"] = page
+    st.session_state["mobile_page_navigation"] = page
+
+
 def _sidebar_button(page: str, selected: str, prefix: str) -> None:
-    clicked = st.button(
+    st.button(
         page,
         key=f"{prefix}_{_navigation_key(page)}",
         type="primary" if page == selected else "secondary",
         use_container_width=True,
+        on_click=_apply_sidebar_route,
+        args=(page,),
     )
-    if clicked and page != selected:
-        st.session_state["primary_navigation"] = page
-        st.rerun()
 
 
 def _sidebar_group(label: str, pages: list[str], selected: str, prefix: str, expanded: bool = True) -> None:
@@ -102,26 +113,25 @@ def _sidebar_group(label: str, pages: list[str], selected: str, prefix: str, exp
 
 
 
-def _mobile_navigation(selected: str) -> None:
-    """Mobile route selector that commits navigation immediately.
+def _apply_mobile_route() -> None:
+    requested = st.session_state.get("mobile_page_navigation")
+    if requested in ALL_NAVIGATION:
+        st.session_state["primary_navigation"] = requested
 
-    Streamlit callback timing can differ between desktop and iOS Safari.  The
-    selector therefore uses its returned value as the source of truth and
-    explicitly reruns after changing the canonical navigation state.
+
+def _mobile_navigation(selected: str) -> None:
+    """Mobile route selector with callback-based state synchronisation.
+
+    The sidebar callback updates this widget key before the rerun.  The mobile
+    selector updates the canonical route in its own callback.  No post-widget
+    rerun logic is needed, so one navigation control cannot overwrite the
+    other with stale state.
     """
     widget_key = "mobile_page_navigation"
 
-    # Sync the selector only before it is instantiated. This keeps a desktop
-    # sidebar click and the mobile selector aligned without mutating a live
-    # widget's state.
     if st.session_state.get(widget_key) not in ALL_NAVIGATION:
         st.session_state[widget_key] = selected
-    elif st.session_state.get("primary_navigation") != selected:
-        st.session_state[widget_key] = selected
 
-    # The keyed container receives a stable CSS class in current Streamlit
-    # builds. It is hidden on desktop and shown as a sticky app bar on narrow
-    # screens.
     with st.container(key="mobile_navigation_container"):
         left, right = st.columns([1.05, 2.15], vertical_alignment="center")
         with left:
@@ -130,17 +140,13 @@ def _mobile_navigation(selected: str) -> None:
                 unsafe_allow_html=True,
             )
         with right:
-            requested = st.selectbox(
+            st.selectbox(
                 "Navigate",
                 ALL_NAVIGATION,
-                index=ALL_NAVIGATION.index(st.session_state.get(widget_key, selected)),
                 key=widget_key,
                 label_visibility="collapsed",
+                on_change=_apply_mobile_route,
             )
-
-    if requested in ALL_NAVIGATION and requested != selected:
-        st.session_state["primary_navigation"] = requested
-        st.rerun()
 
 def top_navigation() -> str:
     """v12 workstation navigation: fixed left rail; legacy More tools content is grouped by workflow."""

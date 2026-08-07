@@ -200,11 +200,16 @@ def render_daily_routine() -> None:
     else:
         st.error("30-day tracker is using local fallback storage. Open Validation → Recovery & persistence before relying on this count.")
     v1, v2, v3, v4 = st.columns(4)
-    v1.metric("Progress", f"{validation['days_completed']}/{validation['target_days']} days")
+    days_done = int(validation.get("days_completed", 0) or 0)
+    target_days = int(validation.get("target_days", 30) or 30)
+    days_left = max(0, target_days - days_done)
+    v1.metric("Validation days", f"{days_done}/{target_days}", f"{days_left} remaining")
     v2.metric("Paper trades", validation["trades_total"], f"{validation['open_trades']} open")
     v3.metric("Profit factor", validation["profit_factor"] if validation["closed_trades"] else "Collecting")
-    v4.metric("Status", validation["status"])
-    st.progress(validation["progress_pct"] / 100.0, text=f"Automatic paper validation: {validation['progress_pct']}% complete")
+    v4.metric("State", "WAITING" if 0 < days_done < target_days else validation["status"])
+    if 0 < days_done < target_days:
+        st.info(f"Day {days_done} of {target_days} complete. Waiting for the next eligible trading day — running again today will not add a duplicate validation day.")
+    st.progress(validation["progress_pct"] / 100.0, text=f"Validation evidence collected: {validation['progress_pct']}% ({days_done}/{target_days} trading days)")
 
     st.caption(
         f"Completed {finished or '—'} in {runtime:g}s. Swing focus currently uses score band "
